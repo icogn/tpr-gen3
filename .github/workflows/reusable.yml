@@ -27,7 +27,7 @@ jobs:
 
       - run: yarn --immutable
 
-      - uses: ./scripts/workflows/verify-web-artifacts
+      - uses: ./scripts/workflows/pull-web-artifacts
         with:
           allowedWebBranches: ${{ vars.ALLOWED_WEB_BRANCHES }}
           artifactInfo: ${{ inputs.input_one }}

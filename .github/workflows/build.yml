@@ -1,3 +1,5 @@
+# Note that the artifacts which have names that are a long string of random
+# characters are for combining the matrix output for each OS
 name: Website Artifact
 on:
   workflow_dispatch:
