@@ -1,0 +1,29 @@
+name: Target Workflow
+on:
+  repository_dispatch:
+    types: [pull_artifacts]
+
+jobs:
+  do_stuff:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ github.action_repository }}
+      - run: echo ${{ github.event.client_payload.artifactInfo }}
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17.0'
+          cache: 'yarn'
+
+      # - uses: qoomon/actions--context@v2
+      #   name: Get environment name as var
+      #   id: context
+
+      - run: yarn --immutable
+
+      # - uses: ./scripts/workflows/pull-web-artifacts
+      #   with:
+      #     allowedWebBranches: ${{ vars.ALLOWED_WEB_BRANCHES }}
+      #     artifactInfo: ${{ inputs.input_one }}

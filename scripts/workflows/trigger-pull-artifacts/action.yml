@@ -1,0 +1,25 @@
+---
+name: 'Pull web artifacts'
+author: 'icogn'
+description: 'Action to trigger the centralized pull-artifacts workflow'
+
+branding:
+  icon: 'plus'
+  color: 'gray-dark'
+
+inputs:
+  token:
+    description: Repository access token
+    required: true
+
+  artifactInfo:
+    description: Artifact info
+    required: true
+
+# outputs:
+#   value:
+#     description: The version
+
+runs:
+  using: node20
+  main: trigger-pull-artifacts.js

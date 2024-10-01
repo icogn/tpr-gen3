@@ -213,8 +213,32 @@ jobs:
     outputs:
       result: '${{ steps.read.outputs.result }}'
 
-  runs_reusable_workflow:
+  # THIS one was before changing to trigger. Reusable was not what we were looking for.
+  # runs_reusable_workflow:
+  #   needs: [read_workflow]
+  #   uses: icogn/tpr-gen3/.github/workflows/reusable.yml@main
+  #   with:
+  #     input_one: ${{ needs.read_workflow.outputs.result }}
+
+  trigger_pull_artifact_workflow:
     needs: [read_workflow]
-    uses: icogn/tpr-gen3/.github/workflows/reusable.yml@main
-    with:
-      input_one: ${{ needs.read_workflow.outputs.result }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17.0'
+          cache: 'yarn'
+
+      # - uses: qoomon/actions--context@v2
+      #   name: Get environment name as var
+      #   id: context
+
+      - run: yarn --immutable
+
+      - uses: ./scripts/workflows/trigger-pull-artifacts
+        name: Trigger pull artifacts in central repo
+        with:
+          token: ${{ secrets.GH_PAT }}
+          artifactInfo: ${{ needs.read_workflow.outputs.result }}
