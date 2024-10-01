@@ -10,7 +10,7 @@ console.log('parsedArtifactInfo:');
 console.log(parsedArtifactInfo);
 
 const bootstrap = async () => {
-  const response = await octokit.rest.actions.createWorkflowDispatch({
+  const response = await octokit.rest.repos.createDispatchEvent({
     owner: 'icogn',
     repo: 'tpr-gen3',
     event_type: 'pull_artifacts',
