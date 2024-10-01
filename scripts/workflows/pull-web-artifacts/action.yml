@@ -1,7 +1,7 @@
 ---
-name: 'Verify web artifacts'
+name: 'Pull web artifacts'
 author: 'icogn'
-description: 'Action to verify web artifacts'
+description: 'Action to verify and add web artifacts to branch for use by offline generator'
 
 branding:
   icon: 'plus'
@@ -22,4 +22,4 @@ inputs:
 
 runs:
   using: node20
-  main: verify-web-artifacts.js
+  main: pull-web-artifacts.js
