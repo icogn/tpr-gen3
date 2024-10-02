@@ -11,22 +11,19 @@ on:
 jobs:
   get_environment_name:
     runs-on: ubuntu-latest
-    steps: # a
-      - run: echo ${{ github.head_ref }}
-      - run: echo ${{ github.ref_name }}
+    outputs:
+      env: '${{ steps.regex-match.outputs.group1 }}'
+    steps:
+      - uses: kaisugi/action-regex-match@v1.0.1
+        name: Check environment name is valid
+        id: regex-match
+        with:
+          text: ${{ github.ref_name }}
+          regex: '^release\/([a-z]+)$'
 
-      - run: exit 1
-
-      # - uses: kaisugi/action-regex-match@v1.0.1
-      #   name: Check environment name is valid
-      #   id: regex-match
-      #   with:
-      #     text: ${{ steps.context.outputs.environment }}
-      #     regex: '^[a-z0-9]+$'
-
-      # - if: ${{ steps.regex-match.outputs.match == '' }}
-      #   name: Exit if invalid environment name
-      #   run: exit 1
+      - if: ${{ steps.regex-match.outputs.group1 == '' }}
+        name: Exit if invalid environment name
+        run: exit 1
 
   increment_validate_version:
     needs: [get_environment_name]
@@ -36,6 +33,10 @@ jobs:
     steps:
       - run: echo ${{ github.sha }}
         name: Echo github.sha
+
+      - run: echo ${{ needs.get_environment_name.outputs.env }}
+
+      - run: exit 1
 
       - uses: actions/checkout@v4
 
