@@ -15,7 +15,7 @@ jobs:
       env: '${{ steps.regex-match.outputs.group1 }}'
     steps:
       - uses: kaisugi/action-regex-match@v1.0.1
-        name: Check environment name is valid
+        name: Get environment name from branch name
         id: regex-match
         with:
           text: ${{ github.ref_name }}
@@ -28,15 +28,14 @@ jobs:
   increment_validate_version:
     needs: [get_environment_name]
     runs-on: [ubuntu-latest]
-    environment: ${{ vars.DEV_BRANCH_NAME }}
-
+    environment: ${{ needs.get_environment_name.outputs.env }}
+    outputs:
+      env: ${{ needs.get_environment_name.outputs.env }}
     steps:
       - run: echo ${{ github.sha }}
         name: Echo github.sha
 
       - run: echo ${{ needs.get_environment_name.outputs.env }}
-
-      - run: exit 1
 
       - uses: actions/checkout@v4
 
@@ -44,21 +43,6 @@ jobs:
         with:
           node-version: '20.17.0'
           cache: 'yarn'
-
-      - uses: qoomon/actions--context@v2
-        name: Get environment name as var
-        id: context
-
-      - uses: kaisugi/action-regex-match@v1.0.1
-        name: Check environment name is valid
-        id: regex-match
-        with:
-          text: ${{ steps.context.outputs.environment }}
-          regex: '^[a-z0-9]+$'
-
-      - if: ${{ steps.regex-match.outputs.match == '' }}
-        name: Exit if invalid environment name
-        run: exit 1
 
       - run: yarn --immutable
 
@@ -71,7 +55,7 @@ jobs:
         with:
           name: 'BUILD_NUMBER'
           token: ${{ secrets.GH_PAT }}
-          environment: ${{ steps.context.outputs.environment }}
+          environment: ${{ needs.get_environment_name.outputs.env }}
 
       # - uses: martinbeentjes/npm-get-version-action@v1.3.1
       #   id: package-version
@@ -97,13 +81,15 @@ jobs:
 
   build_website:
     needs: [increment_validate_version]
+    environment: ${{ needs.increment_validate_version.outputs.env }}
+    outputs:
+      env: ${{ needs.increment_validate_version.outputs.env }}
     strategy:
       fail-fast: true
       matrix:
         # os: [ubuntu-latest]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    environment: ${{ vars.DEV_BRANCH_NAME }}
 
     steps:
       - run: echo ${{ github.sha }}
@@ -116,10 +102,6 @@ jobs:
           node-version: '20.17.0'
           cache: 'yarn'
 
-      - uses: qoomon/actions--context@v2
-        name: Get environment name as var
-        id: context
-
       - run: yarn --immutable
 
       - uses: ./scripts/workflows/package-version
@@ -129,7 +111,7 @@ jobs:
       - uses: matt-usurp/validate-semver@v2
         id: semver
         with:
-          version: ${{ steps.package-version.outputs.value }}-${{ steps.context.outputs.environment }}.${{ vars.BUILD_NUMBER }}
+          version: ${{ steps.package-version.outputs.value }}-${{ needs.increment_validate_version.outputs.env }}.${{ vars.BUILD_NUMBER }}
 
       - run: |
           echo "${{ steps.semver.outputs.version }}"
@@ -139,10 +121,10 @@ jobs:
           echo "${{ steps.semver.outputs.prerelease }}"
           echo "${{ steps.semver.outputs.build }}"
 
-      - run: |
-          gh variable list
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+      # - run: |
+      #     gh variable list
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GH_PAT }}
 
       # - uses: ./scripts/ci/set-github-variable.js
       #   with:
@@ -222,6 +204,7 @@ jobs:
 
       # At the end, set/create var in environment for the "1.2.3" of this build.
       # Probably in another job since this one is a matrix.
+
   read_workflow:
     needs: [build_website]
     runs-on: ubuntu-latest
