@@ -9,7 +9,27 @@ on:
       # - main
 
 jobs:
+  get_environment_name:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ github.head_ref }}
+      - run: echo ${{ github.ref_name }}
+
+      - run: exit 1
+
+      # - uses: kaisugi/action-regex-match@v1.0.1
+      #   name: Check environment name is valid
+      #   id: regex-match
+      #   with:
+      #     text: ${{ steps.context.outputs.environment }}
+      #     regex: '^[a-z0-9]+$'
+
+      # - if: ${{ steps.regex-match.outputs.match == '' }}
+      #   name: Exit if invalid environment name
+      #   run: exit 1
+
   increment_validate_version:
+    needs: [get_environment_name]
     runs-on: [ubuntu-latest]
     environment: ${{ vars.DEV_BRANCH_NAME }}
 
