@@ -240,5 +240,7 @@ jobs:
       - uses: ./scripts/workflows/trigger-pull-artifacts
         name: Trigger pull artifacts in central repo
         with:
+          # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-dispatch-event
+          # Note that the fine-grained token needs `"Contents" repository permissions (write)`
           token: ${{ secrets.GH_PAT }}
           artifactInfo: ${{ needs.read_workflow.outputs.result }}

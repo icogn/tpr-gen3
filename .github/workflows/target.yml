@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo ${{ github.action_repository }}
-      - run: echo ${{ github.event.client_payload.artifactInfo }}
+      - run: echo ${{ toJson(github.event.client_payload.artifactInfo) }}
 
       - uses: actions/checkout@v4
 
