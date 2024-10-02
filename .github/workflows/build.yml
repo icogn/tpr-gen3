@@ -11,7 +11,7 @@ on:
 jobs:
   get_environment_name:
     runs-on: ubuntu-latest
-    steps:
+    steps: # a
       - run: echo ${{ github.head_ref }}
       - run: echo ${{ github.ref_name }}
 
