@@ -35,6 +35,9 @@ function input(name, def) {
 }
 
 async function run() {
+  console.log('artifactClient');
+  console.log(artifactClient);
+
   const inputs = {
     // name: core.getInput(Inputs.Name, { required: false }),
     // path: core.getInput(Inputs.Path, { required: false }),
