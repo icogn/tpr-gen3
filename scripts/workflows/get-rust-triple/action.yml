@@ -1,0 +1,16 @@
+---
+name: 'Get rust triple'
+author: 'icogn'
+description: 'Action to get the rust triple .'
+
+branding:
+  icon: 'plus'
+  color: 'gray-dark'
+
+outputs:
+  triple:
+    description: The target triple
+
+runs:
+  using: node20
+  main: get-rust-triple.js

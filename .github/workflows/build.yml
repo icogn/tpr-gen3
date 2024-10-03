@@ -159,6 +159,10 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           file: downloadedArtifacts/asdf-${{ matrix.os }}.zip
 
+      - name: Get rust triple
+        uses: ./scripts/workflows/get-rust-triple
+        id: rust-triple
+
       - run: echo ${{ steps.sign-files.outputs.value }}
 
       - name: Display structure of downloaded files
@@ -195,6 +199,7 @@ jobs:
             ## Multiline string
             ## web-zip-sig-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
             web-zip-sig: ${{ steps.sign-files.outputs.value }}
+            triple: ${{ steps.rust-triple.outputs.triple }}
 
       # - name: Upload Artifact
       #   uses: actions/upload-artifact@v4
