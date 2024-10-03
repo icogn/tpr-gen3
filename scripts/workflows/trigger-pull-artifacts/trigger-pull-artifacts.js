@@ -15,7 +15,7 @@ function restructureClientPayload() {
   const results = {};
 
   Object.keys(parsedArtifactInfo).forEach((key) => {
-    if (key !== triple) {
+    if (key !== 'triple') {
       const innerObj = parsedArtifactInfo[key];
       Object.keys(innerObj).forEach((innerKey) => {
         const tripleKey = keyMapping[innerKey];
