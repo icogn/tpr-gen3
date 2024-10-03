@@ -1,4 +1,4 @@
-name: Target Workflow
+name: Test Target Workflow
 on:
   workflow_dispatch:
 
