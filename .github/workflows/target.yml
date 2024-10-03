@@ -22,4 +22,5 @@ jobs:
       - uses: ./scripts/workflows/pull-web-artifacts
         with:
           allowedWebBranches: ${{ vars.ALLOWED_WEB_BRANCHES }}
-          artifactInfo: ${{ toJson(github.event.client_payload.artifactInfo) }}
+          # artifactInfo: ${{ toJson(github.event.client_payload.artifactInfo) }}
+          artifactInfo: ${{ github.event.client_payload.artifactInfo }}
