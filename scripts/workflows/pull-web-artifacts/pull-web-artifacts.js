@@ -3,10 +3,10 @@ const artifactClient = require('@actions/artifact').default;
 const core = require('@actions/core');
 const { match } = require('path-to-regexp');
 
-// const allowedWebBranches = input('allowedWebBranches', '');
-// const artifactInfo = input('artifactInfo', '');
+const allowedWebBranches = input('allowedWebBranches', '');
+const artifactInfo = input('artifactInfo', '');
 
-// console.log(`allowedWebBranches:${allowedWebBranches}`);
+console.log(`allowedWebBranches:${allowedWebBranches}`);
 
 const parsedArtifactInfoIn = JSON.parse(artifactInfo);
 console.log('parsedArtifactInfoIn');
