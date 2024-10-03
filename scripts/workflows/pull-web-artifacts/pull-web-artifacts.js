@@ -176,5 +176,6 @@ async function run() {
 }
 
 run().catch((err) => {
+  console.error(err);
   core.setFailed('Failed in pull-web-artifacts.js');
 });
