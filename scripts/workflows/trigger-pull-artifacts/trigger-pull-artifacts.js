@@ -12,7 +12,8 @@ console.log(parsedArtifactInfo);
 function restructureClientPayload() {
   const keyMapping = parsedArtifactInfo.triple;
 
-  const results = {};
+  const root = { byTriple: {} };
+  const { byTriple } = root;
 
   Object.keys(parsedArtifactInfo).forEach((key) => {
     if (key !== 'triple') {
@@ -23,10 +24,10 @@ function restructureClientPayload() {
           throw new Error('Failed to map innerKey to tripleKey.');
         }
 
-        let resObj = results[tripleKey];
+        let resObj = byTriple[tripleKey];
         if (!resObj) {
-          results[tripleKey] = {};
-          resObj = results[tripleKey];
+          byTriple[tripleKey] = {};
+          resObj = byTriple[tripleKey];
         }
 
         resObj[key] = innerObj[innerKey];
@@ -34,7 +35,16 @@ function restructureClientPayload() {
     }
   });
 
-  return results;
+  const date = new Date();
+  root.timestamp = date.toISOString();
+
+  const asStr = JSON.stringify(root);
+
+  // sign
+  const signature = 'exampleSig';
+  root.signature = signature;
+
+  return root;
 
   // const a = {
   //   'web-zip-url': {
@@ -58,12 +68,6 @@ function restructureClientPayload() {
 
 const bootstrap = async () => {
   const newArtifactInfo = restructureClientPayload();
-  console.log('JSON.stringify(newArtifactInfo):');
-  console.log(JSON.stringify(newArtifactInfo));
-
-  if (true) {
-    core.setFailed('Fail for now');
-  }
 
   const response = await octokit.rest.repos.createDispatchEvent({
     owner: 'icogn',
