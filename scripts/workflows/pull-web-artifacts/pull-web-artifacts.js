@@ -8,8 +8,10 @@ const { match } = require('path-to-regexp');
 
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
 
-// const parsedArtifactInfo = JSON.parse(artifactInfo);
-// console.log(parsedArtifactInfo);
+const parsedArtifactInfoIn = JSON.parse(artifactInfo);
+console.log('parsedArtifactInfoIn');
+console.log(parsedArtifactInfoIn);
+
 const parsedArtifactInfo = {
   'web-zip-sig-url': {
     'ubuntu-latest':
