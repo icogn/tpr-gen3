@@ -27,9 +27,9 @@ const signFile = async (inpFilePath) => {
   const sign = createSign(algorithm);
 
   await new Promise((resolve) => inpFile.pipe(sign).once('finish', resolve));
-  const str = sign.sign({ key: privateKey, passphrase: passphrase }, encoding);
-  await fs.promises.writeFile(outFilePath, str);
-  return str;
+  const buf = sign.sign({ key: privateKey, passphrase: passphrase }, encoding);
+  await fs.promises.writeFile(outFilePath, buf);
+  return buf.toString();
 };
 
 (async () => {
