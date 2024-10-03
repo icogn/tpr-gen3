@@ -196,6 +196,7 @@ jobs:
             web-zip-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
             ## Multiline string
             web-zip-sig-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
+            web-zip-sig: ${{ steps.sign-files.outputs.value }}
 
       # - name: Upload Artifact
       #   uses: actions/upload-artifact@v4
