@@ -25,6 +25,7 @@ const parsedArtifactInfo = {
   },
 };
 
+// This is the thing we need to send to the target workflow.
 const desiredOutputConfig = {
   artifacts: {
     'x86_64-pc-windows-msvc': {
@@ -34,7 +35,7 @@ const desiredOutputConfig = {
       signature:
         'pvWamXR38lWQp9mNPhy4TRgtFHaxSaDXlOW1qluW5eWVh7J0bV3FwK4O8arxqPQ9EqyZSgbWezXLB7WT9is2DA3Nx+akCCCCpdCDd461OKdsv5m9ZGvYv/OIACWIGOjnts7kDDrYZlxCHx6yf1ODfxMooTbQhPqBC+ORiL30YDxc8CrDv/1Ds3dsr9vvqxn7Ws1Hxp8nFGOYagJluexz75cs0pFGus4Uamt6FBBVkumbub073dBjO5i03dQ3AMHBfeErwCeFDH9KKPJk6VGzQ7KobV/z3sVgnNCFH44hwtkdOg8YW9Fxz7xa7Z4NYSR4RalhgAGEI8HlPD2khiKsnBs3bi6w8F1f+qY7GrJXwNlqHgDV1b8VI6aStAI2rhi4HJN4c89qNxjB+6y4hUoZApKim5e6H/UywhnN6Mjpe5/UqSuYInfeDNwYIt4ymO7C0NC7AUR703K1uluEtAoep7omwpBZfjZHFmC0GNjEfeQzN6QJ+U8vd6VeYmLLPrsIQoK3iYAe7HGAOpZa4fA72mP9yI0YqieKQN06TxXYsQaaOlynJ8OYWR2LG95hNdXqOcDiR5APLTE/hrLbTQ+9eLXi10yKuhtdKzs7/td1pgkawRDuBDycPDNzNnKtkw7G79S0vQBEWZ/KqoMoTds/iRbQ7+RB3s+WcYEWzM4AC9Y=',
     },
-    'ubuntu-latest': {
+    'x86_64-unknown-linux-gnu': {
       name: 'asdf-ubuntu-latest',
       artifactUrl:
         'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
