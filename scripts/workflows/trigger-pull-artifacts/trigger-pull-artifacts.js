@@ -10,29 +10,68 @@ console.log('parsedArtifactInfo:');
 console.log(parsedArtifactInfo);
 
 function restructureClientPayload() {
-  const a = {
-    'web-zip-url': {
-      'windows-latest':
-        'https://github.com/icogn/tpr-gen3/actions/runs/11170809673/artifacts/2013398710',
-      'ubuntu-latest':
-        'https://github.com/icogn/tpr-gen3/actions/runs/11170809673/artifacts/2013396773',
-    },
-    'web-zip-sig': {
-      'windows-latest':
-        'XPNRx+e1+ivJDT72LtfjAgdbeFh+ypq5qbKFAKdO3jvFWiQI5RFabXMTDoYqLa+jdeVMT8jgjKl68yq6WqKLivVfkWhX6fl6FqI3k93m5CKs3qNDmbZF66JWc453sDe/Af2D5mtvWhJMAyVGiPfurzzbFWCL5wmwITZXHOS4gISANTlN2eZOHNRmbEPDHOqhRXMjnZ92wpgxCQNka7ZtsVfVbMMQr3SvryZoJ8adVsyU9gGR5WlLKiP0Wc0n23a3cNcKgstpb5Q/dqGIubKtL5aY431bciGaXv8JRtvfPCFJT+iRYxh5tQN35mJUL0e1nGqsvMeGjB0mxV1g3TKmqPyTeFLqEXN59OJxQvpQUfHJBrlzSDe5RpCxiZ9R47hGT7k6n+SzuO/0g7fVm51eJjO5Q1kCm0Ab2mEIjvSIOxxyqonIfdV70TgvD2wb+G4RXkkCivf92i8NM/j20k1XlVjpuS0aTDDYnJzUsh3xBtGwgZHrYHqpu0I8iUE1o+kXEx7GPjN8T+59if2jSJkfRizPHY6e0OqdGOIztVNzXAWSIX8It0BJKHmONFPOhDKpjcfXWhza1/v6rTH5llTo88x19B9ofzId7GOBSW3aUbfJdmPDOf+1ciCm0JjzY1uk9ldlq5Z3BVilwnLRjqJPu0eKvv5aRqJuH1nPesIYoEU=',
-      'ubuntu-latest':
-        'EszPAtVDsH/wpGCdPQFvUf4lC+Dth9+L5Pb21AHEVdR/uTX0/IGGJbKlHY+/rGlRXk+MhtLy6LPl2yR0yUobV6GQJUeOoPycM1DzBQk/i7agDt5kdUuuuf/UWL4pHdKNOPMMsN5GVtIm9kKU4HjG4QlQoTdPWR0vv14pf7fb2H0OAe8tdreQ4exHerZe9nGLFt/DbWz2svJmA3Du4bj41vgWLTABXdXgYgmw72droy3xDMOGFiCyF707VVt3UbCCVuyhgTwCAj2Cz2yS6BAUfz9ZLfPnpO5qb8NeUicMFm0IGDhEr27bhCSiwjkT2KM5cy6krb6u8JiSjpsZ1ceT0M89JmD8AZVEBgcRgJq/147v5YN49/Mk1QQ9StvHv5e4cSPTB1B4b/kN0whs09/AzqLlR1CX8HFcd4l/QI9trKait20wJKk00a1pBmzIICt1/sMmNIajJNTz4pD2i9F6av7Sg3elccZB5+aNSxtZLZ0pHQz1lZ4loCRh/c7vdPNX/Ihno8+i5JjX4IM+WvOUityZM3LEfz936POhZFO8pGadSj+XgThOj2QdNRhMJaChKx53uoCc/abXTp5Ty68u5r/nsH7YkwxEByzzmtlTUiDNwhbC1Rbm3y9JbYCADA7qoeaHMoM/k45WhhJCY+DLsZe+KJVrOn7A7lOur9AIzhM=',
-    },
-  };
+  const keyMapping = parsedArtifactInfo.triple;
+
+  const results = {};
+
+  Object.keys(parsedArtifactInfo).forEach((key) => {
+    if (key !== triple) {
+      const innerObj = parsedArtifactInfo[key];
+      Object.keys(innerObj).forEach((innerKey) => {
+        const tripleKey = keyMapping[innerKey];
+        if (!tripleKey) {
+          throw new Error('Failed to map innerKey to tripleKey.');
+        }
+
+        let resObj = results[tripleKey];
+        if (!resObj) {
+          results[tripleKey] = {};
+          resObj = results[tripleKey];
+        }
+
+        resObj[key] = innerObj[innerKey];
+      });
+    }
+  });
+
+  return results;
+
+  // const a = {
+  //   'web-zip-url': {
+  //     'ubuntu-latest':
+  //       'https://github.com/icogn/tpr-gen3/actions/runs/11170907303/artifacts/2013424178',
+  //     'windows-latest':
+  //       'https://github.com/icogn/tpr-gen3/actions/runs/11170907303/artifacts/2013425768',
+  //   },
+  //   'web-zip-sig': {
+  //     'ubuntu-latest':
+  //       'WT1nKvxRbdG66W3n7liU+4hnQTCXOGLOtGPTUddcPdrKIbLGrFo+lMpz6GcMhEdGnLMawZFWqheBg26jQsmKyhoUZJDfXLfbGHOaS5hBwP5nIBc4BlXrUiLjqZObWjmSLIngRuE3kAKZvOwxC2QUl1wIsJ126wT+TD8qaQ2zf9pTSMqRnxlEfXXVN0CnsVaBtC/Eo4RxXg7DpqJ7MG+l/tmVNfVo2nOFOI+FIJmds7jLYNq6mERtmh1CQF8sABAav+vSUl3J9zWU865/BOvSmmj6KF4zTojiRnLcOsCGuHbun998odBMxnh3MkLNOyHREDDGAG25i6U4PhmALayQD7D/mT4MM8CSafqQyWmcrTSbrvzrW5CSELflqptGIurZ6U7NxQ0ROxfkZ5tOz7TRA3bbT/yuVRu5m8obcN/eiHi6QQxiEAgivwy2CW/mJL3+Vk+jrLeTRZ7pd6Svi5zGl2lclrSegP9coETICij2twpsFrNCb4W5oodBVumCxkpMvzWc4n401nZVgD275nzw3hznbzRObAhwzD5QDKqsKBc7eMmWIWnQo5w/h63hFyUqILGO14tdX5wf6Xw+bG9StaMcrLT3MG9F5ZfyZTwtgT5sn+Kh9OGg1BeN0JLQHUPdhhNvL1xhmQWWQTSC4u6eUkfWbYAdokjZNK2n4FJaisQ=',
+  //     'windows-latest':
+  //       'HMNRdkMPwAqpbwxvzo4sU1uw3lnEiB0G2PIMiJu/nNTI+H4Lw7OBT8neR1/WjIP7iBFY2vhzNzRR6UEGZvqGApKa553C9YVzxR/aasHgUqGSPs2sYmTjiBZl5tGXzTF0Smc65AJjsxc65ttLQ6TM5PRgiqvYRf1AIHgZKR+ekw+jeroIIMRYIHI4DrwMmt/oxSSur+SVbmC3CK48Fyq50atXbl6+PAK1oxHO3hooSy1XMtCy60QgxbOYRIUSO5seRf07n9/40RPVGBZo5nw3TYpNmWxeTJ7p7yLnK9GeqB11Xnds6o72dnUhdZgoGODgP0YMNqBLzCzRGkGVXa16yRDqKwGGjU18xnKZzh6HQR7xptVbwuEmmODiHoGTevlHLpCHJY/oRNS/Bd0FK4X/sL5LbLgdAETIHo5EixGT1NIUkDwEtUmo9R+EgiPz/yRhJDPUcPhvrkjyXsROt8NefdhYam176gQs/gXxYXMe8j1aaze8QfasCQXlzp3aRjlxcZWVaqKUxzbWq030exsiOhYMXTQIEKlCs2Jnmf9O2jlRq8kJEMg8faqShFaG57Z6eTKjXoZY8U0bm36+cydlOa3aBVc89vl0rj3bLANrdKN8v/ZjvEkJPYk2P5HII7ZfPzowtWnlMk8KNvacqHaRc1PlbEJr1Uu27S4ZT3fELHQ=',
+  //   },
+  //   triple: {
+  //     'ubuntu-latest': 'x86_64-unknown-linux-gnu',
+  //     'windows-latest': 'x86_64-pc-windows-msvc',
+  //   },
+  // };
 }
 
 const bootstrap = async () => {
+  const newArtifactInfo = restructureClientPayload();
+  console.log('JSON.stringify(newArtifactInfo):');
+  console.log(JSON.stringify(newArtifactInfo));
+
+  if (true) {
+    core.setFailed('Fail for now');
+  }
+
   const response = await octokit.rest.repos.createDispatchEvent({
     owner: 'icogn',
     repo: 'tpr-gen3',
     event_type: 'pull_artifacts',
     client_payload: {
-      artifactInfo: parsedArtifactInfo,
+      // artifactInfo: parsedArtifactInfo,
+      artifactInfo: newArtifactInfo,
     },
   });
 
