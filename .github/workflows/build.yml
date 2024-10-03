@@ -14,6 +14,10 @@ jobs:
     outputs:
       env: '${{ steps.regex-match.outputs.group1 }}'
     steps:
+      - run: rustc -vV
+
+      - run: exit 1
+
       - uses: kaisugi/action-regex-match@v1.0.1
         name: Get environment name from branch name
         id: regex-match

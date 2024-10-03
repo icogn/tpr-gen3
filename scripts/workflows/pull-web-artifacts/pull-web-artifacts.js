@@ -25,6 +25,50 @@ const parsedArtifactInfo = {
   },
 };
 
+const desiredOutputConfig = {
+  artifacts: {
+    'x86_64-pc-windows-msvc': {
+      name: 'asdf-windows-latest',
+      artifactUrl:
+        'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009161024',
+      signature:
+        'pvWamXR38lWQp9mNPhy4TRgtFHaxSaDXlOW1qluW5eWVh7J0bV3FwK4O8arxqPQ9EqyZSgbWezXLB7WT9is2DA3Nx+akCCCCpdCDd461OKdsv5m9ZGvYv/OIACWIGOjnts7kDDrYZlxCHx6yf1ODfxMooTbQhPqBC+ORiL30YDxc8CrDv/1Ds3dsr9vvqxn7Ws1Hxp8nFGOYagJluexz75cs0pFGus4Uamt6FBBVkumbub073dBjO5i03dQ3AMHBfeErwCeFDH9KKPJk6VGzQ7KobV/z3sVgnNCFH44hwtkdOg8YW9Fxz7xa7Z4NYSR4RalhgAGEI8HlPD2khiKsnBs3bi6w8F1f+qY7GrJXwNlqHgDV1b8VI6aStAI2rhi4HJN4c89qNxjB+6y4hUoZApKim5e6H/UywhnN6Mjpe5/UqSuYInfeDNwYIt4ymO7C0NC7AUR703K1uluEtAoep7omwpBZfjZHFmC0GNjEfeQzN6QJ+U8vd6VeYmLLPrsIQoK3iYAe7HGAOpZa4fA72mP9yI0YqieKQN06TxXYsQaaOlynJ8OYWR2LG95hNdXqOcDiR5APLTE/hrLbTQ+9eLXi10yKuhtdKzs7/td1pgkawRDuBDycPDNzNnKtkw7G79S0vQBEWZ/KqoMoTds/iRbQ7+RB3s+WcYEWzM4AC9Y=',
+    },
+    'ubuntu-latest': {
+      name: 'asdf-ubuntu-latest',
+      artifactUrl:
+        'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
+      signature:
+        'OcLUmY+dgSmeBOYmDBZ/mljwXTLzJUlHztm7C93EUvRpn9iWP+7d8dOIRAZ7NWek+OVJY9csCdxKtMepLtLnkIYplg/cVeYlA+I9XjkxhiOLpvZrVR6MfAesi95JkXUnF4lC6vcF+wcNptw1tkrkk0c4VD5GQE8PuBUk8d6Zv/aoJVsS+wcWsYPXIWhOZ9GtwxfhvrjSwvuRoxAX1i86s+3ankXb+D9USejlZXcDW6gxdzIljCc+ZY9/aLinctMjvFJ4wXnNPyGypjq6et71Yuw69eZvi6YLMqXLj8bOaE5yOgrt8WK6BnaF5GvePxE5dB5pcV1krc+01i6ZRvy6iXGP8IliYYQnuX7NbwhYLwj5rW9/UlS0BhJ7QL82ZS1ZqbdCt0/XsScD6BNPmnUuoPzkJefhb+h3AIJCFHcLVWsgJGMMJfXKVFbaNjwnNtmnNgyvdNawKlQ3ZbTxYoMkAPorclC5a7Sk65WqxBRU4xUjAQ4svE0Lf0GFRWZSdl0IDmMPvykBqzLo8ygDCrSdFub+JUQOppxKXrWXtQPZeOcoszn4BTHtPMpzEdb2e8Pu/ND6hdvl934+Ln+z0wY0tPnyml3sbqCaqkKQCysf34rxmqh7YmAw1aAZ2M3NRp2yldvCk8mm8r4T9eCPlttVCxzd8u/uBmYcYc3MXoXweD0=',
+    },
+  },
+  timestamp: '2024-10-03T04:21:02.717Z',
+  signature: 'signature of rest of object stringified',
+};
+
+const a = {
+  'web-zip-url': {
+    'windows-latest':
+      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009161024',
+    'ubuntu-latest':
+      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
+  },
+  'web-zip-sig-url': {
+    'windows-latest':
+      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009161024',
+    'ubuntu-latest':
+      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
+  },
+  'web-zip-sig': {
+    'windows-latest': [
+      'pvWamXR38lWQp9mNPhy4TRgtFHaxSaDXlOW1qluW5eWVh7J0bV3FwK4O8arxqPQ9EqyZSgbWezXLB7WT9is2DA3Nx+akCCCCpdCDd461OKdsv5m9ZGvYv/OIACWIGOjnts7kDDrYZlxCHx6yf1ODfxMooTbQhPqBC+ORiL30YDxc8CrDv/1Ds3dsr9vvqxn7Ws1Hxp8nFGOYagJluexz75cs0pFGus4Uamt6FBBVkumbub073dBjO5i03dQ3AMHBfeErwCeFDH9KKPJk6VGzQ7KobV/z3sVgnNCFH44hwtkdOg8YW9Fxz7xa7Z4NYSR4RalhgAGEI8HlPD2khiKsnBs3bi6w8F1f+qY7GrJXwNlqHgDV1b8VI6aStAI2rhi4HJN4c89qNxjB+6y4hUoZApKim5e6H/UywhnN6Mjpe5/UqSuYInfeDNwYIt4ymO7C0NC7AUR703K1uluEtAoep7omwpBZfjZHFmC0GNjEfeQzN6QJ+U8vd6VeYmLLPrsIQoK3iYAe7HGAOpZa4fA72mP9yI0YqieKQN06TxXYsQaaOlynJ8OYWR2LG95hNdXqOcDiR5APLTE/hrLbTQ+9eLXi10yKuhtdKzs7/td1pgkawRDuBDycPDNzNnKtkw7G79S0vQBEWZ/KqoMoTds/iRbQ7+RB3s+WcYEWzM4AC9Y=',
+    ],
+    'ubuntu-latest': [
+      'OcLUmY+dgSmeBOYmDBZ/mljwXTLzJUlHztm7C93EUvRpn9iWP+7d8dOIRAZ7NWek+OVJY9csCdxKtMepLtLnkIYplg/cVeYlA+I9XjkxhiOLpvZrVR6MfAesi95JkXUnF4lC6vcF+wcNptw1tkrkk0c4VD5GQE8PuBUk8d6Zv/aoJVsS+wcWsYPXIWhOZ9GtwxfhvrjSwvuRoxAX1i86s+3ankXb+D9USejlZXcDW6gxdzIljCc+ZY9/aLinctMjvFJ4wXnNPyGypjq6et71Yuw69eZvi6YLMqXLj8bOaE5yOgrt8WK6BnaF5GvePxE5dB5pcV1krc+01i6ZRvy6iXGP8IliYYQnuX7NbwhYLwj5rW9/UlS0BhJ7QL82ZS1ZqbdCt0/XsScD6BNPmnUuoPzkJefhb+h3AIJCFHcLVWsgJGMMJfXKVFbaNjwnNtmnNgyvdNawKlQ3ZbTxYoMkAPorclC5a7Sk65WqxBRU4xUjAQ4svE0Lf0GFRWZSdl0IDmMPvykBqzLo8ygDCrSdFub+JUQOppxKXrWXtQPZeOcoszn4BTHtPMpzEdb2e8Pu/ND6hdvl934+Ln+z0wY0tPnyml3sbqCaqkKQCysf34rxmqh7YmAw1aAZ2M3NRp2yldvCk8mm8r4T9eCPlttVCxzd8u/uBmYcYc3MXoXweD0=',
+    ],
+  },
+};
+
 function input(name, def) {
   let inp = core.getInput(name).trim();
   if (inp === '' || inp.toLowerCase() === 'false') {
