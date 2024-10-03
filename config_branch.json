@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "branches": {
+    "dev": {
+      "owner": "icogn",
+      "repo": "tpr-gen3",
+      "enabled": true
+    }
+  }
+}
