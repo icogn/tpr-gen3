@@ -151,6 +151,7 @@ jobs:
 
       # - uses: 'FKLC/sign-files-action@v1.0.0'
       - uses: ./scripts/workflows/sign-files
+        id: sign-files
         with:
           privateKey: ${{ secrets.PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
@@ -159,6 +160,8 @@ jobs:
           outputFolder: 'downloadedArtifacts'
           files: downloadedArtifacts/asdf-${{ matrix.os }}.zip
           # files: asdf-${{ matrix.os }}
+
+      - run: echo ${{ steps.sign-files.outputs.value }}
 
       - name: Display structure of downloaded files
         run: ls -R downloadedArtifacts
@@ -229,6 +232,8 @@ jobs:
     needs: [read_workflow]
     runs-on: ubuntu-latest
     steps:
+      - run: exit 1 # temp
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4

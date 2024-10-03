@@ -28,6 +28,11 @@ inputs:
   encoding:
     description: 'Encoding of signature'
     required: false
+
+outputs:
+  value:
+    description: Output value
+
 runs:
   using: node20
   main: 'sign-files.js'

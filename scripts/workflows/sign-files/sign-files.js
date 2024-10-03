@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('@actions/glob');
 const { createSign } = require('crypto');
+const core = require('@actions/core');
 
 const getInput = (name, defVal, required = false) => {
   const val = process.env['INPUT_' + name.toUpperCase()];
@@ -26,10 +27,9 @@ const signFile = async (inpFilePath) => {
   const sign = createSign(algorithm);
 
   await new Promise((resolve) => inpFile.pipe(sign).once('finish', resolve));
-  await fs.promises.writeFile(
-    outFilePath,
-    sign.sign({ key: privateKey, passphrase: passphrase }, encoding)
-  );
+  const str = sign.sign({ key: privateKey, passphrase: passphrase }, encoding);
+  await fs.promises.writeFile(outFilePath, str);
+  return str;
 };
 
 (async () => {
@@ -37,5 +37,8 @@ const signFile = async (inpFilePath) => {
   const files = await globber.glob();
   console.log('files');
   console.log(files);
-  await Promise.all(files.map((filePath) => signFile(filePath)));
+  const resultsArr = await Promise.all(
+    files.map((filePath) => signFile(filePath))
+  );
+  core.setOutput('value', resultsArr);
 })();
