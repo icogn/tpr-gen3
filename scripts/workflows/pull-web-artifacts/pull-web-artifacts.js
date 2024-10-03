@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const artifactClient = require('@actions/artifact');
+const artifactClient = require('@actions/artifact').default;
 const core = require('@actions/core');
 const { match } = require('path-to-regexp');
 
@@ -35,9 +35,6 @@ function input(name, def) {
 }
 
 async function run() {
-  console.log('artifactClient');
-  console.log(artifactClient);
-
   const inputs = {
     // name: core.getInput(Inputs.Name, { required: false }),
     // path: core.getInput(Inputs.Path, { required: false }),
