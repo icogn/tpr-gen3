@@ -4,7 +4,8 @@
     "dev": {
       "owner": "icogn",
       "repo": "tpr-gen3",
-      "enabled": true
+      "enabled": true,
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAw0+QuKRjDZ9zUllvs7tu\nNEfN2LsTHa83mP5gkn2rDEPWfIlxpoC/zvcAO1v10cdkHV4QGi2j4EdHdC0goI64\nwK0aPIwTZYw0IRVcIPEEiZQawbnx3jtVanXe3MEG8+T6GLgbqX4tUBaMag5eL7QW\nW34BcVKUlLecZqedZjadyniYhoYrg3dQ/eLvtOOQXcSgn1c/z1gvfoEweduZ3AQw\nJrlOeDuMkkKt0CfPkWWdWtBh3n33yPWlLSDknTNHSfiSmdMFwlhk7NMq2uQEeUEr\nkCOhzSTCU+FCI5mYvtUqgP/vL2SfIm89aWrV9CSrX3X0VZ4oqPEZOQnY7ytuTJ6V\nwtcUHncU983RmN+8JAF5fl7y01rD/s+ixTJ1g2BRY7ux8fOCE3ZBsc/81uRGdKsD\nUHBv9yYFpDCRwTyjYK4jacRBgSQY1+Wakgqkm1E7U2MPlyCVluP0W9a8hw/DzdPE\nMUqtEYZ0Kg7faO24oBF4Hah4s+vVJ26dfTszI7Uwwo8HA+rYTS+dd49wzc4gk92f\nyZ+p3whTE/I1LsrL/VTuM0rSMJPlegi9GYvWIfOAzqqYPACrql41cwlvf10vo1xR\nCPXgAboVNRAooIWxrox7HdvhFgoRJJstPdDGjvIILhYScpAHTTx+FSzl2lWWQRbA\nFLNKd/ZQyTuO3asDsPIKhsECAwEAAQ==\n-----END PUBLIC KEY-----"
     }
   }
 }
