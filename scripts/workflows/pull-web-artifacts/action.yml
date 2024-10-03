@@ -8,6 +8,10 @@ branding:
   color: 'gray-dark'
 
 inputs:
+  token:
+    description: Repository access token
+    required: true
+
   allowedWebBranches:
     description: Allowed web branches
     required: true

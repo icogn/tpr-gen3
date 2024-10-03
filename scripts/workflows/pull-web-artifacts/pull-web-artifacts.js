@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const artifactClient = require('@actions/artifact');
 const core = require('@actions/core');
 const { match } = require('path-to-regexp');
 
@@ -33,7 +34,19 @@ function input(name, def) {
   return inp;
 }
 
-function main() {
+async function run() {
+  const inputs = {
+    // name: core.getInput(Inputs.Name, { required: false }),
+    // path: core.getInput(Inputs.Path, { required: false }),
+    token: core.getInput('github-token', { required: true }),
+    // repository: core.getInput(Inputs.Repository, { required: false }),
+    // runID: parseInt(core.getInput(Inputs.RunID, { required: false })),
+    // pattern: core.getInput(Inputs.Pattern, { required: false }),
+    // mergeMultiple: core.getBooleanInput(Inputs.MergeMultiple, {
+    //   required: false,
+    // }),
+  };
+
   const branchConfig = fs.readJsonSync('./config_branch/config_branch.json');
 
   const artifactUrl = parsedArtifactInfo['web-zip-url']['ubuntu-latest'];
@@ -52,6 +65,29 @@ function main() {
     const obj = fn(url.pathname);
     console.log('obj');
     console.log(obj);
+
+    const options = {
+      findBy: {
+        token: inputs.token,
+        // workflowRunId: inputs.runID,
+        workflowRunId: obj.run_id,
+        repositoryName: obj.repo,
+        repositoryOwner: obj.owner,
+      },
+    };
+
+    const { artifact: targetArtifact } = await artifactClient.getArtifact(
+      // inputs.name,
+      'asdf-ubuntu-latest',
+      options
+    );
+
+    if (!targetArtifact) {
+      throw new Error(`Artifact not found`);
+    }
+
+    console.log('targetArtifact');
+    console.log(targetArtifact);
   } catch (e) {
     console.error(e);
     throw e;
@@ -69,4 +105,6 @@ function main() {
   // });
 }
 
-main();
+run().catch((err) => {
+  core.setFailed('Failed in pull-web-artifacts.js');
+});
