@@ -29,7 +29,7 @@ const signFile = async (inpFilePath) => {
   await new Promise((resolve) => inpFile.pipe(sign).once('finish', resolve));
   const buf = sign.sign({ key: privateKey, passphrase: passphrase }, encoding);
   await fs.promises.writeFile(outFilePath, buf);
-  return buf.toString();
+  return buf.toString('base64');
 };
 
 (async () => {
