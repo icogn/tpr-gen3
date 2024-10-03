@@ -13,63 +13,24 @@ console.log('parsedArtifactInfoIn');
 console.log(parsedArtifactInfoIn);
 
 const parsedArtifactInfo = {
-  'web-zip-sig-url': {
-    'ubuntu-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11154759297/artifacts/2008941732',
-    'windows-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11154759297/artifacts/2008942833',
-  },
-  'web-zip-url': {
-    'ubuntu-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11154759297/artifacts/2008941732',
-    'windows-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11154759297/artifacts/2008942833',
-  },
-};
-
-// This is the thing we need to send to the target workflow.
-const desiredOutputConfig = {
-  artifacts: {
+  byTriple: {
     'x86_64-pc-windows-msvc': {
-      name: 'asdf-windows-latest',
-      artifactUrl:
-        'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009161024',
-      signature:
-        'pvWamXR38lWQp9mNPhy4TRgtFHaxSaDXlOW1qluW5eWVh7J0bV3FwK4O8arxqPQ9EqyZSgbWezXLB7WT9is2DA3Nx+akCCCCpdCDd461OKdsv5m9ZGvYv/OIACWIGOjnts7kDDrYZlxCHx6yf1ODfxMooTbQhPqBC+ORiL30YDxc8CrDv/1Ds3dsr9vvqxn7Ws1Hxp8nFGOYagJluexz75cs0pFGus4Uamt6FBBVkumbub073dBjO5i03dQ3AMHBfeErwCeFDH9KKPJk6VGzQ7KobV/z3sVgnNCFH44hwtkdOg8YW9Fxz7xa7Z4NYSR4RalhgAGEI8HlPD2khiKsnBs3bi6w8F1f+qY7GrJXwNlqHgDV1b8VI6aStAI2rhi4HJN4c89qNxjB+6y4hUoZApKim5e6H/UywhnN6Mjpe5/UqSuYInfeDNwYIt4ymO7C0NC7AUR703K1uluEtAoep7omwpBZfjZHFmC0GNjEfeQzN6QJ+U8vd6VeYmLLPrsIQoK3iYAe7HGAOpZa4fA72mP9yI0YqieKQN06TxXYsQaaOlynJ8OYWR2LG95hNdXqOcDiR5APLTE/hrLbTQ+9eLXi10yKuhtdKzs7/td1pgkawRDuBDycPDNzNnKtkw7G79S0vQBEWZ/KqoMoTds/iRbQ7+RB3s+WcYEWzM4AC9Y=',
+      name: 'web-windows-latest',
+      'web-zip-sig':
+        'WgXK0m70/HJtb8jVfzDRhNLnGAnhRjAR5GytY2XRLixm82dddijpm6vZnJXE2J+wnNQG2a4PCuczPE2jgLeS2c1KsyYh81cFv+OhFMP3SLXR1OFHqhQ7z0Cy2D/cK50lSKUPNSLisD4HIbGDxRqf9oJ97DoEOvEOpDtuTnwOH0K/pj2WdjzCiqxd8RnljHS8+K+eMdY/yqSWEQDeQO/TaEprIauEeS2oKqcYcetzhkW8KinQofjtFWnlZ01g1RUPM5kra2yzs0pGsxrtzvHRyUWFm808zRQQEUqsNgLzYRbfQYt2Q47g/XDZfdjzrH+f1lmud7SQPOzWkEmikf+RYcVx9jab1lAT5ap4GtAf0yF7zDJHhzK3udgnM2sqcJFcMZ9Oc6DVSXfo/4aXmSuGTEegI8N45YgJtkamV/FqiSCxGvYuzxCZLrOH+qr1YmN69kmVFEI4WvfuDg46OPc9j8j/7JLASKUd3VXEwnitqqyA3G+gPz/Irdxy5lygiYuxOjdSOJDChcpLI4P1YltPKEVAtw8Yo6eQtg0S4OYijlZfjzulsV+mOiL8zw4CvsuxFuEoOcnVZTvbbESZZxCSYVYuix3S/ijmV08lf+/utA1FfxIbbA2QZnSZuOtbQq2tcF6g67726vlFdVrpuHUBOylRjoB2XaibY+j9Nbc56pU=',
+      'web-zip-url':
+        'https://github.com/icogn/tpr-gen3/actions/runs/11171484607/artifacts/2013581135',
     },
     'x86_64-unknown-linux-gnu': {
-      name: 'asdf-ubuntu-latest',
-      artifactUrl:
-        'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
-      signature:
-        'OcLUmY+dgSmeBOYmDBZ/mljwXTLzJUlHztm7C93EUvRpn9iWP+7d8dOIRAZ7NWek+OVJY9csCdxKtMepLtLnkIYplg/cVeYlA+I9XjkxhiOLpvZrVR6MfAesi95JkXUnF4lC6vcF+wcNptw1tkrkk0c4VD5GQE8PuBUk8d6Zv/aoJVsS+wcWsYPXIWhOZ9GtwxfhvrjSwvuRoxAX1i86s+3ankXb+D9USejlZXcDW6gxdzIljCc+ZY9/aLinctMjvFJ4wXnNPyGypjq6et71Yuw69eZvi6YLMqXLj8bOaE5yOgrt8WK6BnaF5GvePxE5dB5pcV1krc+01i6ZRvy6iXGP8IliYYQnuX7NbwhYLwj5rW9/UlS0BhJ7QL82ZS1ZqbdCt0/XsScD6BNPmnUuoPzkJefhb+h3AIJCFHcLVWsgJGMMJfXKVFbaNjwnNtmnNgyvdNawKlQ3ZbTxYoMkAPorclC5a7Sk65WqxBRU4xUjAQ4svE0Lf0GFRWZSdl0IDmMPvykBqzLo8ygDCrSdFub+JUQOppxKXrWXtQPZeOcoszn4BTHtPMpzEdb2e8Pu/ND6hdvl934+Ln+z0wY0tPnyml3sbqCaqkKQCysf34rxmqh7YmAw1aAZ2M3NRp2yldvCk8mm8r4T9eCPlttVCxzd8u/uBmYcYc3MXoXweD0=',
+      name: 'web-ubuntu-latest',
+      'web-zip-sig':
+        'iFxLPOvyx17Sot1+3ySPHF2EFVrYS4agJckbFgp/NsM5epwccloVyUs3V8/l1tZ7/pBSq40J//1bF0VFMSHnAMkV5UoCwLcLTbLaNPjqwLOyU7J/QoKUIRuVShVYADtwO8YEJW+qWxOyk+N02PdAEMtv2G2DtzIiH+G3hg4hoAWs8iquoV8L2rDGARMNAvV6tmHeFqZI7MVDriVTpaqU7etLVtz9Cla1RFlKcB0iil8UhOEdcgwUndjfqEDztT4j9Qyk+6JxG1V5HQ/XLWUy/bKjhiDx+gkT6VC4Lz71jcA+TQUW4Czdpl2wr2Qeex2ZyuOTDzNf7yUN2Sq0ftIHdfvOD/8Wo9VGtOm9pZehQbY6lraMFCTCBlT/bcR2KvCzn0ryj+adg8Cvl05xvmfY8j7Uf+uZyNssudILemAyPC3o+J0iL74DxtEFFkfKiNlUD8QEd+ZSuXorH0C4lXdX7brbnmPDL9SD7BuHGmAeE5isORjGLRi1zHpv0Nvxi0My5vid/s2iWk0ChLN0+dr4BgfrTN944izn+Hq3yPcchfzll7KLdGHpPOB1hQ70yow5ZR8o2d+HLhSREYWELukTcsfKcE+e/qM3516eVEy5TkyBdWSmPIxbTExja92Z5JCuVTU932fM5jaFAFtU6m/3fb/b/YAeyf4POz1o4+IhisE=',
+      'web-zip-url':
+        'https://github.com/icogn/tpr-gen3/actions/runs/11171484607/artifacts/2013579531',
     },
   },
-  timestamp: '2024-10-03T04:21:02.717Z',
-  signature: 'signature of rest of object stringified',
-};
-
-const a = {
-  'web-zip-url': {
-    'windows-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009161024',
-    'ubuntu-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
-  },
-  'web-zip-sig-url': {
-    'windows-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009161024',
-    'ubuntu-latest':
-      'https://github.com/icogn/tpr-gen3/actions/runs/11155612954/artifacts/2009160000',
-  },
-  'web-zip-sig': {
-    'windows-latest': [
-      'pvWamXR38lWQp9mNPhy4TRgtFHaxSaDXlOW1qluW5eWVh7J0bV3FwK4O8arxqPQ9EqyZSgbWezXLB7WT9is2DA3Nx+akCCCCpdCDd461OKdsv5m9ZGvYv/OIACWIGOjnts7kDDrYZlxCHx6yf1ODfxMooTbQhPqBC+ORiL30YDxc8CrDv/1Ds3dsr9vvqxn7Ws1Hxp8nFGOYagJluexz75cs0pFGus4Uamt6FBBVkumbub073dBjO5i03dQ3AMHBfeErwCeFDH9KKPJk6VGzQ7KobV/z3sVgnNCFH44hwtkdOg8YW9Fxz7xa7Z4NYSR4RalhgAGEI8HlPD2khiKsnBs3bi6w8F1f+qY7GrJXwNlqHgDV1b8VI6aStAI2rhi4HJN4c89qNxjB+6y4hUoZApKim5e6H/UywhnN6Mjpe5/UqSuYInfeDNwYIt4ymO7C0NC7AUR703K1uluEtAoep7omwpBZfjZHFmC0GNjEfeQzN6QJ+U8vd6VeYmLLPrsIQoK3iYAe7HGAOpZa4fA72mP9yI0YqieKQN06TxXYsQaaOlynJ8OYWR2LG95hNdXqOcDiR5APLTE/hrLbTQ+9eLXi10yKuhtdKzs7/td1pgkawRDuBDycPDNzNnKtkw7G79S0vQBEWZ/KqoMoTds/iRbQ7+RB3s+WcYEWzM4AC9Y=',
-    ],
-    'ubuntu-latest': [
-      'OcLUmY+dgSmeBOYmDBZ/mljwXTLzJUlHztm7C93EUvRpn9iWP+7d8dOIRAZ7NWek+OVJY9csCdxKtMepLtLnkIYplg/cVeYlA+I9XjkxhiOLpvZrVR6MfAesi95JkXUnF4lC6vcF+wcNptw1tkrkk0c4VD5GQE8PuBUk8d6Zv/aoJVsS+wcWsYPXIWhOZ9GtwxfhvrjSwvuRoxAX1i86s+3ankXb+D9USejlZXcDW6gxdzIljCc+ZY9/aLinctMjvFJ4wXnNPyGypjq6et71Yuw69eZvi6YLMqXLj8bOaE5yOgrt8WK6BnaF5GvePxE5dB5pcV1krc+01i6ZRvy6iXGP8IliYYQnuX7NbwhYLwj5rW9/UlS0BhJ7QL82ZS1ZqbdCt0/XsScD6BNPmnUuoPzkJefhb+h3AIJCFHcLVWsgJGMMJfXKVFbaNjwnNtmnNgyvdNawKlQ3ZbTxYoMkAPorclC5a7Sk65WqxBRU4xUjAQ4svE0Lf0GFRWZSdl0IDmMPvykBqzLo8ygDCrSdFub+JUQOppxKXrWXtQPZeOcoszn4BTHtPMpzEdb2e8Pu/ND6hdvl934+Ln+z0wY0tPnyml3sbqCaqkKQCysf34rxmqh7YmAw1aAZ2M3NRp2yldvCk8mm8r4T9eCPlttVCxzd8u/uBmYcYc3MXoXweD0=',
-    ],
-  },
+  signature: 'exampleSig',
+  timestamp: '2024-10-03T23:55:46.302Z',
 };
 
 function input(name, def) {
@@ -96,7 +57,10 @@ async function run() {
 
   const branchConfig = fs.readJsonSync('./config_branch/config_branch.json');
 
-  const artifactUrl = parsedArtifactInfo['web-zip-url']['ubuntu-latest'];
+  const osArtifactInfo =
+    parsedArtifactInfo.byTriple['x86_64-unknown-linux-gnu'];
+
+  const artifactUrl = osArtifactInfo['web-zip-url'];
 
   const fn = match('/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id');
 
