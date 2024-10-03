@@ -7,10 +7,12 @@ jobs:
   do_stuff:
     runs-on: ubuntu-latest
     steps:
-      # - run: echo ${{ github.action_repository }}
-      # - run: echo ${{ toJson(github.event.client_payload.artifactInfo) }}
+      - uses: actions/checkout@v4
 
       - uses: actions/checkout@v4
+        with:
+          ref: 'config_branch'
+          path: 'config_branch'
 
       - uses: actions/setup-node@v4
         with:
