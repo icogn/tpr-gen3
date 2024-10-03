@@ -15,6 +15,7 @@ jobs:
       env: '${{ steps.regex-match.outputs.group1 }}'
     steps:
       - run: rustc -vV
+      - run: gcc -v
 
       - run: exit 1
 
