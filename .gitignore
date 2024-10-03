@@ -73,3 +73,7 @@ dist-ssr
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Make sure people do not accidentally commit a publicKey.txt which does not
+# need to be in version control.
+/scripts/convenience/publicKey.txt
