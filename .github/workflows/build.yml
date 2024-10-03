@@ -123,47 +123,33 @@ jobs:
           echo "${{ steps.semver.outputs.prerelease }}"
           echo "${{ steps.semver.outputs.build }}"
 
-      # - run: |
-      #     gh variable list
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_PAT }}
-
-      # - uses: ./scripts/ci/set-github-variable.js
-      #   with:
-      #     name: 'SAMPLE_VAR'
-      #     value: 'Hello World'
-      #     repository: mmoyaferrer/set-github-variable
-      #     token: ${{ secrets.REPO_ACCESS_TOKEN }}
-
       - run: yarn --cwd website run build
+
+      - uses: ./scripts/workflows/create-output
+        id: web-zip-name
+        with:
+          input: web-${{ matrix.os }}
+
+      - uses: ./scripts/workflows/create-output
+        id: web-zip-nameext
+        with:
+          input: ${{ steps.web-zip-name.outputs.value }}.zip
 
       - uses: vimtor/action-zip@v1.2
         with:
           files: website/.next/standalone
-          dest: downloadedArtifacts/asdf-${{ matrix.os }}.zip
+          dest: downloadedArtifacts/${{ steps.web-zip-nameext.outputs.value }}
 
-      - name: Display structure of downloaded files
-        run: ls -R downloadedArtifacts
-
-      # - name: Download Artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: asdf-${{ matrix.os }}
-      #     path: downloadedArtifacts
-
-      # - uses: 'FKLC/sign-files-action@v1.0.0'
       - uses: ./scripts/workflows/sign-files
         id: sign-files
         with:
           privateKey: ${{ secrets.PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          file: downloadedArtifacts/asdf-${{ matrix.os }}.zip
+          file: downloadedArtifacts/${{ steps.web-zip-nameext.outputs.value }}
 
       - name: Get rust triple
         uses: ./scripts/workflows/get-rust-triple
         id: rust-triple
-
-      - run: echo ${{ steps.sign-files.outputs.value }}
 
       - name: Display structure of downloaded files
         run: ls -R downloadedArtifacts
@@ -172,19 +158,8 @@ jobs:
         id: upload-web-zip
         uses: actions/upload-artifact@v4
         with:
-          name: asdf-${{ matrix.os }}
-          # include-hidden-files: true # so includes .next folder
-          # path: website/.next/standalone
-          path: downloadedArtifacts/asdf-${{ matrix.os }}.zip
-
-      # - name: Upload Artifact
-      #   id: upload-web-zip-sig
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: asdf-${{ matrix.os }}.sig
-      #     # include-hidden-files: true # so includes .next folder
-      #     # path: website/.next/standalone
-      #     path: downloadedArtifacts/asdf-${{ matrix.os }}.zip.sig
+          name: ${{ steps.web-zip-name.outputs.value }}
+          path: downloadedArtifacts/${{ steps.web-zip-nameext.outputs.value }}
 
       - run: echo ${{ steps.upload-web-zip.outputs.artifact-url }}
 
@@ -196,18 +171,9 @@ jobs:
           matrix-key: ${{ matrix.os }}
           outputs: |-
             web-zip-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
-            ## Multiline string
-            ## web-zip-sig-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
             web-zip-sig: ${{ steps.sign-files.outputs.value }}
             triple: ${{ steps.rust-triple.outputs.triple }}
-
-      # - name: Upload Artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: asdf-${{ matrix.os }}.sig
-      #     include-hidden-files: true # so includes .next folder
-      #     # path: downloadedArtifacts/asdf-${{ matrix.os }}.sig
-      #     path: asdf-${{ matrix.os }}.sig
+            filename: ${{ steps.web-zip-nameext.outputs.value }}
 
       # At the end, set/create var in environment for the "1.2.3" of this build.
       # Probably in another job since this one is a matrix.

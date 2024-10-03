@@ -1,0 +1,21 @@
+---
+name: 'Create output'
+author: 'icogn'
+description: 'Action to set an input to an output.'
+
+branding:
+  icon: 'plus'
+  color: 'gray-dark'
+
+inputs:
+  input:
+    description: Input
+    required: true
+
+outputs:
+  value:
+    description: The input as an output
+
+runs:
+  using: node20
+  main: create-output.js

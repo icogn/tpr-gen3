@@ -1,7 +1,7 @@
 ---
 name: 'Get rust triple'
 author: 'icogn'
-description: 'Action to get the rust triple .'
+description: 'Action to get the rust triple for current OS.'
 
 branding:
   icon: 'plus'
