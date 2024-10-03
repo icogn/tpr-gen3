@@ -1,0 +1,26 @@
+name: Target Workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  do_stuff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          ref: 'config_branch'
+          path: 'config_branch'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17.0'
+          cache: 'yarn'
+
+      - run: yarn --immutable
+
+      - uses: ./scripts/workflows/pull-web-artifacts
+        # with:
+        #   allowedWebBranches: ${{ vars.ALLOWED_WEB_BRANCHES }}
+        #   artifactInfo: ${{ toJson(github.event.client_payload.artifactInfo) }}
