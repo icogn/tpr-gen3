@@ -160,11 +160,7 @@ jobs:
         with:
           privateKey: ${{ secrets.PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          algorithm: 'RSA-SHA256'
-          extension: '.sig'
-          outputFolder: 'downloadedArtifacts'
-          files: downloadedArtifacts/asdf-${{ matrix.os }}.zip
-          # files: asdf-${{ matrix.os }}
+          file: downloadedArtifacts/asdf-${{ matrix.os }}.zip
 
       - run: echo ${{ steps.sign-files.outputs.value }}
 
@@ -180,14 +176,14 @@ jobs:
           # path: website/.next/standalone
           path: downloadedArtifacts/asdf-${{ matrix.os }}.zip
 
-      - name: Upload Artifact
-        id: upload-web-zip-sig
-        uses: actions/upload-artifact@v4
-        with:
-          name: asdf-${{ matrix.os }}.sig
-          # include-hidden-files: true # so includes .next folder
-          # path: website/.next/standalone
-          path: downloadedArtifacts/asdf-${{ matrix.os }}.zip.sig
+      # - name: Upload Artifact
+      #   id: upload-web-zip-sig
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: asdf-${{ matrix.os }}.sig
+      #     # include-hidden-files: true # so includes .next folder
+      #     # path: website/.next/standalone
+      #     path: downloadedArtifacts/asdf-${{ matrix.os }}.zip.sig
 
       - run: echo ${{ steps.upload-web-zip.outputs.artifact-url }}
 
@@ -200,7 +196,7 @@ jobs:
           outputs: |-
             web-zip-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
             ## Multiline string
-            web-zip-sig-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
+            ## web-zip-sig-url: ${{ steps.upload-web-zip.outputs.artifact-url }}
             web-zip-sig: ${{ steps.sign-files.outputs.value }}
 
       # - name: Upload Artifact
