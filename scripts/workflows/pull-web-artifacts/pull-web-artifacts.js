@@ -88,10 +88,33 @@ async function run() {
 
     console.log('targetArtifact');
     console.log(targetArtifact);
+
+    // await artifactClient.downloadArtifact(artifact.id, {
+    await artifactClient.downloadArtifact(obj.params.artifact_id, {
+      ...options,
+      path: 'my_download_dir',
+      // isSingleArtifactDownload || inputs.mergeMultiple
+      //   ? resolvedPath
+      //   : path.join(resolvedPath, artifact.name),
+    });
+
+    // await artifactClient.downloadArtifact(artifact.id, {
+    //   ...options,
+    //   path:
+    //     isSingleArtifactDownload || inputs.mergeMultiple
+    //       ? resolvedPath
+    //       : path.join(resolvedPath, artifact.name),
+    // });
   } catch (e) {
     console.error(e);
     throw e;
   }
+
+  // print files in checked out config_branch branch.
+  console.log('reading my_download_dir');
+  fs.readdirSync('./my_download_dir').forEach((file) => {
+    console.log(file);
+  });
 
   // // print files in checked out config_branch branch.
   // console.log('reading dir `.`');
