@@ -80,7 +80,7 @@ async function run() {
     const options = {
       findBy: {
         token: inputs.token,
-        // workflowRunId: inputs.runID,
+        // run_id is actually used
         workflowRunId: obj.params.run_id,
         repositoryName: obj.params.repo,
         repositoryOwner: obj.params.owner,
@@ -88,8 +88,6 @@ async function run() {
     };
 
     const { artifact: targetArtifact } = await artifactClient.getArtifact(
-      // inputs.name,
-      // 'asdf-ubuntu-latest',
       osArtifactInfo.name,
       options
     );
