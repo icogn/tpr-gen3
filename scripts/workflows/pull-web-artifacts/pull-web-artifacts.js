@@ -4,7 +4,7 @@ const core = require('@actions/core');
 const { match } = require('path-to-regexp');
 
 // const allowedWebBranches = input('allowedWebBranches', '');
-// const artifactInfo = input('artifactInfo', '');
+const artifactInfo = input('artifactInfo', '');
 
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
 
