@@ -89,7 +89,7 @@ async function run() {
     return;
   }
 
-  console.log('aaa:');
+  console.log('isValidSignature:');
   console.log(isValidSignature);
 
   // end verify info signature
