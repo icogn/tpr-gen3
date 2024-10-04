@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const { createSign } = require('node:crypto');
 
 const token = core.getInput('token');
 const octokit = github.getOctokit(token, { required: true });
