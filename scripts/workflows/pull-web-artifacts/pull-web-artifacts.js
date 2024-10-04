@@ -8,33 +8,33 @@ const stableStringify = require('json-stable-stringify');
 // const allowedWebBranches = input('allowedWebBranches', '');
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
 
-const artifactInfo = input('artifactInfo', '');
-const parsedArtifactInfoIn = JSON.parse(artifactInfo);
-console.log('parsedArtifactInfoIn');
-console.log(parsedArtifactInfoIn);
-const parsedArtifactInfo = parsedArtifactInfoIn;
+// const artifactInfo = input('artifactInfo', '');
+// const parsedArtifactInfoIn = JSON.parse(artifactInfo);
+// console.log('parsedArtifactInfoIn');
+// console.log(parsedArtifactInfoIn);
+// const parsedArtifactInfo = parsedArtifactInfoIn;
 
-// const parsedArtifactInfo = {
-//   byTriple: {
-//     'x86_64-pc-windows-msvc': {
-//       name: 'web-windows-latest',
-//       'web-zip-sig':
-//         'L7ASVXwGPDayCT6QdL2nZPSSfF0VmXl/GIn6vv/21o22e9oOM5OP27yhAYbu0+g6UriwbqhL4uBBoF40mAF926E54A1upa1y/sbe1+p51MVQbaArMa06HDVr8U7TPSQwxfNXKNr6DLO6Wfc7XFNVOcPSYeYbrsY1jxD3rTFguk6q9PcHtB1Tyshb/yj9T9e0g5QOt1+71qhLJDilRIy9U0IclOauqGH4O5qJUpqaZ2LxnzfkPwapwd8N6EINcOSReEjhcMjcujApqQWMOMhRiTfQQqM3z7PC9SE1/CGP+Mfa1acRVZKxJZ2SwPR8RSXFXuRAhmjowPWfgYWGBHo8YTRhGHhr+LmzoHikoeSjjMrjKuKkWpGejXUVf8lBaeUxa3JSdtHn6N2GsGd8Cxwxv58nbYXcJVopQ7acGCEij8pg6pif42bQZPUCUlO5w526ySmD40tPUV77iG449Phho2Dn3uyM73sI+aR/lH+uZhRCv1K6Ud47dpRrabdv27+QBSK8tGJUs2cyjUh0ppr+lWWZBbDW5zgmEKLHM/vnREcqaDCeF76FwLvKRYWRu9QaQTJk2w4WRpvso0TEUv3+xOfQVK98+p1qvKhFV2W9v/SzcEuocrAgejs56YeipUircGZ+f9ZG125+k5fno5gosmLEygp7F14+kXllf0fd+wo=',
-//       'web-zip-url':
-//         'https://github.com/icogn/tpr-gen3/actions/runs/11184341001/artifacts/2016988768',
-//     },
-//     'x86_64-unknown-linux-gnu': {
-//       name: 'web-ubuntu-latest',
-//       'web-zip-sig':
-//         'fwmGD2USd7dhL4j44GTK8Ofd+/NQDWEZy8xp6KehVkSinmtDlfkidJYsl/BpcydFtatSoRnyeJwi8DoWN0o3i4kssZQ1C5f2CXGiI1UmGNrPZZ84Qkr+TP/O99KF2GDkUiQfd4m8Kq87HJWxU9CeJMAR5zljnndOFrLIVMYl2wdX5MtADfGtFiTsaf9yW1TSOy0JZdNrqpgVwkCcnC0/P9p8i4fV/UNYDrRKNfZfL9D4Y2DUiW+7aGeYDN2pAW3kCiIt8pj8+X9NmlbBvJJjswmegSarmW4uzw1R75zXruuXpYyNEYnP94pV0Sx4Uxel6xpfdbhA9FRYAIAljphpmSKCPHGWpPLs2yRvPXz6JJkyhws7y1eyqa99r6M+QjP0Ari7VTmXaKycIxTpkK2cVATanca0uNLEiLyVpiyX4mwTvJlwqY7nCavDRrZ3NtA1YcZGzmkMMhaUh0hMjVerfz05Ykj5Mvc/uvKEI9eOQV1wxtRTa44Kb4NMl/b0hOGr1kLM3ypGBvU+Or2rmty5A+WRKJ7tkL6Dk2QMHrkoyOGQ6hmThtlhCPqoMu0xlKR/ro0hkDGqbRKnQhb0GGX6hvEShrJOlvleXGkj8CS/cQdV8lAq91VX3hBC5HPe/tG12FegZwg94/8PR9XtS3s+7rpAQtIgFCNIC+FSgqd5kPo=',
-//       'web-zip-url':
-//         'https://github.com/icogn/tpr-gen3/actions/runs/11184341001/artifacts/2016985763',
-//     },
-//   },
-//   signature:
-//     'hIacfZl23Ti42x2le0zHwvJKzJFbTcE4lYco4za9KOWjAt5ziuYPcv4R1INGR3HNUrqWpl8JFBWA8Y5NvrMaBxoQTNLOQspF+3unuD6OFEoZwGCNG9mbleqRkevi7o1P7GmNqmhgityfEUV+xsuabWWQBVcXcZQLHxz4cgzlXhvAVCJLfIuM38r5zExoDej+RrTuyffQPMvRMd4OEPtLuPkKjW7EySVBPR8Jl3xH2/dOjCypL5Wvb06n8+lnFoNgVEB1ZlZQJ97vOBvBKU1PC/YjQ58BUgvhHLaANHZEa5SummNcqKCM2/ZAzSxHj5aQhvgEfk+QfYRHC1S9QNlucGVycQWrATjjrvumey46vOfPLx3/qfCaZLuoCH3zs2jEWQ8V0ptdhBF55FNWZIdisf2vr/qsarkLlJj9P3Mnt9ttuf/VZvW4F9B2+6Rda0M7JN4NYTybzRb7x5dkV6l0cth1OEjjCtjKIYg7St+RDv85VN/tG6LAiAmJq1HqsDS3zclXuVnNpHxvLCmtcmfrphWLcJK+W69dQmUbcbcqIfKlA5Zgv/iL2MSLWBoYr1ocJKLrwlAp9EFtk9UQRyeGrsJzwYNAojMLy0tgC6Phv1eheX0PZdnhf9IbLhDWfUCqxp6FOdQR98ck7c73pdhvyIVh9agMLfYY/1nXzVuwGac=',
-//   timestamp: '2024-10-04T17:33:52.754Z',
-// };
+const parsedArtifactInfo = {
+  byTriple: {
+    'x86_64-pc-windows-msvc': {
+      name: 'web-windows-latest',
+      'web-zip-sig':
+        'JifDBVCvl05aczmfJV+AByJ3ZIDh3rzvL3+koiGfeGpW6j8mFUPzPO7TsiOAwoCxUuSGwuXQ1dvNicQf0rmvPSKaYP2jTwuo208vsBcWk4qUsKzGE0X0FuBbNJ26WV7dwyU/5QKL8VjJZ/quC7av4qcaopwXCuKMc+Ei3x+Q+qFXe1O2w5lSTroEVC3pmy9MsMVauEPW1dD7L06lhQzEEskl5YtFhbAvCQUrLA8spHzDH0wuEHu6xjZtPSEE2OYR2Q3vEypifITN7y3rCe/AADs+odog38BqvEUaCe3RqXC8u7zXOaDIvgHmIjL9EcfSxSR0safOsxjDV6PPij7ZjPlSnfmk3lRMJbq9QMDxDR7x+qFX5577eIEI0sy2dywfxg+zBW9r6J1iWTojn7YRFZrHb9CqvLUGIgWxTjXPGxELwPN6QhNo1M42OqyS7Y7mT7Oqmn5enoKDgvz+YkDWTYK0XEy0HiGfgIKu86L9MWk3mzzQBMHTX0k7DC8YHFLTUHo7V6abLT7zX3caCZfjn55N/gfd84X8omHd7ePXON9M+ybhjQt5AQdIn5G0CDvTI9NPj19hSnhxen/ucyF2TX89rVTd8Dl38SUc1lVDsKDXPXtpy5g44hFbyUSPvKlkLud2CwhMfnyzPPIv7+HtUwStF98exYSkBK0DXi1PPDM=',
+      'web-zip-url':
+        'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017054138',
+    },
+    'x86_64-unknown-linux-gnu': {
+      name: 'web-ubuntu-latest',
+      'web-zip-sig':
+        'UgG/Z/0vlTN4QQkSf6zyFcH+774vj7Br8SUafd32lvGR5habFeD1GaHTq/I0az0yfyhfYFNsUHRQVimDIBoM6r8Hsg480f8Ll7yXljZS2Ew/fae+kQh/ulgdv1GTKHiZCoiIPD/kGwKCiDVE5Yknu0P38j6nZ/Hiyx4FisuvSUWXTzY+RbZMmpL21RPm+EOxnDk/C2bmADV7Eq6RGKpNfSlDzDFvR21kKrCV2BbUaJ9x+Sz3ARgo86dHL5fd8bu/N2CT2an53bvN6xeE2gHcbg7Dk+JPPq4iROoju8StozhOor23oWOUb33OA1XHfxyzaBZbnDhPlxJP4xlPItWbTqfK+ijRxUWPoWiY/cg8J2JLMAZ4EzHHuTg7DJe+UGuSHzQQ6JFU31gUdWjIQU9TeNZeqAiLU3DXmuTJg8UpWafo5RghcNIuMASEYWng+AtrA5YmPVxUtWRQ6o1j3kDFaRnm60G934TVZmPUljS7VcyJroa+I5q9CEvwgiWTiP8SeX8ElVxGbrIx89wFJUNgbLyLRuDbdc9pjkMAhSBEi9NtRKVvmdCa7INopaDit80T9+XhdgmJTl9bGM9PrXK5TQtoQ5NVL/pTX/XLHWxsusc6I2hfE1ey80ofpnGvrMc/7RVHlByt/OMFLJRg7olrPSWvndCla/mYtCCAraDNF74=',
+      'web-zip-url':
+        'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017051285',
+    },
+  },
+  signature:
+    'v0BxCx0USKrNvWE9SxIGR2LkGB++HUURJNR26OkrwynEdNpbBLoNoXKHw6oeDT1EhuOD7nHZ6DZGnTuUTb4EWNJHiJ/rfNSlA5WcT9fvrkFUMhtMwJALBPfMvMQj4Rh2RIqAT95Tf5f01aD4HrRoz1Mn8jnbuUFUD+TceO+amFJOGRwBALVRCXYGkrfcNAu4Vh4W+Qstp3xg6wIdgIN1U2CKJzcKLj2jZBfL5dAtgVOOzqG0aqlyIwl5yC3NBHyC343EEZl9UvC1Q1IiIlwnmzNyd03EEzSbzymlE8bATadWeVMW61/i4IDDAKz4WYE8djCf4pbGaBaW1VI+ww0IXUBk9GeOwpstXIswQaQVKeq9K+WC6ZanauHeXSftHLtkBJpPef4QZ1XH6WGU0l1BZXiuB1DBLB+Eve0wlRWSMq0BY6oSrX2quGW2zB6PCuxGrtIicwQUkLtSCZW9SvTSEd1z1coT9ZMr/6KXyTBLvoVbPFy7yJ95vse5c7h4t6dsDLHEbfpFKyQQQhUFCUNRvE19MDm4vYehNrhg9ec+Rbp/JD8Gf3RQkzF8Kqirs1QHn5MIUpQ4tj2Ba3lE4/BLeloaj6gcSKLZNejFm7XXIZkD99RsXFshJTDa6bVdtbu0ZM+ISg2U5pSXxZvk7fintWn6hxueAqJ4JYC+3SSN9Ck=',
+  timestamp: '2024-10-04T17:52:14.178Z',
+};
 const signature = parsedArtifactInfo.signature;
 parsedArtifactInfo.signature = undefined;
 
@@ -74,7 +74,7 @@ async function run() {
       'RSA-SHA256',
       Buffer.from(dataToVerify),
       publicKey,
-      Buffer.from(signature),
+      Buffer.from(signature, 'base64'),
       (err, result) => {
         if (err) {
           reject(err);
