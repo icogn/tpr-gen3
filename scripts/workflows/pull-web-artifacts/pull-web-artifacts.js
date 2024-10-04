@@ -89,7 +89,8 @@ async function run() {
 
     const { artifact: targetArtifact } = await artifactClient.getArtifact(
       // inputs.name,
-      'asdf-ubuntu-latest',
+      // 'asdf-ubuntu-latest',
+      osArtifactInfo.name,
       options
     );
 
