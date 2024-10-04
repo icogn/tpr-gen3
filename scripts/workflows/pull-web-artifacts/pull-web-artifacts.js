@@ -69,7 +69,7 @@ async function run() {
   console.log('dataToVerify:');
   console.log(dataToVerify);
 
-  const aaa = await new Promise((resolve, reject) => {
+  const isValidSignature = await new Promise((resolve, reject) => {
     verify(
       'RSA-SHA256',
       Buffer.from(dataToVerify),
@@ -84,9 +84,13 @@ async function run() {
       }
     );
   });
+  if (!isValidSignature) {
+    core.setFailed('artifactInfo had an invalid signature!');
+    return;
+  }
 
   console.log('aaa:');
-  console.log(aaa);
+  console.log(isValidSignature);
 
   // end verify info signature
 
