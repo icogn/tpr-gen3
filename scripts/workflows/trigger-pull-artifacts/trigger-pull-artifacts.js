@@ -20,13 +20,13 @@ const passphrase = 'top secret';
 
 const encoding = getInput('encoding', 'base64');
 
-const getInput = (name, defVal, required = false) => {
+function getInput(name, defVal, required = false) {
   const val = process.env['INPUT_' + name.toUpperCase()];
   if (required && (val == null || val === '')) {
     throw name + ' input must be supplied!';
   }
   return val || defVal;
-};
+}
 
 async function signInput(input, options) {
   const sign = createSign(algorithm);
