@@ -81,7 +81,7 @@ async function run() {
       findBy: {
         token: inputs.token,
         // workflowRunId: inputs.runID,
-        // workflowRunId: obj.params.run_id,
+        workflowRunId: obj.params.run_id,
         repositoryName: obj.params.repo,
         repositoryOwner: obj.params.owner,
       },
