@@ -42,7 +42,7 @@ async function signInput(input, options) {
   return sign.sign({ key: privateKey, passphrase: passphrase }, encoding);
 }
 
-function restructureClientPayload() {
+async function restructureClientPayload() {
   const keyMapping = parsedArtifactInfo.triple;
 
   const root = { byTriple: {} };
@@ -73,7 +73,7 @@ function restructureClientPayload() {
 
   const asStr = JSON.stringify(root);
 
-  const signature = signInput(asStr);
+  const signature = await signInput(asStr);
 
   // sign
   // const signature = 'exampleSig';
@@ -102,7 +102,7 @@ function restructureClientPayload() {
 }
 
 const bootstrap = async () => {
-  const newArtifactInfo = restructureClientPayload();
+  const newArtifactInfo = await restructureClientPayload();
 
   const response = await octokit.rest.repos.createDispatchEvent({
     owner: 'icogn',
