@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const artifactClient = require('@actions/artifact').default;
 const core = require('@actions/core');
 const { match } = require('path-to-regexp');
+const { verify } = require('node:crypto');
 
 // const allowedWebBranches = input('allowedWebBranches', '');
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
