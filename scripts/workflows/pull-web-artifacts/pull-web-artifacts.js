@@ -8,33 +8,33 @@ const stableStringify = require('json-stable-stringify');
 // const allowedWebBranches = input('allowedWebBranches', '');
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
 
-// const artifactInfo = input('artifactInfo', '');
-// const parsedArtifactInfoIn = JSON.parse(artifactInfo);
-// console.log('parsedArtifactInfoIn');
-// console.log(parsedArtifactInfoIn);
-// const parsedArtifactInfo = parsedArtifactInfoIn;
+const artifactInfo = input('artifactInfo', '');
+const parsedArtifactInfoIn = JSON.parse(artifactInfo);
+console.log('parsedArtifactInfoIn');
+console.log(parsedArtifactInfoIn);
+const parsedArtifactInfo = parsedArtifactInfoIn;
 
-const parsedArtifactInfo = {
-  byTriple: {
-    'x86_64-pc-windows-msvc': {
-      name: 'web-windows-latest',
-      'web-zip-sig':
-        'L7ASVXwGPDayCT6QdL2nZPSSfF0VmXl/GIn6vv/21o22e9oOM5OP27yhAYbu0+g6UriwbqhL4uBBoF40mAF926E54A1upa1y/sbe1+p51MVQbaArMa06HDVr8U7TPSQwxfNXKNr6DLO6Wfc7XFNVOcPSYeYbrsY1jxD3rTFguk6q9PcHtB1Tyshb/yj9T9e0g5QOt1+71qhLJDilRIy9U0IclOauqGH4O5qJUpqaZ2LxnzfkPwapwd8N6EINcOSReEjhcMjcujApqQWMOMhRiTfQQqM3z7PC9SE1/CGP+Mfa1acRVZKxJZ2SwPR8RSXFXuRAhmjowPWfgYWGBHo8YTRhGHhr+LmzoHikoeSjjMrjKuKkWpGejXUVf8lBaeUxa3JSdtHn6N2GsGd8Cxwxv58nbYXcJVopQ7acGCEij8pg6pif42bQZPUCUlO5w526ySmD40tPUV77iG449Phho2Dn3uyM73sI+aR/lH+uZhRCv1K6Ud47dpRrabdv27+QBSK8tGJUs2cyjUh0ppr+lWWZBbDW5zgmEKLHM/vnREcqaDCeF76FwLvKRYWRu9QaQTJk2w4WRpvso0TEUv3+xOfQVK98+p1qvKhFV2W9v/SzcEuocrAgejs56YeipUircGZ+f9ZG125+k5fno5gosmLEygp7F14+kXllf0fd+wo=',
-      'web-zip-url':
-        'https://github.com/icogn/tpr-gen3/actions/runs/11184341001/artifacts/2016988768',
-    },
-    'x86_64-unknown-linux-gnu': {
-      name: 'web-ubuntu-latest',
-      'web-zip-sig':
-        'fwmGD2USd7dhL4j44GTK8Ofd+/NQDWEZy8xp6KehVkSinmtDlfkidJYsl/BpcydFtatSoRnyeJwi8DoWN0o3i4kssZQ1C5f2CXGiI1UmGNrPZZ84Qkr+TP/O99KF2GDkUiQfd4m8Kq87HJWxU9CeJMAR5zljnndOFrLIVMYl2wdX5MtADfGtFiTsaf9yW1TSOy0JZdNrqpgVwkCcnC0/P9p8i4fV/UNYDrRKNfZfL9D4Y2DUiW+7aGeYDN2pAW3kCiIt8pj8+X9NmlbBvJJjswmegSarmW4uzw1R75zXruuXpYyNEYnP94pV0Sx4Uxel6xpfdbhA9FRYAIAljphpmSKCPHGWpPLs2yRvPXz6JJkyhws7y1eyqa99r6M+QjP0Ari7VTmXaKycIxTpkK2cVATanca0uNLEiLyVpiyX4mwTvJlwqY7nCavDRrZ3NtA1YcZGzmkMMhaUh0hMjVerfz05Ykj5Mvc/uvKEI9eOQV1wxtRTa44Kb4NMl/b0hOGr1kLM3ypGBvU+Or2rmty5A+WRKJ7tkL6Dk2QMHrkoyOGQ6hmThtlhCPqoMu0xlKR/ro0hkDGqbRKnQhb0GGX6hvEShrJOlvleXGkj8CS/cQdV8lAq91VX3hBC5HPe/tG12FegZwg94/8PR9XtS3s+7rpAQtIgFCNIC+FSgqd5kPo=',
-      'web-zip-url':
-        'https://github.com/icogn/tpr-gen3/actions/runs/11184341001/artifacts/2016985763',
-    },
-  },
-  signature:
-    'hIacfZl23Ti42x2le0zHwvJKzJFbTcE4lYco4za9KOWjAt5ziuYPcv4R1INGR3HNUrqWpl8JFBWA8Y5NvrMaBxoQTNLOQspF+3unuD6OFEoZwGCNG9mbleqRkevi7o1P7GmNqmhgityfEUV+xsuabWWQBVcXcZQLHxz4cgzlXhvAVCJLfIuM38r5zExoDej+RrTuyffQPMvRMd4OEPtLuPkKjW7EySVBPR8Jl3xH2/dOjCypL5Wvb06n8+lnFoNgVEB1ZlZQJ97vOBvBKU1PC/YjQ58BUgvhHLaANHZEa5SummNcqKCM2/ZAzSxHj5aQhvgEfk+QfYRHC1S9QNlucGVycQWrATjjrvumey46vOfPLx3/qfCaZLuoCH3zs2jEWQ8V0ptdhBF55FNWZIdisf2vr/qsarkLlJj9P3Mnt9ttuf/VZvW4F9B2+6Rda0M7JN4NYTybzRb7x5dkV6l0cth1OEjjCtjKIYg7St+RDv85VN/tG6LAiAmJq1HqsDS3zclXuVnNpHxvLCmtcmfrphWLcJK+W69dQmUbcbcqIfKlA5Zgv/iL2MSLWBoYr1ocJKLrwlAp9EFtk9UQRyeGrsJzwYNAojMLy0tgC6Phv1eheX0PZdnhf9IbLhDWfUCqxp6FOdQR98ck7c73pdhvyIVh9agMLfYY/1nXzVuwGac=',
-  timestamp: '2024-10-04T17:33:52.754Z',
-};
+// const parsedArtifactInfo = {
+//   byTriple: {
+//     'x86_64-pc-windows-msvc': {
+//       name: 'web-windows-latest',
+//       'web-zip-sig':
+//         'L7ASVXwGPDayCT6QdL2nZPSSfF0VmXl/GIn6vv/21o22e9oOM5OP27yhAYbu0+g6UriwbqhL4uBBoF40mAF926E54A1upa1y/sbe1+p51MVQbaArMa06HDVr8U7TPSQwxfNXKNr6DLO6Wfc7XFNVOcPSYeYbrsY1jxD3rTFguk6q9PcHtB1Tyshb/yj9T9e0g5QOt1+71qhLJDilRIy9U0IclOauqGH4O5qJUpqaZ2LxnzfkPwapwd8N6EINcOSReEjhcMjcujApqQWMOMhRiTfQQqM3z7PC9SE1/CGP+Mfa1acRVZKxJZ2SwPR8RSXFXuRAhmjowPWfgYWGBHo8YTRhGHhr+LmzoHikoeSjjMrjKuKkWpGejXUVf8lBaeUxa3JSdtHn6N2GsGd8Cxwxv58nbYXcJVopQ7acGCEij8pg6pif42bQZPUCUlO5w526ySmD40tPUV77iG449Phho2Dn3uyM73sI+aR/lH+uZhRCv1K6Ud47dpRrabdv27+QBSK8tGJUs2cyjUh0ppr+lWWZBbDW5zgmEKLHM/vnREcqaDCeF76FwLvKRYWRu9QaQTJk2w4WRpvso0TEUv3+xOfQVK98+p1qvKhFV2W9v/SzcEuocrAgejs56YeipUircGZ+f9ZG125+k5fno5gosmLEygp7F14+kXllf0fd+wo=',
+//       'web-zip-url':
+//         'https://github.com/icogn/tpr-gen3/actions/runs/11184341001/artifacts/2016988768',
+//     },
+//     'x86_64-unknown-linux-gnu': {
+//       name: 'web-ubuntu-latest',
+//       'web-zip-sig':
+//         'fwmGD2USd7dhL4j44GTK8Ofd+/NQDWEZy8xp6KehVkSinmtDlfkidJYsl/BpcydFtatSoRnyeJwi8DoWN0o3i4kssZQ1C5f2CXGiI1UmGNrPZZ84Qkr+TP/O99KF2GDkUiQfd4m8Kq87HJWxU9CeJMAR5zljnndOFrLIVMYl2wdX5MtADfGtFiTsaf9yW1TSOy0JZdNrqpgVwkCcnC0/P9p8i4fV/UNYDrRKNfZfL9D4Y2DUiW+7aGeYDN2pAW3kCiIt8pj8+X9NmlbBvJJjswmegSarmW4uzw1R75zXruuXpYyNEYnP94pV0Sx4Uxel6xpfdbhA9FRYAIAljphpmSKCPHGWpPLs2yRvPXz6JJkyhws7y1eyqa99r6M+QjP0Ari7VTmXaKycIxTpkK2cVATanca0uNLEiLyVpiyX4mwTvJlwqY7nCavDRrZ3NtA1YcZGzmkMMhaUh0hMjVerfz05Ykj5Mvc/uvKEI9eOQV1wxtRTa44Kb4NMl/b0hOGr1kLM3ypGBvU+Or2rmty5A+WRKJ7tkL6Dk2QMHrkoyOGQ6hmThtlhCPqoMu0xlKR/ro0hkDGqbRKnQhb0GGX6hvEShrJOlvleXGkj8CS/cQdV8lAq91VX3hBC5HPe/tG12FegZwg94/8PR9XtS3s+7rpAQtIgFCNIC+FSgqd5kPo=',
+//       'web-zip-url':
+//         'https://github.com/icogn/tpr-gen3/actions/runs/11184341001/artifacts/2016985763',
+//     },
+//   },
+//   signature:
+//     'hIacfZl23Ti42x2le0zHwvJKzJFbTcE4lYco4za9KOWjAt5ziuYPcv4R1INGR3HNUrqWpl8JFBWA8Y5NvrMaBxoQTNLOQspF+3unuD6OFEoZwGCNG9mbleqRkevi7o1P7GmNqmhgityfEUV+xsuabWWQBVcXcZQLHxz4cgzlXhvAVCJLfIuM38r5zExoDej+RrTuyffQPMvRMd4OEPtLuPkKjW7EySVBPR8Jl3xH2/dOjCypL5Wvb06n8+lnFoNgVEB1ZlZQJ97vOBvBKU1PC/YjQ58BUgvhHLaANHZEa5SummNcqKCM2/ZAzSxHj5aQhvgEfk+QfYRHC1S9QNlucGVycQWrATjjrvumey46vOfPLx3/qfCaZLuoCH3zs2jEWQ8V0ptdhBF55FNWZIdisf2vr/qsarkLlJj9P3Mnt9ttuf/VZvW4F9B2+6Rda0M7JN4NYTybzRb7x5dkV6l0cth1OEjjCtjKIYg7St+RDv85VN/tG6LAiAmJq1HqsDS3zclXuVnNpHxvLCmtcmfrphWLcJK+W69dQmUbcbcqIfKlA5Zgv/iL2MSLWBoYr1ocJKLrwlAp9EFtk9UQRyeGrsJzwYNAojMLy0tgC6Phv1eheX0PZdnhf9IbLhDWfUCqxp6FOdQR98ck7c73pdhvyIVh9agMLfYY/1nXzVuwGac=',
+//   timestamp: '2024-10-04T17:33:52.754Z',
+// };
 const signature = parsedArtifactInfo.signature;
 parsedArtifactInfo.signature = undefined;
 
