@@ -3,6 +3,7 @@ const artifactClient = require('@actions/artifact').default;
 const core = require('@actions/core');
 const { match } = require('path-to-regexp');
 const { verify } = require('node:crypto');
+const stableStringify = require('json-stable-stringify');
 
 // const allowedWebBranches = input('allowedWebBranches', '');
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
@@ -64,7 +65,7 @@ async function run() {
   const publicKey =
     '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3BIwGEBi9flZfX6W5y09\nM0S9kV8mXZSL1mkOVx/B18v7kBCRsquCzSs5ot7DChJcyYqanuzWyM14HK7gnLBp\nWEU5PQOhag+WW8pkWgHjlTauB+sEd9X7MPPU5o5OR61nCzYIToNGxLx5NXksj5A4\nuUkS4eKaZ336aZBAj/dvOEPQA1m3azwIBbmxdDadDki76Ykjz35yUgtZyF/x8Bpt\n7YRY0kBwHdq57EVBaMQl0uSfCaFGPx7ez36OkWvhUyfCUy5ApyPoeDK36gIcOuMr\nS6CyLEh+Y0JmZSAzLgSPnh1N7S7F4Lf+IKoiws5Be6xvot16nSRpZc5NJAfyu/MU\nfmy5kcB5TqcQcWh61d4s4p8a1FnU9M0prTOVOHWtkG08tmlniHQXX8igrnRgvcIo\nHbMCVcIrOSrwsSeyabtxXfDpwp2+orr6RNJQKOlc8iCCf8y6CYyFlmftO0WN/+gc\ndc3hIRwmlefg/wmTyS68SvXLA1AvM9tlQ4n0oiYpL6MO5c2828jg3Ytr76FAqHtp\nfrXwRHqAAqq5yvQjuWt5r942ozIBbsElq0cHyguchMw2MXz9m6+rBnuJy8SL1M47\ndgy287Skw4QWKq6G4LnIZp9Na0+svZSiPVD/fQ1sDFOHifUJITNNXXyDdRFd+8DT\nTMiwi2Fsd1kDmGS0eP/TcX0CAwEAAQ==\n-----END PUBLIC KEY-----\n';
 
-  const dataToVerify = JSON.stringify(parsedArtifactInfo);
+  const dataToVerify = stableStringify(parsedArtifactInfo);
   console.log('dataToVerify:');
   console.log(dataToVerify);
 

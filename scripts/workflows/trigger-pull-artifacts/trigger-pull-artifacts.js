@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const { createSign } = require('node:crypto');
+const stableStringify = require('json-stable-stringify');
 
 const token = core.getInput('token');
 const octokit = github.getOctokit(token, { required: true });
@@ -71,7 +72,7 @@ async function restructureClientPayload() {
   const date = new Date();
   root.timestamp = date.toISOString();
 
-  const asStr = JSON.stringify(root);
+  const asStr = stableStringify(root);
 
   const signature = await signInput(asStr);
 
