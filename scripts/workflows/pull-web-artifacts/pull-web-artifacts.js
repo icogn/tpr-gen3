@@ -73,7 +73,7 @@ async function run() {
       'RSA-SHA256',
       Buffer.from(dataToVerify),
       publicKey,
-      signature,
+      Buffer.from(signature),
       (err, result) => {
         if (err) {
           reject(err);
