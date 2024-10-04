@@ -69,13 +69,19 @@ async function run() {
   console.log(dataToVerify);
 
   const aaa = await new Promise((resolve, reject) => {
-    verify('RSA-SHA256', dataToVerify, publicKey, signature, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
+    verify(
+      'RSA-SHA256',
+      Buffer.from(dataToVerify),
+      publicKey,
+      signature,
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
       }
-    });
+    );
   });
 
   console.log('aaa:');
