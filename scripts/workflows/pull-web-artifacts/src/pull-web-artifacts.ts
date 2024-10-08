@@ -62,7 +62,8 @@ const parsedArtifactInfo: ArtifactInfo = {
   },
   signature:
     'v0BxCx0USKrNvWE9SxIGR2LkGB++HUURJNR26OkrwynEdNpbBLoNoXKHw6oeDT1EhuOD7nHZ6DZGnTuUTb4EWNJHiJ/rfNSlA5WcT9fvrkFUMhtMwJALBPfMvMQj4Rh2RIqAT95Tf5f01aD4HrRoz1Mn8jnbuUFUD+TceO+amFJOGRwBALVRCXYGkrfcNAu4Vh4W+Qstp3xg6wIdgIN1U2CKJzcKLj2jZBfL5dAtgVOOzqG0aqlyIwl5yC3NBHyC343EEZl9UvC1Q1IiIlwnmzNyd03EEzSbzymlE8bATadWeVMW61/i4IDDAKz4WYE8djCf4pbGaBaW1VI+ww0IXUBk9GeOwpstXIswQaQVKeq9K+WC6ZanauHeXSftHLtkBJpPef4QZ1XH6WGU0l1BZXiuB1DBLB+Eve0wlRWSMq0BY6oSrX2quGW2zB6PCuxGrtIicwQUkLtSCZW9SvTSEd1z1coT9ZMr/6KXyTBLvoVbPFy7yJ95vse5c7h4t6dsDLHEbfpFKyQQQhUFCUNRvE19MDm4vYehNrhg9ec+Rbp/JD8Gf3RQkzF8Kqirs1QHn5MIUpQ4tj2Ba3lE4/BLeloaj6gcSKLZNejFm7XXIZkD99RsXFshJTDa6bVdtbu0ZM+ISg2U5pSXxZvk7fintWn6hxueAqJ4JYC+3SSN9Ck=',
-  timestamp: '2024-10-04T17:52:14.178Z',
+  // timestamp: '2024-10-04T17:52:14.178Z',
+  timestamp: '2025-10-04T17:52:14.178Z',
 };
 
 function input(name: string, def: string) {
@@ -118,10 +119,14 @@ function verifyTimestamp(timestamp: unknown) {
   const diff = Date.now() - timestampDate.getTime();
   console.log(`diff: ${diff}`);
 
-  // return diff >= 0 && diff <= FIFTEEN_MINUTES_IN_MS;
-
   // TODO: temp allowing any amount of time in past
-  return diff >= 0;
+  if (diff >= 0) {
+    // if (diff >= 0 && diff <= FIFTEEN_MINUTES_IN_MS) {
+    core.setFailed(`timestamp '${timestampStr}' was not in allowed window.`);
+    return false;
+  }
+
+  return true;
 }
 
 async function verifyArtifactInfo() {
