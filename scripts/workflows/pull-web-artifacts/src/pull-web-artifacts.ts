@@ -20,6 +20,8 @@ import stableStringify from 'json-stable-stringify';
 // console.log(parsedArtifactInfoIn);
 // const parsedArtifactInfo = parsedArtifactInfoIn;
 
+console.log('print from within ts file...@@..');
+
 type ArtifactInfo = {
   byTriple: {
     [key: string]: {
