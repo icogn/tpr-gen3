@@ -13,13 +13,11 @@ jobs:
           ref: 'config_branch'
           path: 'config_branch'
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.17.0'
-          cache: 'yarn'
-
-      - run: yarn --immutable
-
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20.17.0'
+      #     cache: 'yarn'
+      # - run: yarn --immutable
       - uses: ./scripts/workflows/pull-web-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
