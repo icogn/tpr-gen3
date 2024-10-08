@@ -20,6 +20,8 @@ import stableStringify from 'json-stable-stringify';
 // console.log(parsedArtifactInfoIn);
 // const parsedArtifactInfo = parsedArtifactInfoIn;
 
+const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
+
 console.log('print from within ts file...@@..');
 
 type ArtifactInfo = {
@@ -72,19 +74,57 @@ function input(name: string, def: string) {
   return inp;
 }
 
-async function run() {
-  const inputs = {
-    // name: core.getInput(Inputs.Name, { required: false }),
-    // path: core.getInput(Inputs.Path, { required: false }),
-    token: core.getInput('github-token', { required: true }),
-    // repository: core.getInput(Inputs.Repository, { required: false }),
-    // runID: parseInt(core.getInput(Inputs.RunID, { required: false })),
-    // pattern: core.getInput(Inputs.Pattern, { required: false }),
-    // mergeMultiple: core.getBooleanInput(Inputs.MergeMultiple, {
-    //   required: false,
-    // }),
-  };
+// From https://stackoverflow.com/a/1353711
+function isDateValid(date: Date) {
+  if (Object.prototype.toString.call(date) === '[object Date]') {
+    // it is a date
+    if (isNaN(date.valueOf())) {
+      // date object is not valid
+      return false;
+    } else {
+      // date object is valid
+      return true;
+    }
+  } else {
+    // not a date object
+    return false;
+  }
+}
 
+function verifyTimestamp(timestamp: unknown) {
+  if (typeof timestamp !== 'string') {
+    core.setFailed('timestamp was not a string');
+    return false;
+  }
+  const timestampStr = timestamp as string;
+
+  const timestampDate = new Date(timestampStr);
+  if (!isDateValid(timestampDate)) {
+    core.setFailed(
+      `timestamp '${timestampStr}' did not construct a valid Date.`
+    );
+    return false;
+  }
+
+  const backToStr = timestampDate.toISOString();
+  if (timestampStr !== backToStr) {
+    core.setFailed(
+      `timestamp '${timestampStr}' did not match backToStr '${backToStr}'.`
+    );
+    return false;
+  }
+
+  // Check if within past 15 minutes.
+  const diff = Date.now() - timestampDate.getTime();
+  console.log(`diff: ${diff}`);
+
+  // return diff >= 0 && diff <= FIFTEEN_MINUTES_IN_MS;
+
+  // TODO: temp allowing any amount of time in past
+  return diff >= 0;
+}
+
+async function verifyArtifactInfo() {
   if (typeof parsedArtifactInfo.signature !== 'string') {
     core.setFailed('parsedArtifactInfo.signature was not a string');
     return;
@@ -93,7 +133,6 @@ async function run() {
   // Set to undefined so not included when we stringify the object.
   parsedArtifactInfo.signature = undefined;
 
-  // start verify info signature
   // This is a hardcoded test value
   const publicKey =
     '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3BIwGEBi9flZfX6W5y09\nM0S9kV8mXZSL1mkOVx/B18v7kBCRsquCzSs5ot7DChJcyYqanuzWyM14HK7gnLBp\nWEU5PQOhag+WW8pkWgHjlTauB+sEd9X7MPPU5o5OR61nCzYIToNGxLx5NXksj5A4\nuUkS4eKaZ336aZBAj/dvOEPQA1m3azwIBbmxdDadDki76Ykjz35yUgtZyF/x8Bpt\n7YRY0kBwHdq57EVBaMQl0uSfCaFGPx7ez36OkWvhUyfCUy5ApyPoeDK36gIcOuMr\nS6CyLEh+Y0JmZSAzLgSPnh1N7S7F4Lf+IKoiws5Be6xvot16nSRpZc5NJAfyu/MU\nfmy5kcB5TqcQcWh61d4s4p8a1FnU9M0prTOVOHWtkG08tmlniHQXX8igrnRgvcIo\nHbMCVcIrOSrwsSeyabtxXfDpwp2+orr6RNJQKOlc8iCCf8y6CYyFlmftO0WN/+gc\ndc3hIRwmlefg/wmTyS68SvXLA1AvM9tlQ4n0oiYpL6MO5c2828jg3Ytr76FAqHtp\nfrXwRHqAAqq5yvQjuWt5r942ozIBbsElq0cHyguchMw2MXz9m6+rBnuJy8SL1M47\ndgy287Skw4QWKq6G4LnIZp9Na0+svZSiPVD/fQ1sDFOHifUJITNNXXyDdRFd+8DT\nTMiwi2Fsd1kDmGS0eP/TcX0CAwEAAQ==\n-----END PUBLIC KEY-----\n';
@@ -117,15 +156,34 @@ async function run() {
       }
     );
   });
+
+  console.log(`isValidSignature: ${isValidSignature}`);
   if (!isValidSignature) {
     core.setFailed('artifactInfo had an invalid signature!');
-    return;
+    return false;
   }
 
-  console.log('isValidSignature:');
-  console.log(isValidSignature);
+  const timestampIsValid = verifyTimestamp(parsedArtifactInfo.timestamp);
+  return timestampIsValid;
+}
 
-  // end verify info signature
+async function run() {
+  const inputs = {
+    // name: core.getInput(Inputs.Name, { required: false }),
+    // path: core.getInput(Inputs.Path, { required: false }),
+    token: core.getInput('github-token', { required: true }),
+    // repository: core.getInput(Inputs.Repository, { required: false }),
+    // runID: parseInt(core.getInput(Inputs.RunID, { required: false })),
+    // pattern: core.getInput(Inputs.Pattern, { required: false }),
+    // mergeMultiple: core.getBooleanInput(Inputs.MergeMultiple, {
+    //   required: false,
+    // }),
+  };
+
+  const artifactInfoVerified = await verifyArtifactInfo();
+  if (!artifactInfoVerified) {
+    return;
+  }
 
   const branchConfig = fs.readJsonSync('./config_branch/config_branch.json');
 
