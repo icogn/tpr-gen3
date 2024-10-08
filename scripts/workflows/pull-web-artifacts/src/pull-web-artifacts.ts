@@ -167,9 +167,7 @@ async function verifyArtifactInfo() {
   }
   console.log(`artifactInfo signature was valid.`);
 
-  // const timestampIsValid = verifyTimestamp(parsedArtifactInfo.timestamp);
-  const timestampIsValid = verifyTimestamp('2025-10-04T17:52:14.178Z');
-  return timestampIsValid;
+  return verifyTimestamp(parsedArtifactInfo.timestamp);
 }
 
 async function run() {
