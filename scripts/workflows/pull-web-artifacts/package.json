@@ -1,0 +1,20 @@
+{
+  "name": "pull-web-artifacts",
+  "packageManager": "yarn@4.5.0",
+  "private": true,
+  "scripts": {
+    "package": "yarn ncc build src/pull-web-artifacts.ts -o dist --source-map --license licenses.txt"
+  },
+  "dependencies": {
+    "@actions/artifact": "^2.1.10",
+    "@actions/core": "^1.11.1",
+    "fs-extra": "^11.2.0",
+    "json-stable-stringify": "^1.1.1",
+    "path-to-regexp": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11",
+    "@types/json-stable-stringify": "^1",
+    "@vercel/ncc": "^0.38.2"
+  }
+}

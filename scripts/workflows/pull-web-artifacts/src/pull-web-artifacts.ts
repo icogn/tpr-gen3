@@ -1,9 +1,15 @@
-const fs = require('fs-extra');
-const artifactClient = require('@actions/artifact').default;
-const core = require('@actions/core');
-const { match } = require('path-to-regexp');
-const { verify } = require('node:crypto');
-const stableStringify = require('json-stable-stringify');
+// const fs = require('fs-extra');
+// const artifactClient = require('@actions/artifact').default;
+// const core = require('@actions/core');
+// const { match } = require('path-to-regexp');
+// const { verify } = require('node:crypto');
+// const stableStringify = require('json-stable-stringify');
+import fs from 'fs-extra';
+import artifactClient from '@actions/artifact';
+import * as core from '@actions/core';
+import { match, MatchResult } from 'path-to-regexp';
+import { verify } from 'node:crypto';
+import stableStringify from 'json-stable-stringify';
 
 // const allowedWebBranches = input('allowedWebBranches', '');
 // console.log(`allowedWebBranches:${allowedWebBranches}`);
@@ -14,7 +20,26 @@ const stableStringify = require('json-stable-stringify');
 // console.log(parsedArtifactInfoIn);
 // const parsedArtifactInfo = parsedArtifactInfoIn;
 
-const parsedArtifactInfo = {
+type ArtifactInfo = {
+  byTriple: {
+    [key: string]: {
+      name: string;
+      'web-zip-sig': string;
+      'web-zip-url': string;
+    };
+  };
+  signature: string | undefined;
+  timestamp: string;
+};
+
+type MatchStuff = {
+  repo: string;
+  owner: string;
+  run_id: string;
+  artifact_id: string;
+};
+
+const parsedArtifactInfo: ArtifactInfo = {
   byTriple: {
     'x86_64-pc-windows-msvc': {
       name: 'web-windows-latest',
@@ -35,10 +60,8 @@ const parsedArtifactInfo = {
     'v0BxCx0USKrNvWE9SxIGR2LkGB++HUURJNR26OkrwynEdNpbBLoNoXKHw6oeDT1EhuOD7nHZ6DZGnTuUTb4EWNJHiJ/rfNSlA5WcT9fvrkFUMhtMwJALBPfMvMQj4Rh2RIqAT95Tf5f01aD4HrRoz1Mn8jnbuUFUD+TceO+amFJOGRwBALVRCXYGkrfcNAu4Vh4W+Qstp3xg6wIdgIN1U2CKJzcKLj2jZBfL5dAtgVOOzqG0aqlyIwl5yC3NBHyC343EEZl9UvC1Q1IiIlwnmzNyd03EEzSbzymlE8bATadWeVMW61/i4IDDAKz4WYE8djCf4pbGaBaW1VI+ww0IXUBk9GeOwpstXIswQaQVKeq9K+WC6ZanauHeXSftHLtkBJpPef4QZ1XH6WGU0l1BZXiuB1DBLB+Eve0wlRWSMq0BY6oSrX2quGW2zB6PCuxGrtIicwQUkLtSCZW9SvTSEd1z1coT9ZMr/6KXyTBLvoVbPFy7yJ95vse5c7h4t6dsDLHEbfpFKyQQQhUFCUNRvE19MDm4vYehNrhg9ec+Rbp/JD8Gf3RQkzF8Kqirs1QHn5MIUpQ4tj2Ba3lE4/BLeloaj6gcSKLZNejFm7XXIZkD99RsXFshJTDa6bVdtbu0ZM+ISg2U5pSXxZvk7fintWn6hxueAqJ4JYC+3SSN9Ck=',
   timestamp: '2024-10-04T17:52:14.178Z',
 };
-const signature = parsedArtifactInfo.signature;
-parsedArtifactInfo.signature = undefined;
 
-function input(name, def) {
+function input(name: string, def: string) {
   let inp = core.getInput(name).trim();
   if (inp === '' || inp.toLowerCase() === 'false') {
     return def;
@@ -59,6 +82,14 @@ async function run() {
     //   required: false,
     // }),
   };
+
+  if (typeof parsedArtifactInfo.signature !== 'string') {
+    core.setFailed('parsedArtifactInfo.signature was not a string');
+    return;
+  }
+  const signature = parsedArtifactInfo.signature as string;
+  // Set to undefined so not included when we stringify the object.
+  parsedArtifactInfo.signature = undefined;
 
   // start verify info signature
   // This is a hardcoded test value
@@ -101,7 +132,9 @@ async function run() {
 
   const artifactUrl = osArtifactInfo['web-zip-url'];
 
-  const fn = match('/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id');
+  const fn = match<MatchStuff>(
+    '/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id'
+  );
 
   try {
     const url = new URL(artifactUrl);
@@ -112,7 +145,12 @@ async function run() {
       );
     }
 
-    const obj = fn(url.pathname);
+    const objBase = fn(url.pathname);
+    if (!objBase) {
+      core.setFailed(`Failed to parse artifact URL '${artifactUrl}'.`);
+      return;
+    }
+    const obj = objBase as MatchResult<MatchStuff>;
     console.log('obj');
     console.log(obj);
 
@@ -120,7 +158,7 @@ async function run() {
       findBy: {
         token: inputs.token,
         // run_id is actually used
-        workflowRunId: obj.params.run_id,
+        workflowRunId: parseInt(obj.params.run_id, 10),
         repositoryName: obj.params.repo,
         repositoryOwner: obj.params.owner,
       },
@@ -139,13 +177,16 @@ async function run() {
     console.log(targetArtifact);
 
     // await artifactClient.downloadArtifact(artifact.id, {
-    await artifactClient.downloadArtifact(obj.params.artifact_id, {
-      ...options,
-      path: 'my_download_dir',
-      // isSingleArtifactDownload || inputs.mergeMultiple
-      //   ? resolvedPath
-      //   : path.join(resolvedPath, artifact.name),
-    });
+    await artifactClient.downloadArtifact(
+      parseInt(obj.params.artifact_id, 10),
+      {
+        ...options,
+        path: 'my_download_dir',
+        // isSingleArtifactDownload || inputs.mergeMultiple
+        //   ? resolvedPath
+        //   : path.join(resolvedPath, artifact.name),
+      }
+    );
 
     // await artifactClient.downloadArtifact(artifact.id, {
     //   ...options,

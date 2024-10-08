@@ -3,7 +3,8 @@
   "version": "0.1.3",
   "workspaces": [
     "tauri-app",
-    "website"
+    "website",
+    "scripts/workflows/pull-web-artifacts"
   ],
   "packageManager": "yarn@4.5.0",
   "devDependencies": {
