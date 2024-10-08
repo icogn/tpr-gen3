@@ -26,4 +26,4 @@ inputs:
 
 runs:
   using: node20
-  main: pull-web-artifacts.js
+  main: action-dist/index.js

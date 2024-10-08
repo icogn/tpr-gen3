@@ -3,7 +3,7 @@
   "packageManager": "yarn@4.5.0",
   "private": true,
   "scripts": {
-    "package": "yarn ncc build src/pull-web-artifacts.ts -o dist --source-map --license licenses.txt"
+    "package": "yarn ncc build src/pull-web-artifacts.ts -o action-dist -m"
   },
   "dependencies": {
     "@actions/artifact": "^2.1.10",

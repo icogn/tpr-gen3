@@ -7,7 +7,7 @@
     "moduleResolution": "NodeNext",
     "baseUrl": "./",
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "./action-dist",
     "noImplicitAny": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "newLine": "lf"
   },
-  "exclude": ["./dist", "./node_modules", "./__tests__", "./coverage"]
+  "exclude": ["./action-dist", "./node_modules", "./__tests__", "./coverage"]
 }
