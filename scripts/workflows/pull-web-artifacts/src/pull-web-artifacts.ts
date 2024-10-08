@@ -119,8 +119,8 @@ function verifyTimestamp(timestamp: unknown) {
   console.log(`diff: ${diff}`);
 
   // TODO: temp allowing any amount of time in past
-  if (diff >= 0) {
-    // if (diff >= 0 && diff <= FIFTEEN_MINUTES_IN_MS) {
+  if (diff < 0) {
+    // if (diff < 0 || diff > FIFTEEN_MINUTES_IN_MS) {
     core.setFailed(`timestamp '${timestampStr}' was not in allowed window.`);
     return false;
   }
