@@ -36,6 +36,8 @@ type Config = {
 };
 
 const config = fs.readJsonSync('./config_branch/config_branch.json') as Config;
+console.log('config:');
+console.log(config);
 
 const token = core.getInput('token');
 const octokit = github.getOctokit(token, { required: true });
