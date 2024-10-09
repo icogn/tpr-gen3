@@ -146,7 +146,7 @@ async function restructureClientPayload() {
 type Target = {
   owner: string;
   repo: string;
-  centralName: string;
+  centralNames: string;
 };
 
 const TARGETS_REGEX = /^(\S+)\/(\S+)\/(\S+)$/;
@@ -168,14 +168,10 @@ function getTargets(
           if (typeof triggerItem === 'string') {
             const match = triggerItem.match(TARGETS_REGEX);
             if (match) {
-              console.log(match);
-              const centralNames = match[3].split('+');
-              centralNames.forEach((centralName) => {
-                targets.push({
-                  owner: match[1],
-                  repo: match[2],
-                  centralName,
-                });
+              targets.push({
+                owner: match[1],
+                repo: match[2],
+                centralNames: match[3],
               });
             }
           }
@@ -186,20 +182,22 @@ function getTargets(
     }
   }
 
-  const foundCombos: { [key: string]: boolean } = {};
+  const foundOwnerRepos: { [key: string]: boolean } = {};
 
-  // Filter out any duplicates
-  return targets.filter(({ owner, repo, centralName }) => {
-    const combo = `${owner}/${repo}/${centralName}`;
+  // Make sure there are not duplicates
+  targets.forEach(({ owner, repo }) => {
+    const ownerRepo = `${owner}/${repo}`;
 
-    if (foundCombos[combo]) {
-      console.warn(`Filtered out duplicate combo '${combo}'.`);
-      return false;
+    if (!foundOwnerRepos[ownerRepo]) {
+      throw new Error(
+        `Had multiple targets for the same repo '${ownerRepo}'. These should be combined like 'owner/repo/first+second'`
+      );
     }
 
-    foundCombos[combo] = true;
-    return true;
+    foundOwnerRepos[ownerRepo] = true;
   });
+
+  return targets;
 }
 
 const bootstrap = async () => {
@@ -214,10 +212,10 @@ const bootstrap = async () => {
   let numSuccess = 0;
 
   for (let i = 0; i < targets.length; i++) {
-    const { owner, repo, centralName } = targets[i];
+    const { owner, repo, centralNames } = targets[i];
 
     console.log(
-      `Sending dispatch event for '${owner}/${repo}/${centralName}'...`
+      `Sending dispatch event for '${owner}/${repo}/${centralNames}'...`
     );
 
     const response = await octokit.rest.repos.createDispatchEvent({
@@ -225,7 +223,7 @@ const bootstrap = async () => {
       repo,
       event_type: 'pull_artifacts',
       client_payload: {
-        centralName,
+        centralNames,
         artifactInfo: newArtifactInfo,
       },
     });
