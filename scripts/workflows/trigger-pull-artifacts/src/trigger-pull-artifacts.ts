@@ -186,7 +186,20 @@ function getTargets(
     }
   }
 
-  return targets;
+  const foundCombos: { [key: string]: boolean } = {};
+
+  // Filter out any duplicates
+  return targets.filter(({ owner, repo, centralName }) => {
+    const combo = `${owner}/${repo}/${centralName}`;
+
+    if (foundCombos[combo]) {
+      console.warn(`Filtered out duplicate combo '${combo}'.`);
+      return false;
+    }
+
+    foundCombos[combo] = true;
+    return true;
+  });
 }
 
 const bootstrap = async () => {
