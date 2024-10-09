@@ -15,6 +15,7 @@ type ArtifactInfo = {
 };
 
 type ClientPayload = {
+  branch: string;
   centralNames: string;
   artifactInfo: ArtifactInfo;
   timestamp: string;
@@ -198,10 +199,12 @@ function getTargets(
 }
 
 async function buildClientPayload(
+  branch: string,
   centralNames: string,
   artifactInfo: ArtifactInfo
 ) {
   const clientPayload: ClientPayload = {
+    branch,
     centralNames,
     artifactInfo,
     signature: undefined,
@@ -215,7 +218,10 @@ async function buildClientPayload(
 }
 
 const bootstrap = async () => {
-  const targets = getTargets('dev', config.triggers);
+  // TODO: pass `branch` in as an input
+  const branch = 'dev';
+
+  const targets = getTargets(branch, config.triggers);
   if (targets.length < 1) {
     console.log('No targets. Skipping...');
     return;
@@ -233,6 +239,7 @@ const bootstrap = async () => {
     );
 
     const clientPayload = await buildClientPayload(
+      branch,
       centralNames,
       newArtifactInfo
     );

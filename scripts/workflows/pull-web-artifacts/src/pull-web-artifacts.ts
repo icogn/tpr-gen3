@@ -33,6 +33,7 @@ type MatchStuff = {
 };
 
 type ClientPayload = {
+  branch: string;
   centralNames: string;
   artifactInfo: ArtifactInfo;
 };
