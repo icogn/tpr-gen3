@@ -84,7 +84,13 @@ if (!fs.existsSync(CONFIG_FILEPATH)) {
 const configIn = fs.readJsonSync(CONFIG_FILEPATH);
 
 // const { success, error } = configSchema.safeParse(configIn);
-const config = configSchema.parse(configIn);
+const { error, data } = configSchema.safeParse(configIn);
+if (error) {
+  core.setFailed(error.message);
+  process.exit(1);
+}
+
+const config = data;
 
 if (!config.branches || !config.central) {
   console.log('Skipping because missing config.branches or config.central.');
