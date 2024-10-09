@@ -188,7 +188,7 @@ function getTargets(
   targets.forEach(({ owner, repo }) => {
     const ownerRepo = `${owner}/${repo}`;
 
-    if (!foundOwnerRepos[ownerRepo]) {
+    if (foundOwnerRepos[ownerRepo]) {
       throw new Error(
         `Had multiple targets for the same repo '${ownerRepo}'. These should be combined like 'owner/repo/first+second'`
       );
