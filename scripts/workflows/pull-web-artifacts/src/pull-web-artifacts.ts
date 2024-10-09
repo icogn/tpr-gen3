@@ -31,6 +31,7 @@ type ArtifactInfo = {
 };
 
 type ClientPayload = {
+  branch: string;
   centralNames: string;
   artifactInfo: ArtifactInfo;
   timestamp: string;
