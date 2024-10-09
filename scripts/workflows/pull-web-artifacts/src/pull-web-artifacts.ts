@@ -38,6 +38,25 @@ type ClientPayload = {
   signature: string | undefined;
 };
 
+type BranchData = {
+  owner: string;
+  repo: string;
+  publicKey: string;
+};
+
+type Config = {
+  branches: Record<string, BranchData | undefined>;
+  central: {
+    [key: string]: string[];
+  };
+};
+
+const config = fs.readJsonSync('./config_branch/config_branch.json') as Config;
+if (!config.branches || !config.central) {
+  console.log('Skipping because missing config.branches or config.central.');
+  process.exit(0);
+}
+
 const clientPayloadFromFile = input('clientPayloadFromFile', '') === 'true';
 let clientPayload: ClientPayload;
 
@@ -53,28 +72,6 @@ if (clientPayloadFromFile) {
 console.log('clientPayload:');
 console.log(clientPayload);
 const parsedArtifactInfo = clientPayload.artifactInfo;
-
-// const parsedArtifactInfo: ArtifactInfo = {
-//   byTriple: {
-//     'x86_64-pc-windows-msvc': {
-//       name: 'web-windows-latest',
-//       'web-zip-sig':
-//         'JifDBVCvl05aczmfJV+AByJ3ZIDh3rzvL3+koiGfeGpW6j8mFUPzPO7TsiOAwoCxUuSGwuXQ1dvNicQf0rmvPSKaYP2jTwuo208vsBcWk4qUsKzGE0X0FuBbNJ26WV7dwyU/5QKL8VjJZ/quC7av4qcaopwXCuKMc+Ei3x+Q+qFXe1O2w5lSTroEVC3pmy9MsMVauEPW1dD7L06lhQzEEskl5YtFhbAvCQUrLA8spHzDH0wuEHu6xjZtPSEE2OYR2Q3vEypifITN7y3rCe/AADs+odog38BqvEUaCe3RqXC8u7zXOaDIvgHmIjL9EcfSxSR0safOsxjDV6PPij7ZjPlSnfmk3lRMJbq9QMDxDR7x+qFX5577eIEI0sy2dywfxg+zBW9r6J1iWTojn7YRFZrHb9CqvLUGIgWxTjXPGxELwPN6QhNo1M42OqyS7Y7mT7Oqmn5enoKDgvz+YkDWTYK0XEy0HiGfgIKu86L9MWk3mzzQBMHTX0k7DC8YHFLTUHo7V6abLT7zX3caCZfjn55N/gfd84X8omHd7ePXON9M+ybhjQt5AQdIn5G0CDvTI9NPj19hSnhxen/ucyF2TX89rVTd8Dl38SUc1lVDsKDXPXtpy5g44hFbyUSPvKlkLud2CwhMfnyzPPIv7+HtUwStF98exYSkBK0DXi1PPDM=',
-//       'web-zip-url':
-//         'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017054138',
-//     },
-//     'x86_64-unknown-linux-gnu': {
-//       name: 'web-ubuntu-latest',
-//       'web-zip-sig':
-//         'UgG/Z/0vlTN4QQkSf6zyFcH+774vj7Br8SUafd32lvGR5habFeD1GaHTq/I0az0yfyhfYFNsUHRQVimDIBoM6r8Hsg480f8Ll7yXljZS2Ew/fae+kQh/ulgdv1GTKHiZCoiIPD/kGwKCiDVE5Yknu0P38j6nZ/Hiyx4FisuvSUWXTzY+RbZMmpL21RPm+EOxnDk/C2bmADV7Eq6RGKpNfSlDzDFvR21kKrCV2BbUaJ9x+Sz3ARgo86dHL5fd8bu/N2CT2an53bvN6xeE2gHcbg7Dk+JPPq4iROoju8StozhOor23oWOUb33OA1XHfxyzaBZbnDhPlxJP4xlPItWbTqfK+ijRxUWPoWiY/cg8J2JLMAZ4EzHHuTg7DJe+UGuSHzQQ6JFU31gUdWjIQU9TeNZeqAiLU3DXmuTJg8UpWafo5RghcNIuMASEYWng+AtrA5YmPVxUtWRQ6o1j3kDFaRnm60G934TVZmPUljS7VcyJroa+I5q9CEvwgiWTiP8SeX8ElVxGbrIx89wFJUNgbLyLRuDbdc9pjkMAhSBEi9NtRKVvmdCa7INopaDit80T9+XhdgmJTl9bGM9PrXK5TQtoQ5NVL/pTX/XLHWxsusc6I2hfE1ey80ofpnGvrMc/7RVHlByt/OMFLJRg7olrPSWvndCla/mYtCCAraDNF74=',
-//       'web-zip-url':
-//         'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017051285',
-//     },
-//   },
-//   signature:
-//     'v0BxCx0USKrNvWE9SxIGR2LkGB++HUURJNR26OkrwynEdNpbBLoNoXKHw6oeDT1EhuOD7nHZ6DZGnTuUTb4EWNJHiJ/rfNSlA5WcT9fvrkFUMhtMwJALBPfMvMQj4Rh2RIqAT95Tf5f01aD4HrRoz1Mn8jnbuUFUD+TceO+amFJOGRwBALVRCXYGkrfcNAu4Vh4W+Qstp3xg6wIdgIN1U2CKJzcKLj2jZBfL5dAtgVOOzqG0aqlyIwl5yC3NBHyC343EEZl9UvC1Q1IiIlwnmzNyd03EEzSbzymlE8bATadWeVMW61/i4IDDAKz4WYE8djCf4pbGaBaW1VI+ww0IXUBk9GeOwpstXIswQaQVKeq9K+WC6ZanauHeXSftHLtkBJpPef4QZ1XH6WGU0l1BZXiuB1DBLB+Eve0wlRWSMq0BY6oSrX2quGW2zB6PCuxGrtIicwQUkLtSCZW9SvTSEd1z1coT9ZMr/6KXyTBLvoVbPFy7yJ95vse5c7h4t6dsDLHEbfpFKyQQQhUFCUNRvE19MDm4vYehNrhg9ec+Rbp/JD8Gf3RQkzF8Kqirs1QHn5MIUpQ4tj2Ba3lE4/BLeloaj6gcSKLZNejFm7XXIZkD99RsXFshJTDa6bVdtbu0ZM+ISg2U5pSXxZvk7fintWn6hxueAqJ4JYC+3SSN9Ck=',
-//   timestamp: '2024-10-04T17:52:14.178Z',
-// };
 
 function input(name: string, def: string) {
   let inp = core.getInput(name).trim();
@@ -144,13 +141,27 @@ async function verifyClientPayload(payload: ClientPayload) {
     core.setFailed('payload.signature was not a string');
     return;
   }
+  if (typeof payload.branch !== 'string') {
+    core.setFailed('payload.branch was not a string');
+    return;
+  }
+
   const signature = payload.signature as string;
   // Set to undefined so not included when we stringify the object.
   payload.signature = undefined;
 
+  const { branch } = payload;
+
+  const branchData = config.branches[branch];
+  if (!branchData) {
+    throw new Error(`Failed to find branchData for branch '${branch}'.`);
+  }
+
+  const { publicKey } = branchData;
+
   // This is a hardcoded test value
-  const publicKey =
-    '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3BIwGEBi9flZfX6W5y09\nM0S9kV8mXZSL1mkOVx/B18v7kBCRsquCzSs5ot7DChJcyYqanuzWyM14HK7gnLBp\nWEU5PQOhag+WW8pkWgHjlTauB+sEd9X7MPPU5o5OR61nCzYIToNGxLx5NXksj5A4\nuUkS4eKaZ336aZBAj/dvOEPQA1m3azwIBbmxdDadDki76Ykjz35yUgtZyF/x8Bpt\n7YRY0kBwHdq57EVBaMQl0uSfCaFGPx7ez36OkWvhUyfCUy5ApyPoeDK36gIcOuMr\nS6CyLEh+Y0JmZSAzLgSPnh1N7S7F4Lf+IKoiws5Be6xvot16nSRpZc5NJAfyu/MU\nfmy5kcB5TqcQcWh61d4s4p8a1FnU9M0prTOVOHWtkG08tmlniHQXX8igrnRgvcIo\nHbMCVcIrOSrwsSeyabtxXfDpwp2+orr6RNJQKOlc8iCCf8y6CYyFlmftO0WN/+gc\ndc3hIRwmlefg/wmTyS68SvXLA1AvM9tlQ4n0oiYpL6MO5c2828jg3Ytr76FAqHtp\nfrXwRHqAAqq5yvQjuWt5r942ozIBbsElq0cHyguchMw2MXz9m6+rBnuJy8SL1M47\ndgy287Skw4QWKq6G4LnIZp9Na0+svZSiPVD/fQ1sDFOHifUJITNNXXyDdRFd+8DT\nTMiwi2Fsd1kDmGS0eP/TcX0CAwEAAQ==\n-----END PUBLIC KEY-----\n';
+  // const publicKey =
+  //   '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3BIwGEBi9flZfX6W5y09\nM0S9kV8mXZSL1mkOVx/B18v7kBCRsquCzSs5ot7DChJcyYqanuzWyM14HK7gnLBp\nWEU5PQOhag+WW8pkWgHjlTauB+sEd9X7MPPU5o5OR61nCzYIToNGxLx5NXksj5A4\nuUkS4eKaZ336aZBAj/dvOEPQA1m3azwIBbmxdDadDki76Ykjz35yUgtZyF/x8Bpt\n7YRY0kBwHdq57EVBaMQl0uSfCaFGPx7ez36OkWvhUyfCUy5ApyPoeDK36gIcOuMr\nS6CyLEh+Y0JmZSAzLgSPnh1N7S7F4Lf+IKoiws5Be6xvot16nSRpZc5NJAfyu/MU\nfmy5kcB5TqcQcWh61d4s4p8a1FnU9M0prTOVOHWtkG08tmlniHQXX8igrnRgvcIo\nHbMCVcIrOSrwsSeyabtxXfDpwp2+orr6RNJQKOlc8iCCf8y6CYyFlmftO0WN/+gc\ndc3hIRwmlefg/wmTyS68SvXLA1AvM9tlQ4n0oiYpL6MO5c2828jg3Ytr76FAqHtp\nfrXwRHqAAqq5yvQjuWt5r942ozIBbsElq0cHyguchMw2MXz9m6+rBnuJy8SL1M47\ndgy287Skw4QWKq6G4LnIZp9Na0+svZSiPVD/fQ1sDFOHifUJITNNXXyDdRFd+8DT\nTMiwi2Fsd1kDmGS0eP/TcX0CAwEAAQ==\n-----END PUBLIC KEY-----\n';
 
   const dataToVerify = stableStringify(payload);
   console.log('dataToVerify:');
@@ -198,8 +209,6 @@ async function run() {
   if (!clientPayloadVerified) {
     return;
   }
-
-  const branchConfig = fs.readJsonSync('./config_branch/config_branch.json');
 
   const osArtifactInfo =
     parsedArtifactInfo.byTriple['x86_64-unknown-linux-gnu'];

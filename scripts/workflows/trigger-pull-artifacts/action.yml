@@ -1,5 +1,5 @@
 ---
-name: 'Pull web artifacts'
+name: 'Trigger pull artifacts'
 author: 'icogn'
 description: 'Action to trigger the centralized pull-artifacts workflow'
 
@@ -12,13 +12,17 @@ inputs:
     description: Repository access token
     required: true
 
+  privateKey:
+    description: RSA-SHA256 private key
+    required: true
+
+  passphrase:
+    description: Passphrase which goes with the privateKey
+    required: false
+
   artifactInfo:
     description: Artifact info
     required: true
-
-# outputs:
-#   value:
-#     description: The version
 
 runs:
   using: node20
