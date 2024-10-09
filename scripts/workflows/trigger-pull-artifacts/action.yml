@@ -12,6 +12,10 @@ inputs:
     description: Repository access token
     required: true
 
+  branch:
+    description: Branch/env we are triggering from
+    required: true
+
   privateKey:
     description: RSA-SHA256 private key
     required: true

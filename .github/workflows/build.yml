@@ -228,6 +228,7 @@ jobs:
           # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-dispatch-event
           # Note that the fine-grained token needs `"Contents" repository permissions (write)`
           token: ${{ secrets.GH_PAT }}
+          branch: ${{ needs.read_workflow.outputs.env }}
           artifactInfo: ${{ needs.read_workflow.outputs.result }}
           privateKey: ${{ secrets.PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
