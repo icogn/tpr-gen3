@@ -23,10 +23,11 @@ jobs:
       #   if: ${{ steps.check-branch-exists.outputs.exists }} != 'true'
       #   run: exit 1
 
+      - run: echo ${{ steps.check-branch-exists.outputs.exists }}
+
       - if: ${{ steps.check-branch-exists.outputs.exists }} == 'true'
         uses: actions/checkout@v4
         id: config-checkout
-        continue-on-error: true
         with:
           ref: 'config_branch'
           path: 'config_branch'
