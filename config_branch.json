@@ -23,6 +23,6 @@
     }
   },
   "triggers": {
-    "dev": ["icogn/tpr-gen3/stable", "icogn/tpr-gen3/dev"]
+    "dev": ["icogn/tpr-gen3/stable+dev"]
   }
 }
