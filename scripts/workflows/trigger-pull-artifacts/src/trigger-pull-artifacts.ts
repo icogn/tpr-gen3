@@ -12,8 +12,13 @@ type ArtifactInfo = {
       'web-zip-url'?: string;
     };
   };
-  signature: string | undefined;
+};
+
+type ClientPayload = {
+  centralNames: string;
+  artifactInfo: ArtifactInfo;
   timestamp: string;
+  signature: string | undefined;
 };
 
 type MatrixOutput = {
@@ -44,8 +49,8 @@ console.log(config);
 const token = core.getInput('token');
 const octokit = github.getOctokit(token, { required: true });
 
-const artifactInfo = core.getInput('artifactInfo', { required: true });
-const parsedArtifactInfo = JSON.parse(artifactInfo) as MatrixOutput;
+const artifactInfoInput = core.getInput('artifactInfo', { required: true });
+const parsedArtifactInfo = JSON.parse(artifactInfoInput) as MatrixOutput;
 console.log('parsedArtifactInfo:');
 console.log(parsedArtifactInfo);
 
@@ -85,15 +90,13 @@ async function signInput(input: string, options?: SignInputOptions) {
   return sign.sign({ key: privateKey, passphrase: passphrase }, encoding);
 }
 
-async function restructureClientPayload() {
+async function restructureArtifactInfo() {
   const keyMapping = parsedArtifactInfo.triple;
 
-  const root: ArtifactInfo = {
+  const artifactInfo: ArtifactInfo = {
     byTriple: {},
-    signature: undefined,
-    timestamp: new Date().toISOString(),
   };
-  const { byTriple } = root;
+  const { byTriple } = artifactInfo;
 
   Object.keys(parsedArtifactInfo).forEach((key) => {
     if (key === 'web-zip-sig' || key === 'web-zip-url' || key === 'name') {
@@ -115,13 +118,7 @@ async function restructureClientPayload() {
     }
   });
 
-  const asStr = stableStringify(root);
-
-  const signature = await signInput(asStr);
-
-  root.signature = signature;
-
-  return root;
+  return artifactInfo;
 
   // const a = {
   //   'web-zip-url': {
@@ -200,6 +197,23 @@ function getTargets(
   return targets;
 }
 
+async function buildClientPayload(
+  centralNames: string,
+  artifactInfo: ArtifactInfo
+) {
+  const clientPayload: ClientPayload = {
+    centralNames,
+    artifactInfo,
+    signature: undefined,
+    timestamp: new Date().toISOString(),
+  };
+
+  const asStr = stableStringify(clientPayload);
+  clientPayload.signature = await signInput(asStr);
+
+  return clientPayload;
+}
+
 const bootstrap = async () => {
   const targets = getTargets('dev', config.triggers);
   if (targets.length < 1) {
@@ -207,12 +221,21 @@ const bootstrap = async () => {
     return;
   }
 
-  const newArtifactInfo = await restructureClientPayload();
+  const newArtifactInfo = await restructureArtifactInfo();
 
   let numSuccess = 0;
 
   for (let i = 0; i < targets.length; i++) {
     const { owner, repo, centralNames } = targets[i];
+
+    console.log(
+      `Building clientPayload for '${owner}/${repo}/${centralNames}'...`
+    );
+
+    const clientPayload = await buildClientPayload(
+      centralNames,
+      newArtifactInfo
+    );
 
     console.log(
       `Sending dispatch event for '${owner}/${repo}/${centralNames}'...`
@@ -222,10 +245,7 @@ const bootstrap = async () => {
       owner,
       repo,
       event_type: 'pull_artifacts',
-      client_payload: {
-        centralNames,
-        artifactInfo: newArtifactInfo,
-      },
+      client_payload: clientPayload,
     });
 
     if (response.status === 204) {
