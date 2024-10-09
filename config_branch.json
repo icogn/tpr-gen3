@@ -8,8 +8,14 @@
     }
   },
   "central": {
-    "stable": ["dev"],
-    "dev": ["dev"]
+    "stable": {
+      "releaseTag": "v0.0.0-branches.stable",
+      "branches": ["dev"]
+    },
+    "dev": {
+      "releaseTag": "v0.0.0-branches.dev",
+      "branches": ["dev"]
+    }
   },
   "triggers": {
     "dev": ["icogn/tpr-gen3/stable+dev"]
