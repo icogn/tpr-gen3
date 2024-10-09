@@ -1,1 +1,23 @@
-{}
+{
+  "branches": {
+    "dev": {
+      "name": "Development",
+      "owner": "icogn",
+      "repo": "tpr-gen3",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyTqeLbusbn54BpboQ24b\nER8U9YupmGt+FcIq7hizQJHMX5/eiFkVbj1mc4OXoEjL8jJxkTU7cbbKVK2dnlqA\nYsJuT1dM5n2ElaGtUMcMjI4us/hIOR7rBlfmbCn7MYjGGo6/AOf635P41MMSqcHE\nwXu5AXA1iCyXFoKCtlnMIZ5QDShTCl15ljRBtrUV8+DeIEOkSaNC0/RNH1TjkAn5\nAR5yCw5gQb4i+IHM4tGHLHjyxI78fZsbkJMb17J0c7+Cz+nfxALObevv+8NhOFii\nby8H2L84hMnXnqLE3EhfYFitVrVW1TnMpEJXD85gEM/dUB521HEY7uH7Lb9B5Qlh\nnxiT6T+WBqJX0YowulAUFMZWsX11bv3OmYgGKMDgVPBatj7S47UEyv4Zn9UlusU3\n2pvixJxYjKHLHb1Grer/QgsJOYjOdDqct0sEjGGxUF0Xzo2lYKRIIjPUpg5kl8QP\nYcICQBsFCmvj4GzGZW3DYgZXudNq++hAlYXd8BM4DUD45Mot6tUIG0Yg9A8pj2YJ\nFPyv8uTwhXBWLY2s8e8NDbL7zav4a8p/tNB6STkItfnl/ZpCZ3keAYi4Xx+4/moc\n6sY5vlCyQdhnq7AcoYQ6WsessdK3rLroeZgj9/VzEoMboAHffVgAVpRI8TB04nlS\nwr7Ievg9UBRTdaSvgXSUQfECAwEAAQ==\n-----END PUBLIC KEY-----"
+    }
+  },
+  "central": {
+    "stable": {
+      "releaseTag": "v0.0.0-branches.stable",
+      "branches": ["dev"]
+    },
+    "dev": {
+      "releaseTag": "v0.0.0-branches.dev",
+      "branches": ["dev"]
+    }
+  },
+  "triggers": {
+    "dev": ["icogn/tpr-gen3/stable+dev"]
+  }
+}
