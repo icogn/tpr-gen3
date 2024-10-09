@@ -3,18 +3,18 @@
   "centralNames": "stable+dev",
   "artifactInfo": {
     "byTriple": {
-      "x86_64-unknown-linux-gnu": {
-        "web-zip-url": "https://github.com/icogn/tpr-gen3/actions/runs/11247321912/artifacts/2032729312",
-        "web-zip-sig": "rv0TAlcpM3uO52ArXHU9EAQeOV6t06EOlK2QHT+Zmgiqbturz9PSbIuFIU5Ch1io0xIZTs3XV1KeK/3/CDytHYuwDfnG+pXM9UlFYu6u0LoagsM7gQYYO1cctspa8cXfm88PsU0p70pRUSEtpuoIQcdorOBbilmaIS/9zvEZYguz5dxAm5h53n8xXeWB/XluuX1pkKRiO941id117i8kuIFKlcgE6UJVgW6s7CB33mz980a7zIel3pZzj4K9TfrKq2ZN6MjxzAEOY5RlQg4henCwZxAB5wvKt70z9hLX8m6/EO3a9GQBWSAYfdNP3Aycu2mdAFHd5SN2YUCPiIXXxPxu87zv/slx3GOU1jJQPFPsdKhDWu+bJPUWcBIrZfCLEV9zT+/xR7b84hcKZW1xqVodheLTeL27ZbXP1iYvXm7Dt9GiWwjtHJxWTwqfso595/WGywIsJyct8n3P592H0miBKaBEOE0Gd0iqvE38K5ToVdkwaWM4+ooxWDd0aRhEWjrY/vrsksHDvnIlk0Vq7pSZRhRTM+BkseLsrQKQK0HseUNNkh4mKKLfpWUpnHwWSSkuGM7vMraK1E3tBaGaBEGbw/BztMnGRsOZ5wbK17E8AKXJ12ONT5QMgpj6pazNzs1opf+Sf3KLUmYVPVGfx1VJDuIdfCfzWB8hjRcWegs=",
-        "name": "web-ubuntu-latest"
-      },
       "x86_64-pc-windows-msvc": {
-        "web-zip-url": "https://github.com/icogn/tpr-gen3/actions/runs/11247321912/artifacts/2032731099",
-        "web-zip-sig": "PJ2COfT78cRsSDbfLn/kk4Z0QoTIHLTVUCBYw7uNHV1ms3tUv69Suor4dORVtUjpMslXSilZgr9+3kSM/RUPQe435cOH/uOm3Lwo1LB4aMxoBPnCQi5FdjiaZ6JOFyMyNxTui8+Rn/ebB3LdgkFrx5uwB7Gp1TpzzipRfGcdmhEpbx12S/aF/Mrn3dt/xNt+0BZjmyePpBc8cfh4FWqVvVXPRy3Xqnb14NOZQpeIYRmYfaQH+36wAr1MwW5XxLY6lyMUY4F7b5YUlk0q1+mYeH21n2+KlMEISGMlySZeaMBJ7WHuam8JGSeE7ge5BmzK7jgf8M63YqTr+GpkMaauan2L/PsBvQqjMASp4hFtadKMC10eFDFRrKe3ci5ikwHh59FCwopHUZ7yrULgpSA++Gnq6pC7b/leeqBnj5mwXuFjsWvB//MIKb8brW0K/bqQjJwh8bLy1Lym8A6q9nAQqTukoLlqknAUhb0SigiS2Vbrfs2oeE+ayhtlfx8i+36SA7bgaOmQsUGWLjIrzNlIKSixwfR+MBilevc3CWE+KYiqWpsqQLv3DuGxljFzFU5uxxQNCVi87jvZClnBV862/FI5HYvZsgMKci59ZwWkRYm/L7fSe38hOOo2c3jIfnRbqN59/BWYEsg89TDB8HQSzCx20JHFUuwTxYLuZ5FNChY=",
+        "web-zip-url": "https://github.com/icogn/tpr-gen3/actions/runs/11248360834/artifacts/2032996072",
+        "web-zip-sig": "bAoKmWbsjumsqGaVk8KYH0TPSliY1KYeFAJjudSGGWIFZIdfO2Rwt+jLtt6KNibQfUngu6OgDCTxv2l3IXGScl8XMVU/Wl3JNBQqZtm7yXSce1Vavs7ey+B6vYyaUvqxsSpEABYlLs/la4AhLjlgQ9P8AzTcSzA1P+3DZOR7y50AmVx+uT/+lOhR70TtkerVhoxeoHxtL0DWkGgp6gspxapWX6XmJRTRz49NhcIQXS34t8/Ku3i3kOSCyOCqKSrx7MTBHLr8kkHVaPBh77e6CqN9CKr7GBDGvybshMtgzRaI5EqqBggDY0uLvHgPTL5mp6rqCSsOAkLHnXg1y2hv5SC1W7I3cL1X+XzBFd2o0/V+hsrr6xdnb8H534HL9Aru/aMQynzf/hNtzGwM3lyDjKUR1221Zu0o8z3GDQczBmC7TgT/R8XZ0bUXMtaAlCW4TATeezu4vo2zUqPZGA+5B4DIn9rBciJ+BtHOH157MA9B0C6tZhR4LbTSMQLPocEd5eM5ZIPs7ZYYa1J3GpOOgSshospzV4/IydfX2a0s8nvznPKThiyYQIv81Hku16kigSdK3KpObr4VxdjqWhYIEtwVb/f2CsWLgoupMSLlRjmI69mJw4F38kbEKitlPwNmeDzDDZiIwjL2rGVSiX5m8MEjL0Nyq3G6FNcMgZ0ll/E=",
         "name": "web-windows-latest"
+      },
+      "x86_64-unknown-linux-gnu": {
+        "web-zip-url": "https://github.com/icogn/tpr-gen3/actions/runs/11248360834/artifacts/2032994586",
+        "web-zip-sig": "FyDrwk1+VmhVG/3zhiCmC/lPAFWjiV9Mpl0FpmYqsrOhg49D408LiRLves5mGnagkFxAWS43K4M0wm5s8ipJoBeSdLJPW8ZatMy2K03DtT+KNlR5xiMkrXZULndXo7Z2GHcdxjzKyrJpvkltTSBArGm4vKiyTpV+fC1ClWoIU8bDt/y3fObIl03V4fRl0APnic5yPtLWyTcPjHrGYdUZWe0RXPyB8dKgQDiQpph0xV4n5TfCYK1+vFUMPd0GEGdVc0kSFJIumBGXdGL5pgj2Dx4PIbHIxys/Qz1MNdIgZ7MB/RSWiU9u8ZhctSP+tNsciF0eNz+euLnBahuQtZeMxVdtLcRSxIrTYaYn36vAOOleF59lCXvHpdqdjuHmqa6bxe5OjfrOnxWlcYvG1PMJ0Ccb1r/cfdhC7LaBt9LxuePBxJh2Bz8qyuV9+LurvfIxqd5qf+E9Kg+oscLKaoUB6k656kys9ZFv0Ur0xNx5ZOYd7zY2a4Afh5qJ+InxMHEA7UJxfqfM9Mb1qDJP9yJswmPaZzpUZG9zlZGSt259PQG4YXhRrf7tLAF3k024G16qtRGTyiTrpK2v3C4+i3vpdAvK+XePjGCcDaC0y8yOqFlbem2xRrGH+FRw3epsX/MdXTH4zSyWfW/co2edwlXw0lVf6SwfnlfD0PZOD/pOQrY=",
+        "name": "web-ubuntu-latest"
       }
     }
   },
-  "signature": "a0gJttRU2XkWWYrfIaBnKUFI4Q+6Ab3axdjObUi99x650HU3B9xoQlGEUY6nVVCSR22D33DpOMVLyJhVLOgenPueAVLA3BPvWxr24SStQvihpaU4p+uTuwKZ2tEhcCkhzSsAWrJgKs46x5v8zxUfQe+fsNXMO1gUtSc79xL6rSZ/qRsdJAoiuIl9nan4rNk7I/fR58uOWBrG4l0ksPINnmBPcsaLdhB/8rVpsOpc08t4SN8HjZOS0xWE9syj3xCOG/Xws4ROgDK0mCLbApEdu6pq/w5ESMybPhYP/zyh7l6gQuH8D9Oqf+9MajiTTcdLZulQK46SqUlNTme7N4d7okTXlkF7U9RlZ/2IJhRugbkpKN8E8s16ZPghivHJn/aPp2HbisXbwFTr/Ix0al1nFAOG4RRjs34pzinT9lYjtNbgU5F59Mb6elaqUxk2AYNzqQoLvnuSGfe7YRiVHIbmSd5FNQhuQ1KznQDCZ+KlvCQUDXtN7//wPAfnhEnk/9jLDbt+KZm1RrItQ9OBecKzBDx6GSK0HcbacbnDX/MYGpuah9lKATEegjjSmRxvHyeGmD948k1mTT1+4j362LrZn66ZxS8bPrmjAR96mRT1417G4TXHmgWpMAZBYczIH1O9gK9gyMa6+7sh3lF58B3vFxpJaduBAnHikBa0JTRZapE=",
-  "timestamp": "2024-10-09T02:52:46.551Z"
+  "signature": "skyZ9TcBwNQgRhs1FAWOHXXeCKdcJ54Ni3X7yaN2CqASujVDePkLoyURL/gwhtGAcMKvorNKvfW/Ko9Zvtgze8S91k2f1/CC9FfPUKN2u322BvmvaORl6xAq22PqSoYUaV7cbbws51EcR0VbU1OOtccGueeHJLHNMV4Ctma42FRKk3mW4M+fkLbNuemgef5SVhRO7hvpCS7sZem/VauOW9pjz/dThHIzapMB01eX92eJ+EWXynB3TgW5VaPqVZVfSI/Rb6nUAexSDJNBZA4LOWXv4nLKgQddR2LhyZY3FNW6ft3GcoLZYMYe2cSEDswukOFjwQ9A50N3LvOaUZDzrIZByeu1bfMhzEd0YbG0TDW09WNtucZvAKZ6n6gjhryLv4xH0WwRAefqska8e+yGh5CzvSMlz72joPIQ8grukv50kBk6c5QuCsOHMBMoDyKYvmVQ+uDYBYvwsfv4Xb+jn8k7Phym0aqDG3DLrkU/rxPQo1Tyw9GTmxOY17SXSy3+ire5Xtn1MtuBDvZ16JqCOPHC56B9D/i7GACWlz5InnilAXQOz1A1jJ4EOuG5zTnk14H/SFqXIEOTqQJ4vVgh2qSDqb2uMbP3ij/mxS4SJeJ9SqUTgl5c482EPvi1wAqRg/mTmnN0iTPd9ofyc4qa0LtTQPgj1KC7Xkk7z9HPrU8=",
+  "timestamp": "2024-10-09T04:43:55.450Z"
 }
