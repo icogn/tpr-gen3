@@ -16,4 +16,4 @@ jobs:
       - uses: ./scripts/workflows/pull-web-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # clientPayload: ${{ toJson(github.event.client_payload) }}
+          clientPayloadFromFile: 'true'

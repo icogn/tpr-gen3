@@ -37,8 +37,18 @@ type ClientPayload = {
   artifactInfo: ArtifactInfo;
 };
 
-const clientPayloadInput = input('clientPayload', '');
-const clientPayload = JSON.parse(clientPayloadInput) as ClientPayload;
+const clientPayloadFromFile = input('clientPayloadFromFile', '') === 'true';
+let clientPayload: ClientPayload;
+
+if (clientPayloadFromFile) {
+  clientPayload = fs.readJSONSync(
+    './config_branch/test_trigger_data.json'
+  ) as ClientPayload;
+} else {
+  const clientPayloadInput = input('clientPayload', '');
+  clientPayload = JSON.parse(clientPayloadInput) as ClientPayload;
+}
+
 console.log('clientPayload:');
 console.log(clientPayload);
 const parsedArtifactInfo = clientPayload.artifactInfo;
@@ -174,7 +184,7 @@ async function run() {
   const inputs = {
     // name: core.getInput(Inputs.Name, { required: false }),
     // path: core.getInput(Inputs.Path, { required: false }),
-    token: core.getInput('github-token', { required: true }),
+    token: core.getInput('github-token'),
     // repository: core.getInput(Inputs.Repository, { required: false }),
     // runID: parseInt(core.getInput(Inputs.RunID, { required: false })),
     // pattern: core.getInput(Inputs.Pattern, { required: false }),

@@ -13,8 +13,12 @@ inputs:
     required: true
 
   clientPayload:
-    description: Client payload
-    required: true
+    description: Client payload. This is required if `clientPayloadFromFile` is not true
+    required: false
+
+  clientPayloadFromFile:
+    description: Set to 'true' if should read clientPayload from file
+    required: false
 
 # outputs:
 #   value:
