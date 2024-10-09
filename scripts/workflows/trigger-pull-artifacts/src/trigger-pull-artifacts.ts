@@ -237,6 +237,9 @@ const bootstrap = async () => {
       newArtifactInfo
     );
 
+    console.log('newArtifactInfo:');
+    console.log(newArtifactInfo);
+
     console.log(
       `Sending dispatch event for '${owner}/${repo}/${centralNames}'...`
     );
