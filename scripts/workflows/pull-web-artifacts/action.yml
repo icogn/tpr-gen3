@@ -12,12 +12,8 @@ inputs:
     description: Repository access token
     required: true
 
-  allowedWebBranches:
-    description: Allowed web branches
-    required: true
-
-  artifactInfo:
-    description: Artifact info
+  clientPayload:
+    description: Client payload
     required: true
 
 # outputs:

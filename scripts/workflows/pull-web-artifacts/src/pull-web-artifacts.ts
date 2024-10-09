@@ -11,18 +11,7 @@ import { match, MatchResult } from 'path-to-regexp';
 import { verify } from 'node:crypto';
 import stableStringify from 'json-stable-stringify';
 
-// const allowedWebBranches = input('allowedWebBranches', '');
-// console.log(`allowedWebBranches:${allowedWebBranches}`);
-
-// const artifactInfo = input('artifactInfo', '');
-// const parsedArtifactInfoIn = JSON.parse(artifactInfo);
-// console.log('parsedArtifactInfoIn');
-// console.log(parsedArtifactInfoIn);
-// const parsedArtifactInfo = parsedArtifactInfoIn;
-
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
-
-console.log('print from within ts file...@@..');
 
 type ArtifactInfo = {
   byTriple: {
@@ -43,27 +32,38 @@ type MatchStuff = {
   artifact_id: string;
 };
 
-const parsedArtifactInfo: ArtifactInfo = {
-  byTriple: {
-    'x86_64-pc-windows-msvc': {
-      name: 'web-windows-latest',
-      'web-zip-sig':
-        'JifDBVCvl05aczmfJV+AByJ3ZIDh3rzvL3+koiGfeGpW6j8mFUPzPO7TsiOAwoCxUuSGwuXQ1dvNicQf0rmvPSKaYP2jTwuo208vsBcWk4qUsKzGE0X0FuBbNJ26WV7dwyU/5QKL8VjJZ/quC7av4qcaopwXCuKMc+Ei3x+Q+qFXe1O2w5lSTroEVC3pmy9MsMVauEPW1dD7L06lhQzEEskl5YtFhbAvCQUrLA8spHzDH0wuEHu6xjZtPSEE2OYR2Q3vEypifITN7y3rCe/AADs+odog38BqvEUaCe3RqXC8u7zXOaDIvgHmIjL9EcfSxSR0safOsxjDV6PPij7ZjPlSnfmk3lRMJbq9QMDxDR7x+qFX5577eIEI0sy2dywfxg+zBW9r6J1iWTojn7YRFZrHb9CqvLUGIgWxTjXPGxELwPN6QhNo1M42OqyS7Y7mT7Oqmn5enoKDgvz+YkDWTYK0XEy0HiGfgIKu86L9MWk3mzzQBMHTX0k7DC8YHFLTUHo7V6abLT7zX3caCZfjn55N/gfd84X8omHd7ePXON9M+ybhjQt5AQdIn5G0CDvTI9NPj19hSnhxen/ucyF2TX89rVTd8Dl38SUc1lVDsKDXPXtpy5g44hFbyUSPvKlkLud2CwhMfnyzPPIv7+HtUwStF98exYSkBK0DXi1PPDM=',
-      'web-zip-url':
-        'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017054138',
-    },
-    'x86_64-unknown-linux-gnu': {
-      name: 'web-ubuntu-latest',
-      'web-zip-sig':
-        'UgG/Z/0vlTN4QQkSf6zyFcH+774vj7Br8SUafd32lvGR5habFeD1GaHTq/I0az0yfyhfYFNsUHRQVimDIBoM6r8Hsg480f8Ll7yXljZS2Ew/fae+kQh/ulgdv1GTKHiZCoiIPD/kGwKCiDVE5Yknu0P38j6nZ/Hiyx4FisuvSUWXTzY+RbZMmpL21RPm+EOxnDk/C2bmADV7Eq6RGKpNfSlDzDFvR21kKrCV2BbUaJ9x+Sz3ARgo86dHL5fd8bu/N2CT2an53bvN6xeE2gHcbg7Dk+JPPq4iROoju8StozhOor23oWOUb33OA1XHfxyzaBZbnDhPlxJP4xlPItWbTqfK+ijRxUWPoWiY/cg8J2JLMAZ4EzHHuTg7DJe+UGuSHzQQ6JFU31gUdWjIQU9TeNZeqAiLU3DXmuTJg8UpWafo5RghcNIuMASEYWng+AtrA5YmPVxUtWRQ6o1j3kDFaRnm60G934TVZmPUljS7VcyJroa+I5q9CEvwgiWTiP8SeX8ElVxGbrIx89wFJUNgbLyLRuDbdc9pjkMAhSBEi9NtRKVvmdCa7INopaDit80T9+XhdgmJTl9bGM9PrXK5TQtoQ5NVL/pTX/XLHWxsusc6I2hfE1ey80ofpnGvrMc/7RVHlByt/OMFLJRg7olrPSWvndCla/mYtCCAraDNF74=',
-      'web-zip-url':
-        'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017051285',
-    },
-  },
-  signature:
-    'v0BxCx0USKrNvWE9SxIGR2LkGB++HUURJNR26OkrwynEdNpbBLoNoXKHw6oeDT1EhuOD7nHZ6DZGnTuUTb4EWNJHiJ/rfNSlA5WcT9fvrkFUMhtMwJALBPfMvMQj4Rh2RIqAT95Tf5f01aD4HrRoz1Mn8jnbuUFUD+TceO+amFJOGRwBALVRCXYGkrfcNAu4Vh4W+Qstp3xg6wIdgIN1U2CKJzcKLj2jZBfL5dAtgVOOzqG0aqlyIwl5yC3NBHyC343EEZl9UvC1Q1IiIlwnmzNyd03EEzSbzymlE8bATadWeVMW61/i4IDDAKz4WYE8djCf4pbGaBaW1VI+ww0IXUBk9GeOwpstXIswQaQVKeq9K+WC6ZanauHeXSftHLtkBJpPef4QZ1XH6WGU0l1BZXiuB1DBLB+Eve0wlRWSMq0BY6oSrX2quGW2zB6PCuxGrtIicwQUkLtSCZW9SvTSEd1z1coT9ZMr/6KXyTBLvoVbPFy7yJ95vse5c7h4t6dsDLHEbfpFKyQQQhUFCUNRvE19MDm4vYehNrhg9ec+Rbp/JD8Gf3RQkzF8Kqirs1QHn5MIUpQ4tj2Ba3lE4/BLeloaj6gcSKLZNejFm7XXIZkD99RsXFshJTDa6bVdtbu0ZM+ISg2U5pSXxZvk7fintWn6hxueAqJ4JYC+3SSN9Ck=',
-  timestamp: '2024-10-04T17:52:14.178Z',
+type ClientPayload = {
+  centralName: string;
+  artifactInfo: ArtifactInfo;
 };
+
+const clientPayloadInput = input('clientPayload', '');
+const clientPayload = JSON.parse(clientPayloadInput) as ClientPayload;
+console.log('clientPayload:');
+console.log(clientPayload);
+const parsedArtifactInfo = clientPayload.artifactInfo;
+
+// const parsedArtifactInfo: ArtifactInfo = {
+//   byTriple: {
+//     'x86_64-pc-windows-msvc': {
+//       name: 'web-windows-latest',
+//       'web-zip-sig':
+//         'JifDBVCvl05aczmfJV+AByJ3ZIDh3rzvL3+koiGfeGpW6j8mFUPzPO7TsiOAwoCxUuSGwuXQ1dvNicQf0rmvPSKaYP2jTwuo208vsBcWk4qUsKzGE0X0FuBbNJ26WV7dwyU/5QKL8VjJZ/quC7av4qcaopwXCuKMc+Ei3x+Q+qFXe1O2w5lSTroEVC3pmy9MsMVauEPW1dD7L06lhQzEEskl5YtFhbAvCQUrLA8spHzDH0wuEHu6xjZtPSEE2OYR2Q3vEypifITN7y3rCe/AADs+odog38BqvEUaCe3RqXC8u7zXOaDIvgHmIjL9EcfSxSR0safOsxjDV6PPij7ZjPlSnfmk3lRMJbq9QMDxDR7x+qFX5577eIEI0sy2dywfxg+zBW9r6J1iWTojn7YRFZrHb9CqvLUGIgWxTjXPGxELwPN6QhNo1M42OqyS7Y7mT7Oqmn5enoKDgvz+YkDWTYK0XEy0HiGfgIKu86L9MWk3mzzQBMHTX0k7DC8YHFLTUHo7V6abLT7zX3caCZfjn55N/gfd84X8omHd7ePXON9M+ybhjQt5AQdIn5G0CDvTI9NPj19hSnhxen/ucyF2TX89rVTd8Dl38SUc1lVDsKDXPXtpy5g44hFbyUSPvKlkLud2CwhMfnyzPPIv7+HtUwStF98exYSkBK0DXi1PPDM=',
+//       'web-zip-url':
+//         'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017054138',
+//     },
+//     'x86_64-unknown-linux-gnu': {
+//       name: 'web-ubuntu-latest',
+//       'web-zip-sig':
+//         'UgG/Z/0vlTN4QQkSf6zyFcH+774vj7Br8SUafd32lvGR5habFeD1GaHTq/I0az0yfyhfYFNsUHRQVimDIBoM6r8Hsg480f8Ll7yXljZS2Ew/fae+kQh/ulgdv1GTKHiZCoiIPD/kGwKCiDVE5Yknu0P38j6nZ/Hiyx4FisuvSUWXTzY+RbZMmpL21RPm+EOxnDk/C2bmADV7Eq6RGKpNfSlDzDFvR21kKrCV2BbUaJ9x+Sz3ARgo86dHL5fd8bu/N2CT2an53bvN6xeE2gHcbg7Dk+JPPq4iROoju8StozhOor23oWOUb33OA1XHfxyzaBZbnDhPlxJP4xlPItWbTqfK+ijRxUWPoWiY/cg8J2JLMAZ4EzHHuTg7DJe+UGuSHzQQ6JFU31gUdWjIQU9TeNZeqAiLU3DXmuTJg8UpWafo5RghcNIuMASEYWng+AtrA5YmPVxUtWRQ6o1j3kDFaRnm60G934TVZmPUljS7VcyJroa+I5q9CEvwgiWTiP8SeX8ElVxGbrIx89wFJUNgbLyLRuDbdc9pjkMAhSBEi9NtRKVvmdCa7INopaDit80T9+XhdgmJTl9bGM9PrXK5TQtoQ5NVL/pTX/XLHWxsusc6I2hfE1ey80ofpnGvrMc/7RVHlByt/OMFLJRg7olrPSWvndCla/mYtCCAraDNF74=',
+//       'web-zip-url':
+//         'https://github.com/icogn/tpr-gen3/actions/runs/11184566516/artifacts/2017051285',
+//     },
+//   },
+//   signature:
+//     'v0BxCx0USKrNvWE9SxIGR2LkGB++HUURJNR26OkrwynEdNpbBLoNoXKHw6oeDT1EhuOD7nHZ6DZGnTuUTb4EWNJHiJ/rfNSlA5WcT9fvrkFUMhtMwJALBPfMvMQj4Rh2RIqAT95Tf5f01aD4HrRoz1Mn8jnbuUFUD+TceO+amFJOGRwBALVRCXYGkrfcNAu4Vh4W+Qstp3xg6wIdgIN1U2CKJzcKLj2jZBfL5dAtgVOOzqG0aqlyIwl5yC3NBHyC343EEZl9UvC1Q1IiIlwnmzNyd03EEzSbzymlE8bATadWeVMW61/i4IDDAKz4WYE8djCf4pbGaBaW1VI+ww0IXUBk9GeOwpstXIswQaQVKeq9K+WC6ZanauHeXSftHLtkBJpPef4QZ1XH6WGU0l1BZXiuB1DBLB+Eve0wlRWSMq0BY6oSrX2quGW2zB6PCuxGrtIicwQUkLtSCZW9SvTSEd1z1coT9ZMr/6KXyTBLvoVbPFy7yJ95vse5c7h4t6dsDLHEbfpFKyQQQhUFCUNRvE19MDm4vYehNrhg9ec+Rbp/JD8Gf3RQkzF8Kqirs1QHn5MIUpQ4tj2Ba3lE4/BLeloaj6gcSKLZNejFm7XXIZkD99RsXFshJTDa6bVdtbu0ZM+ISg2U5pSXxZvk7fintWn6hxueAqJ4JYC+3SSN9Ck=',
+//   timestamp: '2024-10-04T17:52:14.178Z',
+// };
 
 function input(name: string, def: string) {
   let inp = core.getInput(name).trim();
