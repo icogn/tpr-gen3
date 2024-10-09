@@ -32,7 +32,9 @@ type MatrixOutput = {
 };
 
 type Config = {
-  triggers?: string[];
+  triggers?: {
+    [key: string]: string[];
+  };
 };
 
 const config = fs.readJsonSync('./config_branch/config_branch.json') as Config;
@@ -147,35 +149,48 @@ type Target = {
   centralName: string;
 };
 
-function getTargets(triggers: string[] | undefined): Target[] {
+const TARGETS_REGEX = /^(\S+)\/(\S+)\/(\S+)$/;
+
+function getTargets(
+  currentBranch: string,
+  triggers: typeof config.triggers
+): Target[] {
   const targets: Target[] = [];
 
   if (triggers) {
-    const regex = /^(\S+)\/(\S+)\/(\S+)$/;
+    const branchesWhichTrigger = Object.keys(triggers);
 
-    triggers.forEach((triggerItem) => {
-      if (typeof triggerItem === 'string') {
-        const match = triggerItem.match(regex);
-        if (match) {
-          console.log(match);
-          const centralNames = match[3].split('+');
-          centralNames.forEach((centralName) => {
-            targets.push({
-              owner: match[1],
-              repo: match[2],
-              centralName,
-            });
-          });
-        }
+    for (let i = 0; i < branchesWhichTrigger.length; i++) {
+      const branch = branchesWhichTrigger[i];
+
+      if (branch === currentBranch) {
+        triggers[branch].forEach((triggerItem) => {
+          if (typeof triggerItem === 'string') {
+            const match = triggerItem.match(TARGETS_REGEX);
+            if (match) {
+              console.log(match);
+              const centralNames = match[3].split('+');
+              centralNames.forEach((centralName) => {
+                targets.push({
+                  owner: match[1],
+                  repo: match[2],
+                  centralName,
+                });
+              });
+            }
+          }
+        });
+
+        break;
       }
-    });
+    }
   }
 
   return targets;
 }
 
 const bootstrap = async () => {
-  const targets = getTargets(config.triggers);
+  const targets = getTargets('dev', config.triggers);
   if (targets.length < 1) {
     console.log('No targets. Skipping...');
     return;
