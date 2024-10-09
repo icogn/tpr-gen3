@@ -10,7 +10,8 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: 'config_branch'
+          # ref: 'config_branch'
+          ref: ahdsfiohasf
           path: 'config_branch'
 
       - uses: ./scripts/workflows/pull-web-artifacts
