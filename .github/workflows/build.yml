@@ -181,6 +181,9 @@ jobs:
   read_workflow:
     needs: [build_website]
     runs-on: ubuntu-latest
+    outputs:
+      result: '${{ steps.read.outputs.result }}'
+      env: ${{ needs.build_website.outputs.env }}
     steps:
       ## Read matrix outputs
       - uses: cloudposse/github-action-matrix-outputs-read@v1
@@ -188,8 +191,6 @@ jobs:
         with:
           matrix-step-name: build_website
       - run: echo ${{ steps.read.outputs.result }}
-    outputs:
-      result: '${{ steps.read.outputs.result }}'
 
   # THIS one was before changing to trigger. Reusable was not what we were looking for.
   # runs_reusable_workflow:
@@ -201,6 +202,7 @@ jobs:
   trigger_pull_artifact_workflow:
     needs: [read_workflow]
     runs-on: ubuntu-latest
+    environment: ${{ needs.read_workflow.outputs.env }}
     steps:
       - uses: actions/checkout@v4
 
