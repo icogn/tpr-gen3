@@ -8,17 +8,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - id: check-branch-exists
+        run: |
+          if [[ -n $(git ls-remote --heads origin config_branchasdhfio) ]]; then
+              echo "exists=true" >> $GITHUB_OUTPUT
+          else
+              echo "exists=false" >> $GITHUB_OUTPUT          
+          fi
+        shell: bash
+
+      - name: Stop if config branch doesn't exist
+        if: ${{ steps.check-branch-exists.outputs.exists }} != 'true'
+        run: exit 1
+
       - uses: actions/checkout@v4
         id: config-checkout
         continue-on-error: true
         with:
-          # ref: 'config_branch'
-          ref: ahdsfiohasf
+          ref: 'config_branch'
           path: 'config_branch'
-
-      - name: Stop if config branch doesn't exist
-        if: ${{ steps.config-checkout.outcome }} === 'failure'
-        run: exit 1
 
       - uses: ./scripts/workflows/pull-web-artifacts
         with:
