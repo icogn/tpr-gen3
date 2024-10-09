@@ -9,10 +9,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/checkout@v4
+        id: config-checkout
+        continue-on-error: true
         with:
           # ref: 'config_branch'
           ref: ahdsfiohasf
           path: 'config_branch'
+
+      - name: Stop if config branch doesn't exist
+        if: ${{ steps.config-checkout.outcome }} === 'failure'
+        run: exit 1
 
       - uses: ./scripts/workflows/pull-web-artifacts
         with:
