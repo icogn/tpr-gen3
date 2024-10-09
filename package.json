@@ -4,7 +4,8 @@
   "workspaces": [
     "tauri-app",
     "website",
-    "scripts/workflows/pull-web-artifacts"
+    "scripts/workflows/pull-web-artifacts",
+    "scripts/workflows/trigger-pull-artifacts"
   ],
   "packageManager": "yarn@4.5.0",
   "devDependencies": {

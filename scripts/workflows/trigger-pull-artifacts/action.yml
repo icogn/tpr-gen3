@@ -22,4 +22,4 @@ inputs:
 
 runs:
   using: node20
-  main: trigger-pull-artifacts.js
+  main: action-dist/index.js
