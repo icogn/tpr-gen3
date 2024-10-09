@@ -237,6 +237,9 @@ const bootstrap = async () => {
       newArtifactInfo
     );
 
+    console.log('clientPayload:');
+    console.log(clientPayload);
+
     console.log('newArtifactInfo:');
     console.log(newArtifactInfo);
 
