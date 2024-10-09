@@ -86,7 +86,6 @@ const configIn = fs.readJsonSync(CONFIG_FILEPATH);
 // const { success, error } = configSchema.safeParse(configIn);
 const { error, data } = configSchema.safeParse(configIn);
 if (error) {
-  console.error(error.message);
   core.setFailed(error.message);
   process.exit(1);
 }
