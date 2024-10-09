@@ -227,3 +227,5 @@ jobs:
           # Note that the fine-grained token needs `"Contents" repository permissions (write)`
           token: ${{ secrets.GH_PAT }}
           artifactInfo: ${{ needs.read_workflow.outputs.result }}
+          privateKey: ${{ secrets.PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
