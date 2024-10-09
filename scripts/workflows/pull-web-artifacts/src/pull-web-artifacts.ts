@@ -10,6 +10,7 @@ import * as core from '@actions/core';
 import { match, MatchResult } from 'path-to-regexp';
 import { verify } from 'node:crypto';
 import stableStringify from 'json-stable-stringify';
+import { z } from 'zod';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 
@@ -44,14 +45,47 @@ type BranchData = {
   publicKey: string;
 };
 
-type Config = {
-  branches: Record<string, BranchData | undefined>;
-  central: {
-    [key: string]: string[];
-  };
-};
+const configSchema = z.object({
+  branches: z.record(
+    z.string(),
+    z.object({
+      name: z.string(),
+      owner: z.string(),
+      repo: z.string(),
+      publicKey: z.string(),
+    })
+  ),
+  central: z.record(
+    z.string(),
+    z.object({
+      releaseTag: z.string(),
+      branches: z.array(z.string()),
+    })
+  ),
+  triggers: z.record(z.string(), z.array(z.string())),
+});
 
-const config = fs.readJsonSync('./config_branch/config_branch.json') as Config;
+type Config = z.infer<typeof configSchema>;
+
+// type Config = {
+//   branches: Record<string, BranchData | undefined>;
+//   central: {
+//     [key: string]: string[];
+//   };
+// };
+
+const CONFIG_FILEPATH = './config_branch/config_branch.json';
+
+if (!fs.existsSync(CONFIG_FILEPATH)) {
+  console.log('config_branch.json file not found.');
+  process.exit(0);
+}
+
+const configIn = fs.readJsonSync(CONFIG_FILEPATH);
+
+// const { success, error } = configSchema.safeParse(configIn);
+const config = configSchema.parse(configIn);
+
 if (!config.branches || !config.central) {
   console.log('Skipping because missing config.branches or config.central.');
   process.exit(0);
