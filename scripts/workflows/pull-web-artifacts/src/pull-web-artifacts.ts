@@ -11,6 +11,13 @@ import { GitHub } from '@actions/github/lib/utils';
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 const CONFIG_FILEPATH = './config_branch/config_branch.json';
 
+const thisOwner = github.context.repo.owner;
+const thisRepo = github.context.repo.repo;
+
+const siteArtifactMatchFn = match<SiteArtifactMatch>(
+  '/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id'
+);
+
 let octokit: InstanceType<typeof GitHub>;
 
 function getOctokit() {
@@ -22,7 +29,7 @@ function failAndExit(msg: string) {
   process.exit(1);
 }
 
-type MatchStuff = {
+type SiteArtifactMatch = {
   repo: string;
   owner: string;
   run_id: string;
@@ -61,18 +68,19 @@ type Config = z.infer<typeof configSchema>;
 
 type Inputs = ReturnType<typeof parseInputs>;
 
+const siteArtifactInfoSchema = z.object({
+  'web-zip-url': zString,
+  'web-zip-sig': zString,
+  name: zString,
+});
+
+type SiteArtifactInfoSchema = z.infer<typeof siteArtifactInfoSchema>;
+
 const clientPayloadSchema = z.object({
   branch: zString,
   centralNames: zString,
   artifactInfo: z.object({
-    byTriple: z.record(
-      zString,
-      z.object({
-        'web-zip-url': zString,
-        'web-zip-sig': zString,
-        name: zString,
-      })
-    ),
+    byTriple: z.record(zString, siteArtifactInfoSchema),
   }),
   signature: zString.optional(),
   timestamp: zString,
@@ -290,6 +298,93 @@ async function getCentralNamesData(config: Config, inputs: Inputs) {
   return results;
 }
 
+async function downloadAndVerifySiteArtifact(
+  token: string,
+  branchData: BranchData,
+  siteArtifactInfo: SiteArtifactInfoSchema
+) {
+  const artifactUrl = siteArtifactInfo['web-zip-url'];
+
+  const url = new URL(artifactUrl);
+
+  if (url.origin !== 'https://github.com') {
+    failAndExit(`Origin must be https://github.com, but was '${url.origin}'.`);
+  }
+
+  const siteArtifactMatchBase = siteArtifactMatchFn(url.pathname);
+  if (!siteArtifactMatchBase) {
+    failAndExit(`Failed to parse artifact URL '${artifactUrl}'.`);
+  }
+  const siteArtifactMatch =
+    siteArtifactMatchBase as MatchResult<SiteArtifactMatch>;
+
+  const { owner, repo } = siteArtifactMatch.params;
+  if (owner !== branchData.owner) {
+    failAndExit(
+      `siteArtifactInfo owner was '${owner}', but should have been '${branchData.owner}'.`
+    );
+  }
+  if (repo !== branchData.repo) {
+    failAndExit(
+      `siteArtifactInfo repo was '${repo}', but should have been '${branchData.repo}'.`
+    );
+  }
+
+  const options = {
+    findBy: {
+      token,
+      // run_id is actually used
+      workflowRunId: parseInt(siteArtifactMatch.params.run_id, 10),
+      repositoryName: siteArtifactMatch.params.repo,
+      repositoryOwner: siteArtifactMatch.params.owner,
+    },
+  };
+
+  const { artifact: targetArtifact } = await artifactClient.getArtifact(
+    siteArtifactInfo.name,
+    options
+  );
+
+  if (!targetArtifact) {
+    failAndExit(`Artifact with name '${siteArtifactInfo.name}' not found.`);
+  }
+  console.log('targetArtifact');
+  console.log(targetArtifact);
+
+  await artifactClient.downloadArtifact(
+    parseInt(siteArtifactMatch.params.artifact_id, 10),
+    {
+      ...options,
+      path: 'my_download_dir',
+    }
+  );
+}
+
+async function processSiteArtifacts(
+  inputs: Inputs,
+  config: Config,
+  centralNamesInfos: CentralNameInfo[]
+) {
+  const { byTriple } = inputs.clientPayload.artifactInfo;
+
+  if (Object.keys(byTriple).length < 1) {
+    failAndExit('No site zips were in the clientPayload.');
+  }
+
+  const branchData = config.branches[inputs.clientPayload.branch];
+  const triples = Object.keys(byTriple);
+
+  for (let i = 0; i < triples.length; i++) {
+    const siteArtifactInfo = byTriple[triples[i]];
+
+    await downloadAndVerifySiteArtifact(
+      inputs.token,
+      branchData,
+      siteArtifactInfo
+    );
+  }
+}
+
 async function run() {
   const inputs = parseInputs();
   const config = loadConfig();
@@ -325,79 +420,80 @@ async function run() {
 
   // TODO: if we have at least 1 centralNameToProcess, then we need to download
   // and verify all of the web-zip assets.
+  await processSiteArtifacts(inputs, config, centralNamesToProcess);
 
-  const osArtifactInfo =
-    inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];
+  // const osArtifactInfo =
+  //   inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];
 
-  const artifactUrl = osArtifactInfo['web-zip-url'];
+  // const artifactUrl = osArtifactInfo['web-zip-url'];
 
-  const fn = match<MatchStuff>(
-    '/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id'
-  );
+  // const fn = match<SiteArtifactMatch>(
+  //   '/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id'
+  // );
 
-  try {
-    const url = new URL(artifactUrl);
+  // try {
+  //   const url = new URL(artifactUrl);
 
-    if (url.origin !== 'https://github.com') {
-      throw new Error(
-        `Origin must be https://github.com, but was '${url.origin}'.`
-      );
-    }
+  //   if (url.origin !== 'https://github.com') {
+  //     throw new Error(
+  //       `Origin must be https://github.com, but was '${url.origin}'.`
+  //     );
+  //   }
 
-    const objBase = fn(url.pathname);
-    if (!objBase) {
-      core.setFailed(`Failed to parse artifact URL '${artifactUrl}'.`);
-      return;
-    }
-    const obj = objBase as MatchResult<MatchStuff>;
-    console.log('obj');
-    console.log(obj);
+  //   const objBase = fn(url.pathname);
+  //   if (!objBase) {
+  //     core.setFailed(`Failed to parse artifact URL '${artifactUrl}'.`);
+  //     return;
+  //   }
+  //   const obj = objBase as MatchResult<SiteArtifactMatch>;
+  //   console.log('obj');
+  //   console.log(obj);
 
-    const options = {
-      findBy: {
-        token: inputs.token,
-        // run_id is actually used
-        workflowRunId: parseInt(obj.params.run_id, 10),
-        repositoryName: obj.params.repo,
-        repositoryOwner: obj.params.owner,
-      },
-    };
+  //   const options = {
+  //     findBy: {
+  //       token: inputs.token,
+  //       // run_id is actually used
+  //       workflowRunId: parseInt(obj.params.run_id, 10),
+  //       repositoryName: obj.params.repo,
+  //       repositoryOwner: obj.params.owner,
+  //     },
+  //   };
 
-    const { artifact: targetArtifact } = await artifactClient.getArtifact(
-      osArtifactInfo.name,
-      options
-    );
+  //   const { artifact: targetArtifact } = await artifactClient.getArtifact(
+  //     osArtifactInfo.name,
+  //     options
+  //   );
 
-    if (!targetArtifact) {
-      throw new Error(`Artifact not found`);
-    }
+  //   if (!targetArtifact) {
+  //     throw new Error(`Artifact not found`);
+  //   }
 
-    console.log('targetArtifact');
-    console.log(targetArtifact);
+  //   console.log('targetArtifact');
+  //   console.log(targetArtifact);
 
-    // await artifactClient.downloadArtifact(artifact.id, {
-    await artifactClient.downloadArtifact(
-      parseInt(obj.params.artifact_id, 10),
-      {
-        ...options,
-        path: 'my_download_dir',
-        // isSingleArtifactDownload || inputs.mergeMultiple
-        //   ? resolvedPath
-        //   : path.join(resolvedPath, artifact.name),
-      }
-    );
+  //   // await artifactClient.downloadArtifact(artifact.id, {
+  //   await artifactClient.downloadArtifact(
+  //     parseInt(obj.params.artifact_id, 10),
+  //     {
+  //       ...options,
+  //       path: 'my_download_dir',
+  //       // isSingleArtifactDownload || inputs.mergeMultiple
+  //       //   ? resolvedPath
+  //       //   : path.join(resolvedPath, artifact.name),
+  //     }
+  //   );
 
-    // await artifactClient.downloadArtifact(artifact.id, {
-    //   ...options,
-    //   path:
-    //     isSingleArtifactDownload || inputs.mergeMultiple
-    //       ? resolvedPath
-    //       : path.join(resolvedPath, artifact.name),
-    // });
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  //   // await artifactClient.downloadArtifact(artifact.id, {
+  //   //   ...options,
+  //   //   path:
+  //   //     isSingleArtifactDownload || inputs.mergeMultiple
+  //   //       ? resolvedPath
+  //   //       : path.join(resolvedPath, artifact.name),
+  //   // });
+  // } catch (e) {
+  //   console.error(e);
+  //   throw e;
+  // }
 
   // print files in checked out config_branch branch.
   console.log('reading my_download_dir');
