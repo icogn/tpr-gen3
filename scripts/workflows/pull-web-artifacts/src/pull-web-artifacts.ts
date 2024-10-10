@@ -1,13 +1,26 @@
 import fs from 'fs-extra';
 import artifactClient from '@actions/artifact';
 import * as core from '@actions/core';
+import * as github from '@actions/github';
 import { match, MatchResult } from 'path-to-regexp';
 import { verify } from 'node:crypto';
 import stableStringify from 'json-stable-stringify';
 import { z } from 'zod';
+import { GitHub } from '@actions/github/lib/utils';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 const CONFIG_FILEPATH = './config_branch/config_branch.json';
+
+let octokit: InstanceType<typeof GitHub>;
+
+function getOctokit() {
+  return octokit;
+}
+
+function failAndExit(msg: string) {
+  core.setFailed(msg);
+  process.exit(1);
+}
 
 type MatchStuff = {
   repo: string;
@@ -139,28 +152,25 @@ function verifyTimestamp(timestamp: unknown, inputs: Inputs) {
 }
 
 async function verifyClientPayload(config: Config, inputs: Inputs) {
-  const { clientPayload: payload } = inputs;
-  if (typeof payload.signature !== 'string') {
-    core.setFailed('payload.signature was not a string');
-    return;
-  }
-  if (typeof payload.branch !== 'string') {
-    core.setFailed('payload.branch was not a string');
-    return;
-  }
+  const { clientPayload } = inputs;
 
-  const signature = payload.signature as string;
+  const signature = clientPayload.signature as string;
   // Set to undefined so not included when we stringify the object.
-  payload.signature = undefined;
+  clientPayload.signature = undefined;
 
-  const { branch } = payload;
+  const { branch } = clientPayload;
+
+  if (branch === 'stable') {
+    core.setFailed(`'stable' is a reserved branch name.`);
+    process.exit(1);
+  }
 
   const branchData = config.branches[branch];
   if (!branchData) {
     throw new Error(`Failed to find branchData for branch '${branch}'.`);
   }
 
-  const dataToVerify = stableStringify(payload);
+  const dataToVerify = stableStringify(clientPayload);
   console.log('dataToVerify:');
   console.log(dataToVerify);
 
@@ -186,7 +196,7 @@ async function verifyClientPayload(config: Config, inputs: Inputs) {
   }
   console.log(`payload signature was valid.`);
 
-  return verifyTimestamp(payload.timestamp, inputs);
+  return verifyTimestamp(clientPayload.timestamp, inputs);
 }
 
 function parseInputs() {
@@ -218,11 +228,65 @@ function parseInputs() {
     process.exit(1);
   }
 
+  const token = input('github-token', '', true);
+  octokit = github.getOctokit(token, { required: true });
+
   return {
-    token: input('github-token', '', true),
+    token,
     clientPayload: data,
     clientPayloadFromFile,
+    owner: input('owner', '', true),
+    repo: input('repo', '', true),
   };
+}
+
+type CentralNameInfo = {
+  centralName: string;
+  browser_download_url?: string;
+};
+
+async function getCentralNamesData(config: Config, inputs: Inputs) {
+  const results: CentralNameInfo[] = [];
+
+  const { branch, centralNames } = inputs.clientPayload;
+  const centrals = centralNames.trim().split('+');
+
+  for (let i = 0; i < centrals.length; i++) {
+    const central = centrals[i];
+
+    // TODO: type seems wrong here. Does not think can be undefined.
+    const centralInfo = config.central[central];
+    if (centralInfo && centralInfo.branches.includes(branch)) {
+      // Do call to get release info based on the tag.
+      const res = await getOctokit().rest.repos.getReleaseByTag({
+        owner: inputs.owner,
+        repo: inputs.repo,
+        tag: centralInfo.releaseTag,
+      });
+
+      if (res.status !== 200) {
+        failAndExit(
+          `getReleaseByTag status was '${res.status}' for tag '${centralInfo.releaseTag}'.`
+        );
+      }
+
+      let browser_download_url = undefined;
+      for (let assetIdx = 0; assetIdx < res.data.assets.length; assetIdx++) {
+        const asset = res.data.assets[0];
+        if (asset.name === 'asset_info.json') {
+          browser_download_url = asset.browser_download_url;
+          break;
+        }
+      }
+
+      results.push({
+        centralName: central,
+        browser_download_url,
+      });
+    }
+  }
+
+  return results;
 }
 
 async function run() {
@@ -233,6 +297,8 @@ async function run() {
   if (!clientPayloadVerified) {
     return;
   }
+
+  const centralNamesToProcess = await getCentralNamesData(config, inputs);
 
   const osArtifactInfo =
     inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];

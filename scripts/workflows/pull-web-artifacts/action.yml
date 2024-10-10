@@ -20,6 +20,14 @@ inputs:
     description: Set to 'true' if should read clientPayload from file
     required: false
 
+  owner:
+    description: Current repo owner
+    required: true
+
+  repo:
+    description: Current repo
+    required: true
+
 # outputs:
 #   value:
 #     description: The version

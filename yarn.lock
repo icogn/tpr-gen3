@@ -5352,6 +5352,7 @@ __metadata:
   dependencies:
     "@actions/artifact": "npm:^2.1.10"
     "@actions/core": "npm:^1.11.1"
+    "@actions/github": "npm:^6.0.0"
     "@types/fs-extra": "npm:^11"
     "@types/json-stable-stringify": "npm:^1"
     "@vercel/ncc": "npm:^0.38.2"
