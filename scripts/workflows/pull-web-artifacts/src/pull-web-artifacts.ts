@@ -235,8 +235,6 @@ function parseInputs() {
     token,
     clientPayload: data,
     clientPayloadFromFile,
-    owner: input('owner', '', true),
-    repo: input('repo', '', true),
   };
 }
 
@@ -259,8 +257,8 @@ async function getCentralNamesData(config: Config, inputs: Inputs) {
     if (centralInfo && centralInfo.branches.includes(branch)) {
       // Do call to get release info based on the tag.
       const res = await getOctokit().rest.repos.getReleaseByTag({
-        owner: inputs.owner,
-        repo: inputs.repo,
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
         tag: centralInfo.releaseTag,
       });
 

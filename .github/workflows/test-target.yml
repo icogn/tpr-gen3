@@ -31,5 +31,3 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           clientPayloadFromFile: 'true'
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
