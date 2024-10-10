@@ -94,18 +94,9 @@ function input(name: string, defVal: string, required = false) {
 // From https://stackoverflow.com/a/1353711
 function isDateValid(date: Date) {
   if (Object.prototype.toString.call(date) === '[object Date]') {
-    // it is a date
-    if (isNaN(date.valueOf())) {
-      // date object is not valid
-      return false;
-    } else {
-      // date object is valid
-      return true;
-    }
-  } else {
-    // not a date object
-    return false;
+    return !isNaN(date.valueOf());
   }
+  return false; // not a date object
 }
 
 function verifyTimestamp(timestamp: unknown, inputs: Inputs) {
