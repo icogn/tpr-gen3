@@ -409,12 +409,12 @@ async function processSiteArtifacts(
     const siteArtifactInfo = byTriple[triple];
     const signature = siteArtifactInfo['web-zip-sig'];
 
-    await downloadSiteArtifact(inputs.token, branchData, siteArtifactInfo);
-
     const filepath = path.join(DOWNLOAD_DIR, `${siteArtifactInfo.name}.zip`);
     if (fs.existsSync(filepath)) {
       failAndExit(`Tried to download multiple artifacts to '${filepath}'.`);
     }
+
+    await downloadSiteArtifact(inputs.token, branchData, siteArtifactInfo);
 
     const isVerified = await verifyFileSignature(
       branchData.publicKey,
