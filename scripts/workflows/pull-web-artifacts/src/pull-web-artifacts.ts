@@ -362,14 +362,18 @@ async function downloadSiteArtifact(
   );
 }
 
-function verifyFileSignature(
+async function verifyFileSignature(
   publicKey: string,
   signature: string,
   filepath: string
 ) {
   const verifier = createVerify('RSA-SHA256');
 
-  fs.createReadStream(filepath).pipe(verifier);
+  // fs.createReadStream(filepath).pipe(verifier);
+
+  await new Promise((resolve) =>
+    fs.createReadStream(filepath).pipe(verifier).once('finish', resolve)
+  );
 
   return verifier.verify(publicKey, signature, 'base64');
 
@@ -410,7 +414,7 @@ async function processSiteArtifacts(
     await downloadSiteArtifact(inputs.token, branchData, siteArtifactInfo);
 
     const filepath = path.join(DOWNLOAD_DIR, `${siteArtifactInfo.name}.zip`);
-    const isVerified = verifyFileSignature(
+    const isVerified = await verifyFileSignature(
       branchData.publicKey,
       siteArtifactInfo['web-zip-sig'],
       filepath
