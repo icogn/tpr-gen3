@@ -4,7 +4,7 @@ import artifactClient from '@actions/artifact';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { match, MatchResult } from 'path-to-regexp';
-import { createVerify, verify } from 'node:crypto';
+import { createVerify, sign, verify } from 'node:crypto';
 import stableStringify from 'json-stable-stringify';
 import { z } from 'zod';
 import { GitHub } from '@actions/github/lib/utils';
@@ -42,6 +42,12 @@ type BranchData = {
   owner: string;
   repo: string;
   publicKey: string;
+};
+
+type SiteZipInfo = {
+  triple: string;
+  filepath: string;
+  signature: string;
 };
 
 const zString = z.string().trim().min(1);
@@ -369,29 +375,11 @@ async function verifyFileSignature(
 ) {
   const verifier = createVerify('RSA-SHA256');
 
-  // fs.createReadStream(filepath).pipe(verifier);
-
   await new Promise((resolve) =>
     fs.createReadStream(filepath).pipe(verifier).once('finish', resolve)
   );
 
   return verifier.verify(publicKey, signature, 'base64');
-
-  // return await new Promise((resolve, reject) => {
-  //   verify(
-  //     'RSA-SHA256',
-  //     Buffer.from(dataToVerify),
-  //     publicKey,
-  //     Buffer.from(signature, 'base64'),
-  //     (err, result) => {
-  //       if (err) {
-  //         reject(err);
-  //       } else {
-  //         resolve(result);
-  //       }
-  //     }
-  //   );
-  // });
 }
 
 async function processSiteArtifacts(
@@ -399,6 +387,8 @@ async function processSiteArtifacts(
   config: Config,
   centralNamesInfos: CentralNameInfo[]
 ) {
+  const results: SiteZipInfo[] = [];
+
   const { byTriple } = inputs.clientPayload.artifactInfo;
 
   if (Object.keys(byTriple).length < 1) {
@@ -408,22 +398,42 @@ async function processSiteArtifacts(
   const branchData = config.branches[inputs.clientPayload.branch];
   const triples = Object.keys(byTriple);
 
+  // Need to return info about the files we downloaded.
+  // the triple, filepath, signature
+
+  // Probably want the filename in the release to be something like:
+  // dev-1.0.0-dev.255-x86_64-pc-windows-msvc.zip
+
   for (let i = 0; i < triples.length; i++) {
-    const siteArtifactInfo = byTriple[triples[i]];
+    const triple = triples[i];
+    const siteArtifactInfo = byTriple[triple];
+    const signature = siteArtifactInfo['web-zip-sig'];
 
     await downloadSiteArtifact(inputs.token, branchData, siteArtifactInfo);
 
     const filepath = path.join(DOWNLOAD_DIR, `${siteArtifactInfo.name}.zip`);
+    if (fs.existsSync(filepath)) {
+      failAndExit(`Tried to download multiple artifacts to '${filepath}'.`);
+    }
+
     const isVerified = await verifyFileSignature(
       branchData.publicKey,
-      siteArtifactInfo['web-zip-sig'],
+      signature,
       filepath
     );
     console.log(`isVerified: ${isVerified}`);
     if (!isVerified) {
       failAndExit(`Failed to verify '${siteArtifactInfo.name}.zip'.`);
     }
+
+    results.push({
+      triple,
+      filepath,
+      signature,
+    });
   }
+
+  return results;
 }
 
 async function run() {
@@ -461,7 +471,13 @@ async function run() {
 
   // TODO: if we have at least 1 centralNameToProcess, then we need to download
   // and verify all of the web-zip assets.
-  await processSiteArtifacts(inputs, config, centralNamesToProcess);
+  const siteZipInfos = await processSiteArtifacts(
+    inputs,
+    config,
+    centralNamesToProcess
+  );
+  console.log('siteZipInfos:');
+  console.log(siteZipInfos);
 
   // const osArtifactInfo =
   //   inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];
