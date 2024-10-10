@@ -351,13 +351,16 @@ async function downloadAndVerifySiteArtifact(
   console.log('targetArtifact');
   console.log(targetArtifact);
 
-  await artifactClient.downloadArtifact(
+  const downloadPath = await artifactClient.downloadArtifact(
     parseInt(siteArtifactMatch.params.artifact_id, 10),
     {
       ...options,
       path: 'my_download_dir',
     }
   );
+
+  console.log('downloadPath:');
+  console.log(downloadPath);
 }
 
 async function processSiteArtifacts(
