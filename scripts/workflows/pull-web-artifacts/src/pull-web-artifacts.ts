@@ -240,10 +240,7 @@ function parseInputs() {
 
 type CentralNameInfo = {
   centralName: string;
-  asset_info_properties?: {
-    id: number;
-    browser_download_url: string;
-  };
+  assetInfoAssetId?: number;
 };
 
 async function getCentralNamesData(config: Config, inputs: Inputs) {
@@ -271,21 +268,18 @@ async function getCentralNamesData(config: Config, inputs: Inputs) {
         );
       }
 
-      let asset_info_properties = undefined;
+      let assetInfoAssetId: number | undefined;
       for (let assetIdx = 0; assetIdx < res.data.assets.length; assetIdx++) {
         const asset = res.data.assets[0];
         if (asset.name === 'asset_info.json') {
-          asset_info_properties = {
-            id: asset.id,
-            browser_download_url: asset.browser_download_url,
-          };
+          assetInfoAssetId = asset.id;
           break;
         }
       }
 
       results.push({
         centralName: central,
-        asset_info_properties,
+        assetInfoAssetId,
       });
     }
   }
@@ -311,19 +305,23 @@ async function run() {
     process.exit(0);
   }
 
-  const res = await getOctokit().rest.repos.getReleaseAsset({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    asset_id: centralNamesToProcess[0].asset_info_properties!.id,
-    headers: {
-      Accept: 'application/octet-stream',
-    },
-  });
+  // NOTE: can use the following to get the asset_info.json data. I think
+  // res.data was a Buffer, but can uncomment and run in the Action to see the
+  // output.
 
-  console.log('typeof res');
-  console.log(typeof res);
-  console.log('res:');
-  console.log(res);
+  // const res = await getOctokit().rest.repos.getReleaseAsset({
+  //   owner: github.context.repo.owner,
+  //   repo: github.context.repo.repo,
+  //   asset_id: centralNamesToProcess[0].assetInfoAssetId!,
+  //   headers: {
+  //     Accept: 'application/octet-stream',
+  //   },
+  // });
+
+  // console.log('typeof res');
+  // console.log(typeof res);
+  // console.log('res:');
+  // console.log(res);
 
   // TODO: if we have at least 1 centralNameToProcess, then we need to download
   // and verify all of the web-zip assets.
