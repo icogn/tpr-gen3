@@ -22,24 +22,26 @@ type BranchData = {
   publicKey: string;
 };
 
+const zString = z.string().trim().min(1);
+
 const configSchema = z.object({
   branches: z.record(
-    z.string(),
+    zString,
     z.object({
-      name: z.string(),
-      owner: z.string(),
-      repo: z.string(),
-      publicKey: z.string(),
+      name: zString,
+      owner: zString,
+      repo: zString,
+      publicKey: zString,
     })
   ),
   central: z.record(
-    z.string(),
+    zString,
     z.object({
-      releaseTag: z.string(),
-      branches: z.array(z.string()),
+      releaseTag: zString,
+      branches: z.array(zString),
     })
   ),
-  triggers: z.record(z.string(), z.array(z.string())),
+  triggers: z.record(zString, z.array(zString)),
 });
 
 type Config = z.infer<typeof configSchema>;
@@ -47,20 +49,20 @@ type Config = z.infer<typeof configSchema>;
 type Inputs = ReturnType<typeof parseInputs>;
 
 const clientPayloadSchema = z.object({
-  branch: z.string(),
-  centralNames: z.string(),
+  branch: zString,
+  centralNames: zString,
   artifactInfo: z.object({
     byTriple: z.record(
-      z.string(),
+      zString,
       z.object({
-        'web-zip-url': z.string(),
-        'web-zip-sig': z.string(),
-        name: z.string(),
+        'web-zip-url': zString,
+        'web-zip-sig': zString,
+        name: zString,
       })
     ),
   }),
-  signature: z.string().optional(),
-  timestamp: z.string(),
+  signature: zString.optional(),
+  timestamp: zString,
 });
 
 type ClientPayload = z.infer<typeof clientPayloadSchema>;
