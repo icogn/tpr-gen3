@@ -9,12 +9,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+      - name: Check config branch exists
+        id: check-branch-exists
+        run: |
+          if [[ -n $(git ls-remote --heads origin config_branch) ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "config branch does not exist."
+            echo "exists=false" >> $GITHUB_OUTPUT          
+          fi
+        shell: bash
+
+      - if: steps.check-branch-exists.outputs.exists  == 'true'
+        uses: actions/checkout@v4
+        id: config-checkout
         with:
           ref: 'config_branch'
           path: 'config_branch'
 
-      - uses: ./scripts/workflows/pull-web-artifacts
+      - if: steps.check-branch-exists.outputs.exists  == 'true'
+        uses: ./scripts/workflows/pull-web-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           clientPayload: ${{ toJson(github.event.client_payload) }}
