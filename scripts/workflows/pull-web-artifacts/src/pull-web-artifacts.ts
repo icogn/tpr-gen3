@@ -242,7 +242,7 @@ function parseInputs() {
 
 type CentralNameInfo = {
   centralName: string;
-  browser_download_url?: string;
+  asset_info_browser_download_url?: string;
 };
 
 async function getCentralNamesData(config: Config, inputs: Inputs) {
@@ -281,10 +281,13 @@ async function getCentralNamesData(config: Config, inputs: Inputs) {
 
       results.push({
         centralName: central,
-        browser_download_url,
+        asset_info_browser_download_url: browser_download_url,
       });
     }
   }
+
+  console.log('getCentralNamesData results:');
+  console.log(results);
 
   return results;
 }
