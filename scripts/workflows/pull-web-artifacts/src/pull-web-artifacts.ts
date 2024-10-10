@@ -300,6 +300,10 @@ async function run() {
   }
 
   const centralNamesToProcess = await getCentralNamesData(config, inputs);
+  if (centralNamesToProcess.length < 1) {
+    console.log('No centralNames to process.');
+    process.exit(0);
+  }
 
   const osArtifactInfo =
     inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];
