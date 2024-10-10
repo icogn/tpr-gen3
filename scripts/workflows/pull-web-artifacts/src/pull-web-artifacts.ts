@@ -1,9 +1,3 @@
-// const fs = require('fs-extra');
-// const artifactClient = require('@actions/artifact').default;
-// const core = require('@actions/core');
-// const { match } = require('path-to-regexp');
-// const { verify } = require('node:crypto');
-// const stableStringify = require('json-stable-stringify');
 import fs from 'fs-extra';
 import artifactClient from '@actions/artifact';
 import * as core from '@actions/core';
@@ -13,30 +7,13 @@ import stableStringify from 'json-stable-stringify';
 import { z } from 'zod';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
+const CONFIG_FILEPATH = './config_branch/config_branch.json';
 
 type MatchStuff = {
   repo: string;
   owner: string;
   run_id: string;
   artifact_id: string;
-};
-
-type ArtifactInfo = {
-  byTriple: {
-    [key: string]: {
-      name: string;
-      'web-zip-sig': string;
-      'web-zip-url': string;
-    };
-  };
-};
-
-type ClientPayload = {
-  branch: string;
-  centralNames: string;
-  artifactInfo: ArtifactInfo;
-  timestamp: string;
-  signature: string | undefined;
 };
 
 type BranchData = {
@@ -67,60 +44,51 @@ const configSchema = z.object({
 
 type Config = z.infer<typeof configSchema>;
 
-// type Config = {
-//   branches: Record<string, BranchData | undefined>;
-//   central: {
-//     [key: string]: string[];
-//   };
-// };
+type Inputs = ReturnType<typeof parseInputs>;
 
-const CONFIG_FILEPATH = './config_branch/config_branch.json';
+const clientPayloadSchema = z.object({
+  branch: z.string(),
+  centralNames: z.string(),
+  artifactInfo: z.object({
+    byTriple: z.record(
+      z.string(),
+      z.object({
+        'web-zip-url': z.string(),
+        'web-zip-sig': z.string(),
+        name: z.string(),
+      })
+    ),
+  }),
+  signature: z.string().optional(),
+  timestamp: z.string(),
+});
 
-if (!fs.existsSync(CONFIG_FILEPATH)) {
-  console.log('config_branch.json file not found.');
-  process.exit(0);
-}
+type ClientPayload = z.infer<typeof clientPayloadSchema>;
 
-const configIn = fs.readJsonSync(CONFIG_FILEPATH);
-
-// const { success, error } = configSchema.safeParse(configIn);
-const { error, data } = configSchema.safeParse(configIn);
-if (error) {
-  console.log('config zod error:');
-  core.setFailed(error.message);
-  process.exit(1);
-}
-
-const config = data;
-
-if (!config.branches || !config.central) {
-  console.log('Skipping because missing config.branches or config.central.');
-  process.exit(0);
-}
-
-const clientPayloadFromFile = input('clientPayloadFromFile', '') === 'true';
-let clientPayload: ClientPayload;
-
-if (clientPayloadFromFile) {
-  clientPayload = fs.readJSONSync(
-    './config_branch/test_trigger_data.json'
-  ) as ClientPayload;
-} else {
-  const clientPayloadInput = input('clientPayload', '');
-  clientPayload = JSON.parse(clientPayloadInput) as ClientPayload;
-}
-
-console.log('clientPayload:');
-console.log(clientPayload);
-const parsedArtifactInfo = clientPayload.artifactInfo;
-
-function input(name: string, def: string) {
-  let inp = core.getInput(name).trim();
-  if (inp === '' || inp.toLowerCase() === 'false') {
-    return def;
+function loadConfig() {
+  if (!fs.existsSync(CONFIG_FILEPATH)) {
+    console.log('config_branch.json file not found.');
+    process.exit(0);
   }
 
-  return inp;
+  const configIn = fs.readJsonSync(CONFIG_FILEPATH);
+
+  const { error, data } = configSchema.safeParse(configIn);
+  if (error) {
+    console.log('config zod error:');
+    core.setFailed(error.message);
+    process.exit(1);
+  }
+
+  return data;
+}
+
+function input(name: string, defVal: string, required = false) {
+  const val = core.getInput(name).trim();
+  if (required && (val == null || val === '')) {
+    throw `Input '${name}' is required!`;
+  }
+  return val || defVal;
 }
 
 // From https://stackoverflow.com/a/1353711
@@ -140,7 +108,7 @@ function isDateValid(date: Date) {
   }
 }
 
-function verifyTimestamp(timestamp: unknown) {
+function verifyTimestamp(timestamp: unknown, inputs: Inputs) {
   if (typeof timestamp !== 'string') {
     core.setFailed('timestamp was not a string');
     return false;
@@ -163,13 +131,13 @@ function verifyTimestamp(timestamp: unknown) {
     return false;
   }
 
-  // Check if within past 15 minutes.
   const diff = Date.now() - timestampDate.getTime();
   console.log(`diff: ${diff}`);
 
-  // TODO: temp allowing any amount of time in past
-  if (diff < 0) {
-    // if (diff < 0 || diff > FIFTEEN_MINUTES_IN_MS) {
+  if (
+    diff < 0 ||
+    (!inputs.clientPayloadFromFile && diff > FIFTEEN_MINUTES_IN_MS)
+  ) {
     core.setFailed(`timestamp '${timestampStr}' was not in allowed window.`);
     return false;
   }
@@ -177,7 +145,8 @@ function verifyTimestamp(timestamp: unknown) {
   return true;
 }
 
-async function verifyClientPayload(payload: ClientPayload) {
+async function verifyClientPayload(config: Config, inputs: Inputs) {
+  const { clientPayload: payload } = inputs;
   if (typeof payload.signature !== 'string') {
     core.setFailed('payload.signature was not a string');
     return;
@@ -198,12 +167,6 @@ async function verifyClientPayload(payload: ClientPayload) {
     throw new Error(`Failed to find branchData for branch '${branch}'.`);
   }
 
-  const { publicKey } = branchData;
-
-  // This is a hardcoded test value
-  // const publicKey =
-  //   '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3BIwGEBi9flZfX6W5y09\nM0S9kV8mXZSL1mkOVx/B18v7kBCRsquCzSs5ot7DChJcyYqanuzWyM14HK7gnLBp\nWEU5PQOhag+WW8pkWgHjlTauB+sEd9X7MPPU5o5OR61nCzYIToNGxLx5NXksj5A4\nuUkS4eKaZ336aZBAj/dvOEPQA1m3azwIBbmxdDadDki76Ykjz35yUgtZyF/x8Bpt\n7YRY0kBwHdq57EVBaMQl0uSfCaFGPx7ez36OkWvhUyfCUy5ApyPoeDK36gIcOuMr\nS6CyLEh+Y0JmZSAzLgSPnh1N7S7F4Lf+IKoiws5Be6xvot16nSRpZc5NJAfyu/MU\nfmy5kcB5TqcQcWh61d4s4p8a1FnU9M0prTOVOHWtkG08tmlniHQXX8igrnRgvcIo\nHbMCVcIrOSrwsSeyabtxXfDpwp2+orr6RNJQKOlc8iCCf8y6CYyFlmftO0WN/+gc\ndc3hIRwmlefg/wmTyS68SvXLA1AvM9tlQ4n0oiYpL6MO5c2828jg3Ytr76FAqHtp\nfrXwRHqAAqq5yvQjuWt5r942ozIBbsElq0cHyguchMw2MXz9m6+rBnuJy8SL1M47\ndgy287Skw4QWKq6G4LnIZp9Na0+svZSiPVD/fQ1sDFOHifUJITNNXXyDdRFd+8DT\nTMiwi2Fsd1kDmGS0eP/TcX0CAwEAAQ==\n-----END PUBLIC KEY-----\n';
-
   const dataToVerify = stableStringify(payload);
   console.log('dataToVerify:');
   console.log(dataToVerify);
@@ -212,7 +175,7 @@ async function verifyClientPayload(payload: ClientPayload) {
     verify(
       'RSA-SHA256',
       Buffer.from(dataToVerify),
-      publicKey,
+      branchData.publicKey,
       Buffer.from(signature, 'base64'),
       (err, result) => {
         if (err) {
@@ -230,29 +193,56 @@ async function verifyClientPayload(payload: ClientPayload) {
   }
   console.log(`payload signature was valid.`);
 
-  return verifyTimestamp(payload.timestamp);
+  return verifyTimestamp(payload.timestamp, inputs);
+}
+
+function parseInputs() {
+  const clientPayloadFromFile = input('clientPayloadFromFile', '') === 'true';
+  let clientPayloadObj: any;
+
+  if (clientPayloadFromFile) {
+    clientPayloadObj = fs.readJSONSync(
+      './config_branch/test_trigger_data.json'
+    );
+  } else {
+    const clientPayloadInput = input('clientPayload', '');
+    clientPayloadObj = JSON.parse(clientPayloadInput);
+  }
+
+  console.log('clientPayloadObj:');
+  console.log(clientPayloadObj);
+
+  const { error, data } = clientPayloadSchema.safeParse(clientPayloadObj);
+  if (error) {
+    console.log('clientPayload zod error:');
+    core.setFailed(error.message);
+    process.exit(1);
+  }
+
+  // Manually confirm signature is a string since our schema says it is optional.
+  if (typeof data.signature !== 'string') {
+    core.setFailed('clientPayload.signature must be a string.');
+    process.exit(1);
+  }
+
+  return {
+    token: input('github-token', '', true),
+    clientPayload: data,
+    clientPayloadFromFile,
+  };
 }
 
 async function run() {
-  const inputs = {
-    // name: core.getInput(Inputs.Name, { required: false }),
-    // path: core.getInput(Inputs.Path, { required: false }),
-    token: core.getInput('github-token'),
-    // repository: core.getInput(Inputs.Repository, { required: false }),
-    // runID: parseInt(core.getInput(Inputs.RunID, { required: false })),
-    // pattern: core.getInput(Inputs.Pattern, { required: false }),
-    // mergeMultiple: core.getBooleanInput(Inputs.MergeMultiple, {
-    //   required: false,
-    // }),
-  };
+  const inputs = parseInputs();
+  const config = loadConfig();
 
-  const clientPayloadVerified = await verifyClientPayload(clientPayload);
+  const clientPayloadVerified = await verifyClientPayload(config, inputs);
   if (!clientPayloadVerified) {
     return;
   }
 
   const osArtifactInfo =
-    parsedArtifactInfo.byTriple['x86_64-unknown-linux-gnu'];
+    inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];
 
   const artifactUrl = osArtifactInfo['web-zip-url'];
 
