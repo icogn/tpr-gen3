@@ -19,20 +19,16 @@ jobs:
           fi
         shell: bash
 
-      # - name: Stop if config branch doesn't exist
-      #   if: ${{ steps.check-branch-exists.outputs.exists }} != 'true'
-      #   run: exit 1
-
       - run: echo ${{ steps.check-branch-exists.outputs.exists }}
 
-      - if: ${{ steps.check-branch-exists.outputs.exists }} == 'true'
+      - if: steps.check-branch-exists.outputs.exists  == 'true'
         uses: actions/checkout@v4
         id: config-checkout
         with:
           ref: 'config_branch'
           path: 'config_branch'
 
-      - if: ${{ steps.check-branch-exists.outputs.exists }} == 'true'
+      - if: steps.check-branch-exists.outputs.exists  == 'true'
         uses: ./scripts/workflows/pull-web-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
