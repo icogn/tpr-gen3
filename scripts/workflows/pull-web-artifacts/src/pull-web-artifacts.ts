@@ -1,15 +1,17 @@
+import path from 'node:path';
 import fs from 'fs-extra';
 import artifactClient from '@actions/artifact';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { match, MatchResult } from 'path-to-regexp';
-import { verify } from 'node:crypto';
+import { createVerify, verify } from 'node:crypto';
 import stableStringify from 'json-stable-stringify';
 import { z } from 'zod';
 import { GitHub } from '@actions/github/lib/utils';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 const CONFIG_FILEPATH = './config_branch/config_branch.json';
+const DOWNLOAD_DIR = 'my_download_dir';
 
 const thisOwner = github.context.repo.owner;
 const thisRepo = github.context.repo.repo;
@@ -298,7 +300,7 @@ async function getCentralNamesData(config: Config, inputs: Inputs) {
   return results;
 }
 
-async function downloadAndVerifySiteArtifact(
+async function downloadSiteArtifact(
   token: string,
   branchData: BranchData,
   siteArtifactInfo: SiteArtifactInfoSchema
@@ -351,16 +353,41 @@ async function downloadAndVerifySiteArtifact(
   console.log('targetArtifact');
   console.log(targetArtifact);
 
-  const downloadPath = await artifactClient.downloadArtifact(
+  await artifactClient.downloadArtifact(
     parseInt(siteArtifactMatch.params.artifact_id, 10),
     {
       ...options,
-      path: 'my_download_dir',
+      path: DOWNLOAD_DIR,
     }
   );
+}
 
-  console.log('downloadPath:');
-  console.log(downloadPath);
+function verifyFileSignature(
+  publicKey: string,
+  signature: string,
+  filepath: string
+) {
+  const verifier = createVerify('RSA-SHA256');
+
+  fs.createReadStream(filepath).pipe(verifier);
+
+  return verifier.verify(publicKey, signature, 'base64');
+
+  // return await new Promise((resolve, reject) => {
+  //   verify(
+  //     'RSA-SHA256',
+  //     Buffer.from(dataToVerify),
+  //     publicKey,
+  //     Buffer.from(signature, 'base64'),
+  //     (err, result) => {
+  //       if (err) {
+  //         reject(err);
+  //       } else {
+  //         resolve(result);
+  //       }
+  //     }
+  //   );
+  // });
 }
 
 async function processSiteArtifacts(
@@ -380,11 +407,18 @@ async function processSiteArtifacts(
   for (let i = 0; i < triples.length; i++) {
     const siteArtifactInfo = byTriple[triples[i]];
 
-    await downloadAndVerifySiteArtifact(
-      inputs.token,
-      branchData,
-      siteArtifactInfo
+    await downloadSiteArtifact(inputs.token, branchData, siteArtifactInfo);
+
+    const filepath = path.join(DOWNLOAD_DIR, `${siteArtifactInfo.name}.zip`);
+    const isVerified = verifyFileSignature(
+      branchData.publicKey,
+      siteArtifactInfo['web-zip-sig'],
+      filepath
     );
+    console.log(`isVerified: ${isVerified}`);
+    if (!isVerified) {
+      failAndExit(`Failed to verify '${siteArtifactInfo.name}.zip'.`);
+    }
   }
 }
 
@@ -499,8 +533,8 @@ async function run() {
   // }
 
   // print files in checked out config_branch branch.
-  console.log('reading my_download_dir');
-  fs.readdirSync('./my_download_dir').forEach((file) => {
+  console.log(`reading downloadDir '${DOWNLOAD_DIR}'`);
+  fs.readdirSync(DOWNLOAD_DIR).forEach((file) => {
     console.log(file);
   });
 
