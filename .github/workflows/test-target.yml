@@ -11,7 +11,7 @@ jobs:
       - name: Check config branch exists
         id: check-branch-exists
         run: |
-          if [[ -n $(git ls-remote --heads origin config_branchasdhfio) ]]; then
+          if [[ -n $(git ls-remote --heads origin config_branch) ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "config branch does not exist."
