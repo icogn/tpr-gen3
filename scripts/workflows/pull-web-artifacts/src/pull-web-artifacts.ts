@@ -477,15 +477,16 @@ async function updateReleaseAssets(
   // - create/update the asset_info.json file
   //
   // Perhaps files should follow a pattern.
-  // dev__1.2.3-dev.234-x86_64-unknown-linux-gnu.zip
+  // b_dev_1.2.3-dev.234-x86_64-unknown-linux-gnu.zip
   // We would delete all that start with "<branch>__" and end with ".zip".
+
+  const branchAssetPrefix = `b_${branch}_`;
 
   for (let i = 0; i < centralNamesInfos.length; i++) {
     const centralNamesInfo = centralNamesInfos[i];
+    console.log(`Processing centralName '${centralNamesInfo.centralName}'...`);
 
-    // TODO: need to handle pagination correctly.
-
-    const res = await getOctokit().paginate(
+    const assets = await getOctokit().paginate(
       'GET /repos/{owner}/{repo}/releases/{release_id}/assets',
       {
         owner: thisOwner,
@@ -495,12 +496,26 @@ async function updateReleaseAssets(
       }
     );
 
-    console.log('pagedRes');
-    console.log(res);
+    let numDeleted = 0;
+    for (let assetIdx = 0; assetIdx < assets.length; assetIdx++) {
+      const asset = assets[assetIdx];
+      if (asset.name.startsWith(branchAssetPrefix)) {
+        console.log(`Deleting asset name:${asset.name},id:${asset.id}...`);
+        const rmRes = await getOctokit().rest.repos.deleteReleaseAsset({
+          owner: thisOwner,
+          repo: thisRepo,
+          asset_id: asset.id,
+        });
 
-    // await getOctokit().rest.repos.listReleaseAssets({
-    //   // per_page: 100,
-    // });
+        if (rmRes.status !== 204) {
+          failAndExit(
+            `deleteReleaseAsset expected status 204, but was '${rmRes.status}'.`
+          );
+        }
+        numDeleted += 1;
+      }
+    }
+    console.log(`Deleted ${numDeleted} of ${assets.length} asset(s).`);
   }
 }
 
