@@ -561,9 +561,6 @@ async function updateReleaseAssets(
       }
 
       siteZipAssetIds.push(uploadRes.data.id);
-
-      console.log(uploadRes);
-      console.log(uploadRes.data);
     }
 
     // Create/replace asset_info.json
