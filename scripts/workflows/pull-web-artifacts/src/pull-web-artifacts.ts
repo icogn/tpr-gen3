@@ -521,14 +521,14 @@ async function updateReleaseAssets(
         repo: thisRepo,
         release_id: centralNamesInfo.releaseId,
         name: `b_${branch}_${version}-${siteZipInfo.triple}.zip`,
-        'data-binary': fileData,
+        // 'data-binary': fileData,
         data: fileData as unknown as string,
         mediaType: {
           format: 'raw',
         },
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
+        // headers: {
+        //   'Content-Type': 'application/octet-stream',
+        // },
       });
 
       console.log('a:');
