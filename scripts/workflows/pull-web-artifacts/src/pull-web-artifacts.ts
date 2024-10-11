@@ -514,14 +514,21 @@ async function updateReleaseAssets(
     for (let uploadIdx = 0; uploadIdx < siteZipInfos.length; uploadIdx++) {
       const siteZipInfo = siteZipInfos[uploadIdx];
 
-      const fileData = fs.readFileSync(siteZipInfo.filepath, 'utf8');
+      const fileData = fs.readFileSync(siteZipInfo.filepath);
 
       const a = await getOctokit().rest.repos.uploadReleaseAsset({
         owner: thisOwner,
         repo: thisRepo,
         release_id: centralNamesInfo.releaseId,
-        name: `b_${branch}-${siteZipInfo.triple}.zip`,
-        data: fileData,
+        name: `b_${branch}_${version}-${siteZipInfo.triple}.zip`,
+        'data-binary': fileData,
+        data: fileData as unknown as string,
+        mediaType: {
+          format: 'raw',
+        },
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
       });
 
       console.log('a:');
