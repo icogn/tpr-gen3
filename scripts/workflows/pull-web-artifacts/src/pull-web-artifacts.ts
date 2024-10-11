@@ -566,14 +566,11 @@ async function updateReleaseAssets(
       console.log(uploadRes.data);
     }
 
-    // Update asset_info.json
-
-    // NOTE: can use the following to get the asset_info.json data. I think
-    // res.data was a Buffer, but can uncomment and run in the Action to see the
-    // output.
+    // Create/replace asset_info.json
+    let newAssetInfoJson: AssetInfo = { branches: {} };
 
     if (centralNamesInfo.assetInfoAssetId != null) {
-      // Update existing file
+      console.log('Going to replace existing asset_info.json...');
       const res = await getOctokit().rest.repos.getReleaseAsset({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
@@ -608,14 +605,7 @@ async function updateReleaseAssets(
         failAndExit(error.message);
       }
 
-      const assetInfoBranch = buildAssetInfoBranchObj(
-        version,
-        siteZipInfos,
-        siteZipAssetIds
-      );
-
-      const newAssetInfoJson = JSON.parse(stableStringify(data)) as AssetInfo;
-      newAssetInfoJson.branches[branch] = assetInfoBranch;
+      newAssetInfoJson = JSON.parse(stableStringify(data)) as AssetInfo;
 
       console.log(`Deleting asset_info.json...`);
       const delAssetInfoRes = await getOctokit().rest.repos.deleteReleaseAsset({
@@ -629,22 +619,29 @@ async function updateReleaseAssets(
           `updateRes has status ${delAssetInfoRes.status} instead of 204.`
         );
       }
-
-      console.log(`Uploading new asset_info.json...`);
-      const uploadAssetInfoRes =
-        await getOctokit().rest.repos.uploadReleaseAsset({
-          owner: thisOwner,
-          repo: thisRepo,
-          release_id: centralNamesInfo.releaseId,
-          name: 'asset_info.json',
-          // TS expects `data` to be a string, but we pass an object. I think
-          // there is an issue with the types. This code works as intended.
-          data: newAssetInfoJson as unknown as string,
-        });
     } else {
-      // Create file since does not exist
-      console.log('Would need to create asset_info.json');
+      console.log('Need to create asset_info.json since does not exist...');
     }
+
+    const assetInfoBranch = buildAssetInfoBranchObj(
+      version,
+      siteZipInfos,
+      siteZipAssetIds
+    );
+    newAssetInfoJson.branches[branch] = assetInfoBranch;
+
+    console.log(`Uploading new asset_info.json...`);
+    const uploadAssetInfoRes = await getOctokit().rest.repos.uploadReleaseAsset(
+      {
+        owner: thisOwner,
+        repo: thisRepo,
+        release_id: centralNamesInfo.releaseId,
+        name: 'asset_info.json',
+        // TS expects `data` to be a string, but we pass an object. I think
+        // there is an issue with the types. This code works as intended.
+        data: newAssetInfoJson as unknown as string,
+      }
+    );
   }
 }
 
