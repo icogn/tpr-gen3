@@ -497,6 +497,7 @@ async function updateReleaseAssets(
 
   for (let i = 0; i < centralNamesInfos.length; i++) {
     const centralNamesInfo = centralNamesInfos[i];
+    console.log('---');
     console.log(`Processing centralName '${centralNamesInfo.centralName}'...`);
 
     // Delete release assets
