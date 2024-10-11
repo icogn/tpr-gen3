@@ -467,18 +467,10 @@ async function processSiteArtifacts(
 async function updateReleaseAssets(
   inputs: Inputs,
   config: Config,
-  centralNamesInfos: CentralNameInfo[]
+  centralNamesInfos: CentralNameInfo[],
+  siteZipInfos: SiteZipInfo[]
 ) {
   const { branch, version } = inputs.clientPayload;
-
-  // TODO: for each central thing, we need to:
-  // - delete any old files for this branch from the release
-  // - upload all new files to the release
-  // - create/update the asset_info.json file
-  //
-  // Perhaps files should follow a pattern.
-  // b_dev_1.2.3-dev.234-x86_64-unknown-linux-gnu.zip
-  // We would delete all that start with "<branch>__" and end with ".zip".
 
   const branchAssetPrefix = `b_${branch}_`;
 
@@ -486,6 +478,7 @@ async function updateReleaseAssets(
     const centralNamesInfo = centralNamesInfos[i];
     console.log(`Processing centralName '${centralNamesInfo.centralName}'...`);
 
+    // Delete release assets
     const assets = await getOctokit().paginate(
       'GET /repos/{owner}/{repo}/releases/{release_id}/assets',
       {
@@ -516,6 +509,27 @@ async function updateReleaseAssets(
       }
     }
     console.log(`Deleted ${numDeleted} of ${assets.length} asset(s).`);
+
+    // Upload release assets
+    for (let uploadIdx = 0; uploadIdx < siteZipInfos.length; uploadIdx++) {
+      const siteZipInfo = siteZipInfos[uploadIdx];
+
+      const fileData = fs.readFileSync(siteZipInfo.filepath, 'utf8');
+
+      const a = await getOctokit().rest.repos.uploadReleaseAsset({
+        owner: thisOwner,
+        repo: thisRepo,
+        release_id: centralNamesInfo.releaseId,
+        name: `b_${branch}-${siteZipInfo.triple}.zip`,
+        data: fileData,
+      });
+
+      console.log('a:');
+      console.log(a);
+    }
+
+    //
+    // Update asset_info.json
   }
 }
 
@@ -562,7 +576,7 @@ async function run() {
   console.log('siteZipInfos:');
   console.log(siteZipInfos);
 
-  await updateReleaseAssets(inputs, config, centralNameInfos);
+  await updateReleaseAssets(inputs, config, centralNameInfos, siteZipInfos);
 
   // print files in checked out config_branch branch.
   console.log(`reading downloadDir '${DOWNLOAD_DIR}'`);
