@@ -99,20 +99,21 @@ const clientPayloadSchema = z.object({
 
 type ClientPayload = z.infer<typeof clientPayloadSchema>;
 
-const assetInfoSchema = z.object({
-  branches: z.record(
+const assetInfoBranchSchema = z.object({
+  version: zString,
+  siteZips: z.record(
     zString,
     z.object({
-      version: zString,
-      siteZips: z.record(
-        zString,
-        z.object({
-          asset_id: z.number().nonnegative(),
-          signature: zString,
-        })
-      ),
+      asset_id: z.number().nonnegative(),
+      signature: zString,
     })
   ),
+});
+
+type AssetInfoBranch = z.infer<typeof assetInfoBranchSchema>;
+
+const assetInfoSchema = z.object({
+  branches: z.record(zString, assetInfoBranchSchema),
 });
 
 type AssetInfo = z.infer<typeof assetInfoSchema>;
@@ -529,6 +530,8 @@ async function updateReleaseAssets(
     }
     console.log(`Deleted ${numDeleted} of ${assets.length} asset(s).`);
 
+    const siteZipAssetIds: number[] = [];
+
     // Upload release assets
     for (let uploadIdx = 0; uploadIdx < siteZipInfos.length; uploadIdx++) {
       const siteZipInfo = siteZipInfos[uploadIdx];
@@ -556,6 +559,8 @@ async function updateReleaseAssets(
           `uploadReleaseAsset for '${uploadName}' has status ${uploadRes.status} instead of 201.`
         );
       }
+
+      siteZipAssetIds.push(uploadRes.data.id);
 
       console.log(uploadRes);
       console.log(uploadRes.data);
@@ -602,19 +607,58 @@ async function updateReleaseAssets(
         failAndExit(error.message);
       }
 
-      // const siteZips =
+      const assetInfoBranch = buildAssetInfoBranchObj(
+        version,
+        siteZipInfos,
+        siteZipAssetIds
+      );
 
-      // const partial = {
-      //   [branch]: {
-      //     version,
-      //     siteZips: {}
-      //   }
-      // }
+      const newAssetInfoJson = JSON.parse(stableStringify(data)) as AssetInfo;
+      newAssetInfoJson.branches[branch] = assetInfoBranch;
+
+      console.log(`Updating asset_info.json...`);
+      const updateRes = await getOctokit().rest.repos.updateReleaseAsset({
+        owner: thisOwner,
+        repo: thisRepo,
+        asset_id: centralNamesInfo.assetInfoAssetId,
+        name: 'asset_info_old.json',
+        // data: newAssetInfoJson
+        // mediaType: {
+        //   format: 'raw',
+        // },
+      });
+
+      if (updateRes.status !== 200) {
+        failAndExit(`updateRes has status ${updateRes.status} instead of 200.`);
+      }
     } else {
       // Create file since does not exist
       console.log('Would need to create asset_info.json');
     }
   }
+}
+
+function buildAssetInfoBranchObj(
+  version: string,
+  siteZipInfos: SiteZipInfo[],
+  assetIds: number[]
+): AssetInfoBranch {
+  const result: AssetInfoBranch = {
+    version,
+    siteZips: {},
+  };
+
+  for (let i = 0; i < siteZipInfos.length; i++) {
+    const siteZipInfo = siteZipInfos[i];
+    const assetId = assetIds[i];
+
+    result.siteZips[siteZipInfo.triple] = {
+      asset_id: assetId,
+      signature: siteZipInfo.signature,
+    };
+  }
+
+  return result;
 }
 
 async function run() {
