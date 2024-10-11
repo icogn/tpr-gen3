@@ -622,6 +622,7 @@ async function updateReleaseAssets(
         repo: thisRepo,
         asset_id: centralNamesInfo.assetInfoAssetId,
         name: 'asset_info_old.json',
+        label: 'asset_info_old.json',
         // data: newAssetInfoJson
         // mediaType: {
         //   format: 'raw',
