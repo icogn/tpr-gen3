@@ -515,24 +515,28 @@ async function updateReleaseAssets(
       const siteZipInfo = siteZipInfos[uploadIdx];
 
       const fileData = fs.readFileSync(siteZipInfo.filepath);
+      const uploadName = `b_${branch}_${version}-${siteZipInfo.triple}.zip`;
 
-      const a = await getOctokit().rest.repos.uploadReleaseAsset({
+      console.log(`Uploading release asset: '${uploadName}'...`);
+      const uploadRes = await getOctokit().rest.repos.uploadReleaseAsset({
         owner: thisOwner,
         repo: thisRepo,
         release_id: centralNamesInfo.releaseId,
-        name: `b_${branch}_${version}-${siteZipInfo.triple}.zip`,
-        // 'data-binary': fileData,
+        name: uploadName,
+        // TS expects `data` to be a string, but we pass a Buffer. This works
+        // out because we set mediaType.format to 'raw' I think, so it seems
+        // like the types here are just wrong. The code works though.
         data: fileData as unknown as string,
         mediaType: {
           format: 'raw',
         },
-        // headers: {
-        //   'Content-Type': 'application/octet-stream',
-        // },
       });
 
-      console.log('a:');
-      console.log(a);
+      if (uploadRes.status !== 201) {
+        failAndExit(
+          `uploadReleaseAsset for '${uploadName}' has status ${uploadRes.status} instead of 201.`
+        );
+      }
     }
 
     //
