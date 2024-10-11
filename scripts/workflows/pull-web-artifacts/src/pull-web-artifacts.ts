@@ -689,23 +689,6 @@ async function run() {
   console.log(siteZipInfos);
 
   await updateReleaseAssets(inputs, config, centralNameInfos, siteZipInfos);
-
-  // print files in checked out config_branch branch.
-  console.log(`reading downloadDir '${DOWNLOAD_DIR}'`);
-  fs.readdirSync(DOWNLOAD_DIR).forEach((file) => {
-    console.log(file);
-  });
-
-  // // print files in checked out config_branch branch.
-  // console.log('reading dir `.`');
-  // fs.readdirSync('.').forEach((file) => {
-  //   console.log(file);
-  // });
-
-  // console.log('reading dir `config_branch`');
-  // fs.readdirSync('./config_branch').forEach((file) => {
-  //   console.log(file);
-  // });
 }
 
 run().catch((err) => {
