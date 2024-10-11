@@ -623,7 +623,7 @@ async function updateReleaseAssets(
         failAndExit(error.message);
       }
 
-      newAssetInfoJson = JSON.parse(stableStringify(data)) as AssetInfo;
+      newAssetInfoJson = JSON.parse(JSON.stringify(data)) as AssetInfo;
 
       console.log(`Deleting asset_info.json...`);
       const delAssetInfoRes = await getOctokit().rest.repos.deleteReleaseAsset({
