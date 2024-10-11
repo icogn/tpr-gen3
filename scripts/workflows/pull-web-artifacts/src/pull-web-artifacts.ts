@@ -539,8 +539,31 @@ async function updateReleaseAssets(
       }
     }
 
-    //
     // Update asset_info.json
+
+    // NOTE: can use the following to get the asset_info.json data. I think
+    // res.data was a Buffer, but can uncomment and run in the Action to see the
+    // output.
+
+    if (centralNamesInfo.assetInfoAssetId != null) {
+      // Update existing file
+      const res = await getOctokit().rest.repos.getReleaseAsset({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        asset_id: centralNamesInfo.assetInfoAssetId,
+        headers: {
+          Accept: 'application/octet-stream',
+        },
+      });
+
+      console.log('typeof res');
+      console.log(typeof res);
+      console.log('res:');
+      console.log(res);
+    } else {
+      // Create file since does not exist
+      console.log('Would need to create asset_info.json');
+    }
   }
 }
 
@@ -559,26 +582,6 @@ async function run() {
     process.exit(0);
   }
 
-  // NOTE: can use the following to get the asset_info.json data. I think
-  // res.data was a Buffer, but can uncomment and run in the Action to see the
-  // output.
-
-  // const res = await getOctokit().rest.repos.getReleaseAsset({
-  //   owner: github.context.repo.owner,
-  //   repo: github.context.repo.repo,
-  //   asset_id: centralNamesToProcess[0].assetInfoAssetId!,
-  //   headers: {
-  //     Accept: 'application/octet-stream',
-  //   },
-  // });
-
-  // console.log('typeof res');
-  // console.log(typeof res);
-  // console.log('res:');
-  // console.log(res);
-
-  // TODO: if we have at least 1 centralNameToProcess, then we need to download
-  // and verify all of the web-zip assets.
   const siteZipInfos = await processSiteArtifacts(
     inputs,
     config,
