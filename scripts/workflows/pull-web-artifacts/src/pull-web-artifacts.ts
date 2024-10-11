@@ -605,9 +605,10 @@ async function updateReleaseAssets(
         assetInfoOldFilename
       );
 
-      fs.mkdirSync(OLD_ASSET_INFO_DIR);
+      // We use mkdirp since the directory will already exist if we have
+      // multiple centralNames meaning multiple iterations.
+      fs.mkdirpSync(OLD_ASSET_INFO_DIR);
       fs.writeJsonSync(assetInfoOldPath, oldAssetInfoJson);
-
       await artifactClient.uploadArtifact(
         assetInfoOldFilename,
         [assetInfoOldPath],
