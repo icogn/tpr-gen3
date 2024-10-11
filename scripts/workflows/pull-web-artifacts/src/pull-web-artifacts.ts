@@ -9,6 +9,7 @@ import stableStringify from 'json-stable-stringify';
 import { z } from 'zod';
 import { GitHub } from '@actions/github/lib/utils';
 import * as semver from 'semver';
+import { TextDecoder } from 'node:util';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 const CONFIG_FILEPATH = './config_branch/config_branch.json';
@@ -556,10 +557,28 @@ async function updateReleaseAssets(
         },
       });
 
+      if (res.status !== 200) {
+        failAndExit(
+          `Get asset_info.json has status ${res.status} instead of 200.`
+        );
+      }
+
       console.log('typeof res');
       console.log(typeof res);
       console.log('res:');
       console.log(res);
+
+      const data = res.data as unknown as ArrayBuffer;
+
+      let parsedJson;
+      try {
+        parsedJson = JSON.parse(new TextDecoder().decode(data));
+      } catch (e) {
+        console.log('failure...');
+        parsedJson = {};
+      }
+
+      console.log(parsedJson);
     } else {
       // Create file since does not exist
       console.log('Would need to create asset_info.json');
