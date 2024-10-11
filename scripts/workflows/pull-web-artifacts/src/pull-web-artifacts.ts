@@ -599,7 +599,7 @@ async function updateReleaseAssets(
 
       // Store old asset_info.json as an artifact in case we need to get it if
       // something goes wrong.
-      const assetInfoOldFilename = 'asset_info_old.json';
+      const assetInfoOldFilename = `${centralNamesInfo.centralName}_asset_info_old.json`;
       const assetInfoOldPath = path.join(
         OLD_ASSET_INFO_DIR,
         assetInfoOldFilename
