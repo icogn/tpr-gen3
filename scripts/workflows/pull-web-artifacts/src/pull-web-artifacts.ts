@@ -8,6 +8,7 @@ import { createVerify, sign, verify } from 'node:crypto';
 import stableStringify from 'json-stable-stringify';
 import { z } from 'zod';
 import { GitHub } from '@actions/github/lib/utils';
+import * as semver from 'semver';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 const CONFIG_FILEPATH = './config_branch/config_branch.json';
@@ -26,7 +27,7 @@ function getOctokit() {
   return octokit;
 }
 
-function failAndExit(msg: string) {
+function failAndExit(msg: string): never {
   core.setFailed(msg);
   process.exit(1);
 }
@@ -86,6 +87,7 @@ type SiteArtifactInfoSchema = z.infer<typeof siteArtifactInfoSchema>;
 
 const clientPayloadSchema = z.object({
   branch: zString,
+  version: zString,
   centralNames: zString,
   artifactInfo: z.object({
     byTriple: z.record(zString, siteArtifactInfoSchema),
@@ -167,6 +169,28 @@ function verifyTimestamp(timestamp: unknown, inputs: Inputs) {
   return true;
 }
 
+function validateVersion(clientPayload: ClientPayload) {
+  const { branch, version } = clientPayload;
+
+  if (!semver.valid(version)) {
+    failAndExit(`clientPayload.version '${version}' was not a valid semver.`);
+  }
+  const prereleaseChunks = semver.prerelease(clientPayload.version);
+  if (prereleaseChunks == null || prereleaseChunks.length !== 2) {
+    failAndExit(
+      `Expected 2 chunks, but prereleaseChunks was ${prereleaseChunks}.`
+    );
+  }
+  if (prereleaseChunks[0] !== clientPayload.branch) {
+    failAndExit(`First prerelease el must be '${branch}'.`);
+  }
+  if (typeof prereleaseChunks[1] !== 'number') {
+    failAndExit(
+      `Second prerelease el must be a number, but was '${prereleaseChunks[1]}'.`
+    );
+  }
+}
+
 async function verifyClientPayload(config: Config, inputs: Inputs) {
   const { clientPayload } = inputs;
 
@@ -185,6 +209,8 @@ async function verifyClientPayload(config: Config, inputs: Inputs) {
   if (!branchData) {
     throw new Error(`Failed to find branchData for branch '${branch}'.`);
   }
+
+  validateVersion(clientPayload);
 
   const dataToVerify = stableStringify(clientPayload);
   console.log('dataToVerify:');
@@ -438,7 +464,13 @@ async function processSiteArtifacts(
   return results;
 }
 
-async function updateReleaseAssets(centralNamesInfos: CentralNameInfo[]) {
+async function updateReleaseAssets(
+  inputs: Inputs,
+  config: Config,
+  centralNamesInfos: CentralNameInfo[]
+) {
+  const { branch, version } = inputs.clientPayload;
+
   // TODO: for each central thing, we need to:
   // - delete any old files for this branch from the release
   // - upload all new files to the release
@@ -515,7 +547,7 @@ async function run() {
   console.log('siteZipInfos:');
   console.log(siteZipInfos);
 
-  await updateReleaseAssets(centralNameInfos);
+  await updateReleaseAssets(inputs, config, centralNameInfos);
 
   // print files in checked out config_branch branch.
   console.log(`reading downloadDir '${DOWNLOAD_DIR}'`);

@@ -1789,6 +1789,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/semver@npm:^7":
+  version: 7.5.8
+  resolution: "@types/semver@npm:7.5.8"
+  checksum: 10c0/8663ff927234d1c5fcc04b33062cb2b9fcfbe0f5f351ed26c4d1e1581657deebd506b41ff7fdf89e787e3d33ce05854bc01686379b89e9c49b564c4cfa988efa
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/parser@npm:^5.4.2 || ^6.0.0 || 7.0.0 - 7.2.0":
   version: 7.2.0
   resolution: "@typescript-eslint/parser@npm:7.2.0"
@@ -5355,10 +5362,12 @@ __metadata:
     "@actions/github": "npm:^6.0.0"
     "@types/fs-extra": "npm:^11"
     "@types/json-stable-stringify": "npm:^1"
+    "@types/semver": "npm:^7"
     "@vercel/ncc": "npm:^0.38.2"
     fs-extra: "npm:^11.2.0"
     json-stable-stringify: "npm:^1.1.1"
     path-to-regexp: "npm:^8.2.0"
+    semver: "npm:^7.6.3"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
