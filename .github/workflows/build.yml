@@ -82,7 +82,7 @@ jobs:
 
       - name: Create version string
         id: create-version-string
-        run: echo "version=${{ steps.package-version.outputs.value }}-${{ needs.increment_validate_version.outputs.env }}.${{ vars.BUILD_NUMBER }}" >> $GITHUB_OUTPUT
+        run: echo "version=${{ steps.package-version.outputs.value }}-${{ needs.get_environment_name.outputs.env }}.${{ steps.increment.outputs.value }}" >> $GITHUB_OUTPUT
 
       - uses: matt-usurp/validate-semver@v2
         id: semver
