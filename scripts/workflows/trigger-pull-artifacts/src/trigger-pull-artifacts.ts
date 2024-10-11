@@ -16,6 +16,7 @@ type ArtifactInfo = {
 
 type ClientPayload = {
   branch: string;
+  version: string;
   centralNames: string;
   artifactInfo: ArtifactInfo;
   timestamp: string;
@@ -54,6 +55,7 @@ const artifactInfoInput = getInput('artifactInfo', '', true);
 const parsedArtifactInfo = JSON.parse(artifactInfoInput) as MatrixOutput;
 
 const branchInput = getInput('branch', '', true);
+const versionInput = getInput('version', '', true);
 const privateKey = getInput('privateKey', '', true);
 let passphrase: string | undefined = getInput('passphrase', '');
 if (!passphrase) {
@@ -175,11 +177,13 @@ function getTargets(
 
 async function buildClientPayload(
   branch: string,
+  version: string,
   centralNames: string,
   artifactInfo: ArtifactInfo
 ) {
   const clientPayload: ClientPayload = {
     branch,
+    version,
     centralNames,
     artifactInfo,
     signature: undefined,
@@ -212,6 +216,7 @@ async function bootstrap() {
 
     const clientPayload = await buildClientPayload(
       branchInput,
+      versionInput,
       centralNames,
       newArtifactInfo
     );

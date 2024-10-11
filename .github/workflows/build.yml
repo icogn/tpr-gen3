@@ -110,10 +110,16 @@ jobs:
         id: package-version
         name: Get root package.json version
 
+      - name: Create version string
+        id: create-version-string
+        run: |
+          echo "version=${{ steps.package-version.outputs.value }}-${{ needs.increment_validate_version.outputs.env }}.${{ vars.BUILD_NUMBER }}" >> $GITHUB_OUTPUT
+
       - uses: matt-usurp/validate-semver@v2
         id: semver
         with:
-          version: ${{ steps.package-version.outputs.value }}-${{ needs.increment_validate_version.outputs.env }}.${{ vars.BUILD_NUMBER }}
+          # version: ${{ steps.package-version.outputs.value }}-${{ needs.increment_validate_version.outputs.env }}.${{ vars.BUILD_NUMBER }}
+          version: ${{ steps.create-version-string.outputs.version }}
 
       - run: |
           echo "${{ steps.semver.outputs.version }}"

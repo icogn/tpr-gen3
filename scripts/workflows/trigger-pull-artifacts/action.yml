@@ -16,6 +16,10 @@ inputs:
     description: Branch/env we are triggering from
     required: true
 
+  version:
+    description: Version like 1.2.3-dev.234
+    required: true
+
   privateKey:
     description: RSA-SHA256 private key
     required: true
