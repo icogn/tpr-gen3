@@ -600,16 +600,17 @@ async function updateReleaseAssets(
       // Store old asset_info.json as an artifact in case we need to get it if
       // something goes wrong.
       const assetInfoOldFilename = 'asset_info_old.json';
+      const assetInfoOldPath = path.join(
+        OLD_ASSET_INFO_DIR,
+        assetInfoOldFilename
+      );
 
       fs.mkdirSync(OLD_ASSET_INFO_DIR);
-      fs.writeJsonSync(
-        path.join(OLD_ASSET_INFO_DIR, assetInfoOldFilename),
-        oldAssetInfoJson
-      );
+      fs.writeJsonSync(assetInfoOldPath, oldAssetInfoJson);
 
       await artifactClient.uploadArtifact(
         assetInfoOldFilename,
-        [assetInfoOldFilename],
+        [assetInfoOldPath],
         OLD_ASSET_INFO_DIR,
         { retentionDays: 90 }
       );
