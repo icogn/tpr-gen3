@@ -14,6 +14,7 @@ import { TextDecoder } from 'node:util';
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 const CONFIG_FILEPATH = './config_branch/config_branch.json';
 const DOWNLOAD_DIR = 'my_download_dir';
+const OLD_ASSET_INFO_DIR = 'old_asset_info_dir';
 
 const thisOwner = github.context.repo.owner;
 const thisRepo = github.context.repo.repo;
@@ -595,6 +596,23 @@ async function updateReleaseAssets(
 
       console.log('oldAssetInfoJson:');
       console.log(oldAssetInfoJson);
+
+      // Store old asset_info.json as an artifact in case we need to get it if
+      // something goes wrong.
+      const assetInfoOldFilename = 'asset_info_old.json';
+
+      fs.mkdirSync(OLD_ASSET_INFO_DIR);
+      fs.writeJsonSync(
+        path.join(OLD_ASSET_INFO_DIR, assetInfoOldFilename),
+        oldAssetInfoJson
+      );
+
+      await artifactClient.uploadArtifact(
+        assetInfoOldFilename,
+        [assetInfoOldFilename],
+        OLD_ASSET_INFO_DIR,
+        { retentionDays: 90 }
+      );
 
       const { error, data } = assetInfoSchema.safeParse(oldAssetInfoJson);
       if (error) {
