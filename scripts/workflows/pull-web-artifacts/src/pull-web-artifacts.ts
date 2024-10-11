@@ -256,6 +256,7 @@ function parseInputs() {
 
 type CentralNameInfo = {
   centralName: string;
+  releaseId: number;
   assetInfoAssetId?: number;
 };
 
@@ -295,6 +296,7 @@ async function getCentralNamesData(config: Config, inputs: Inputs) {
 
       results.push({
         centralName: central,
+        releaseId: res.data.id,
         assetInfoAssetId,
       });
     }
@@ -436,6 +438,40 @@ async function processSiteArtifacts(
   return results;
 }
 
+async function updateReleaseAssets(centralNamesInfos: CentralNameInfo[]) {
+  // TODO: for each central thing, we need to:
+  // - delete any old files for this branch from the release
+  // - upload all new files to the release
+  // - create/update the asset_info.json file
+  //
+  // Perhaps files should follow a pattern.
+  // dev__1.2.3-dev.234-x86_64-unknown-linux-gnu.zip
+  // We would delete all that start with "<branch>__" and end with ".zip".
+
+  for (let i = 0; i < centralNamesInfos.length; i++) {
+    const centralNamesInfo = centralNamesInfos[i];
+
+    // TODO: need to handle pagination correctly.
+
+    const res = await getOctokit().paginate(
+      'GET /repos/{owner}/{repo}/releases/{release_id}/assets',
+      {
+        owner: thisOwner,
+        repo: thisRepo,
+        release_id: centralNamesInfo.releaseId,
+        per_page: 100,
+      }
+    );
+
+    console.log('pagedRes');
+    console.log(res);
+
+    // await getOctokit().rest.repos.listReleaseAssets({
+    //   // per_page: 100,
+    // });
+  }
+}
+
 async function run() {
   const inputs = parseInputs();
   const config = loadConfig();
@@ -445,8 +481,8 @@ async function run() {
     return;
   }
 
-  const centralNamesToProcess = await getCentralNamesData(config, inputs);
-  if (centralNamesToProcess.length < 1) {
+  const centralNameInfos = await getCentralNamesData(config, inputs);
+  if (centralNameInfos.length < 1) {
     console.log('No centralNames to process.');
     process.exit(0);
   }
@@ -474,83 +510,12 @@ async function run() {
   const siteZipInfos = await processSiteArtifacts(
     inputs,
     config,
-    centralNamesToProcess
+    centralNameInfos
   );
   console.log('siteZipInfos:');
   console.log(siteZipInfos);
 
-  // const osArtifactInfo =
-  //   inputs.clientPayload.artifactInfo.byTriple['x86_64-unknown-linux-gnu'];
-
-  // const artifactUrl = osArtifactInfo['web-zip-url'];
-
-  // const fn = match<SiteArtifactMatch>(
-  //   '/:owner/:repo/actions/runs/:run_id/artifacts/:artifact_id'
-  // );
-
-  // try {
-  //   const url = new URL(artifactUrl);
-
-  //   if (url.origin !== 'https://github.com') {
-  //     throw new Error(
-  //       `Origin must be https://github.com, but was '${url.origin}'.`
-  //     );
-  //   }
-
-  //   const objBase = fn(url.pathname);
-  //   if (!objBase) {
-  //     core.setFailed(`Failed to parse artifact URL '${artifactUrl}'.`);
-  //     return;
-  //   }
-  //   const obj = objBase as MatchResult<SiteArtifactMatch>;
-  //   console.log('obj');
-  //   console.log(obj);
-
-  //   const options = {
-  //     findBy: {
-  //       token: inputs.token,
-  //       // run_id is actually used
-  //       workflowRunId: parseInt(obj.params.run_id, 10),
-  //       repositoryName: obj.params.repo,
-  //       repositoryOwner: obj.params.owner,
-  //     },
-  //   };
-
-  //   const { artifact: targetArtifact } = await artifactClient.getArtifact(
-  //     osArtifactInfo.name,
-  //     options
-  //   );
-
-  //   if (!targetArtifact) {
-  //     throw new Error(`Artifact not found`);
-  //   }
-
-  //   console.log('targetArtifact');
-  //   console.log(targetArtifact);
-
-  //   // await artifactClient.downloadArtifact(artifact.id, {
-  //   await artifactClient.downloadArtifact(
-  //     parseInt(obj.params.artifact_id, 10),
-  //     {
-  //       ...options,
-  //       path: 'my_download_dir',
-  //       // isSingleArtifactDownload || inputs.mergeMultiple
-  //       //   ? resolvedPath
-  //       //   : path.join(resolvedPath, artifact.name),
-  //     }
-  //   );
-
-  //   // await artifactClient.downloadArtifact(artifact.id, {
-  //   //   ...options,
-  //   //   path:
-  //   //     isSingleArtifactDownload || inputs.mergeMultiple
-  //   //       ? resolvedPath
-  //   //       : path.join(resolvedPath, artifact.name),
-  //   // });
-  // } catch (e) {
-  //   console.error(e);
-  //   throw e;
-  // }
+  await updateReleaseAssets(centralNameInfos);
 
   // print files in checked out config_branch branch.
   console.log(`reading downloadDir '${DOWNLOAD_DIR}'`);
