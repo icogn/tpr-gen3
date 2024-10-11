@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - 'release/**'
-      # - main
+      # - main _
 
 jobs:
   get_environment_name:
