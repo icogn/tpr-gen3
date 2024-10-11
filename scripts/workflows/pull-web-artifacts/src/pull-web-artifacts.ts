@@ -599,6 +599,7 @@ async function updateReleaseAssets(
         failAndExit(`Failed to parse asset_info.json.`);
       }
 
+      console.log('oldAssetInfoJson:');
       console.log(oldAssetInfoJson);
 
       const { error, data } = assetInfoSchema.safeParse(oldAssetInfoJson);
@@ -616,22 +617,30 @@ async function updateReleaseAssets(
       const newAssetInfoJson = JSON.parse(stableStringify(data)) as AssetInfo;
       newAssetInfoJson.branches[branch] = assetInfoBranch;
 
-      console.log(`Updating asset_info.json...`);
-      const updateRes = await getOctokit().rest.repos.updateReleaseAsset({
+      console.log(`Deleting asset_info.json...`);
+      const delAssetInfoRes = await getOctokit().rest.repos.deleteReleaseAsset({
         owner: thisOwner,
         repo: thisRepo,
         asset_id: centralNamesInfo.assetInfoAssetId,
-        name: 'asset_info_old.json',
-        label: 'asset_info_old.json',
-        // data: newAssetInfoJson
-        // mediaType: {
-        //   format: 'raw',
-        // },
       });
 
-      if (updateRes.status !== 200) {
-        failAndExit(`updateRes has status ${updateRes.status} instead of 200.`);
+      if (delAssetInfoRes.status !== 204) {
+        failAndExit(
+          `updateRes has status ${delAssetInfoRes.status} instead of 204.`
+        );
       }
+
+      console.log(`Uploading new asset_info.json...`);
+      const uploadAssetInfoRes =
+        await getOctokit().rest.repos.uploadReleaseAsset({
+          owner: thisOwner,
+          repo: thisRepo,
+          release_id: centralNamesInfo.releaseId,
+          name: 'asset_info.json',
+          // TS expects `data` to be a string, but we pass an object. I think
+          // there is an issue with the types. This code works as intended.
+          data: newAssetInfoJson as unknown as string,
+        });
     } else {
       // Create file since does not exist
       console.log('Would need to create asset_info.json');
