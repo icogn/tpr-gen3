@@ -99,6 +99,24 @@ const clientPayloadSchema = z.object({
 
 type ClientPayload = z.infer<typeof clientPayloadSchema>;
 
+const assetInfoSchema = z.object({
+  branches: z.record(
+    zString,
+    z.object({
+      version: zString,
+      siteZips: z.record(
+        zString,
+        z.object({
+          asset_id: z.number().nonnegative(),
+          signature: zString,
+        })
+      ),
+    })
+  ),
+});
+
+type AssetInfo = z.infer<typeof assetInfoSchema>;
+
 function loadConfig() {
   if (!fs.existsSync(CONFIG_FILEPATH)) {
     console.log('config_branch.json file not found.');
@@ -538,6 +556,9 @@ async function updateReleaseAssets(
           `uploadReleaseAsset for '${uploadName}' has status ${uploadRes.status} instead of 201.`
         );
       }
+
+      console.log(uploadRes);
+      console.log(uploadRes.data);
     }
 
     // Update asset_info.json
@@ -563,22 +584,32 @@ async function updateReleaseAssets(
         );
       }
 
-      console.log('typeof res');
-      console.log(typeof res);
-      console.log('res:');
-      console.log(res);
+      // Another case where I think the types are wrong.
+      const arrBuf = res.data as unknown as ArrayBuffer;
 
-      const data = res.data as unknown as ArrayBuffer;
-
-      let parsedJson;
+      let oldAssetInfoJson;
       try {
-        parsedJson = JSON.parse(new TextDecoder().decode(data));
+        oldAssetInfoJson = JSON.parse(new TextDecoder().decode(arrBuf));
       } catch (e) {
-        console.log('failure...');
-        parsedJson = {};
+        failAndExit(`Failed to parse asset_info.json.`);
       }
 
-      console.log(parsedJson);
+      console.log(oldAssetInfoJson);
+
+      const { error, data } = assetInfoSchema.safeParse(oldAssetInfoJson);
+      if (error) {
+        console.log('config zod error:');
+        failAndExit(error.message);
+      }
+
+      // const siteZips =
+
+      // const partial = {
+      //   [branch]: {
+      //     version,
+      //     siteZips: {}
+      //   }
+      // }
     } else {
       // Create file since does not exist
       console.log('Would need to create asset_info.json');
