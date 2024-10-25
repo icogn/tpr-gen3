@@ -50,7 +50,7 @@ pub fn run() {
 
     let website_dir = app_handle
         .path()
-        .resolve("resources/website", tauri::path::BaseDirectory::Resource)
+        .resolve("resources/standalone", tauri::path::BaseDirectory::Resource)
         .unwrap();
 
     let api_manager = APIManager::new(app_handle, website_dir);

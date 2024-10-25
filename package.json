@@ -8,6 +8,10 @@
     "scripts/workflows/trigger-pull-artifacts"
   ],
   "packageManager": "yarn@4.5.0",
+  "scripts": {
+    "build:website-only": "yarn --cwd website build",
+    "build:website": "yarn build:website-only && node scripts/copy-build-to-tauri.mjs"
+  },
   "devDependencies": {
     "@actions/artifact": "^2.1.10",
     "@actions/core": "^1.10.1",

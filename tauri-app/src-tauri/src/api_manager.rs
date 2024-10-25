@@ -20,7 +20,8 @@ impl APIManager {
             .shell()
             .sidecar("node_v20_17_0")
             .unwrap()
-            .args(["server.js"])
+            .env("HOSTNAME", "127.0.0.1")
+            .args(["website/server.js"])
             .current_dir(path_buf);
 
         // let t = TCommand::new_sidecar("node_v20_17_0").expect("启动API服务器失败");

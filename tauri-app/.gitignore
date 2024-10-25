@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Added below
-src-tauri/resources/website
+src-tauri/resources/standalone
