@@ -1,14 +1,20 @@
 pub mod api_manager;
 
+use anyhow::Result;
 use api_manager::APIManager;
 use std::{
     path::PathBuf,
     sync::{Mutex, OnceLock},
 };
-use tauri::{AppHandle, Manager, State, Window, WindowEvent};
+use tauri::{AppHandle, Manager, Window, WindowEvent};
 
 struct APIManagerState {
     api_manager_mutex: Mutex<APIManager>,
+}
+
+struct CustomState {
+    abc: APIManagerState,
+    volume_dir: PathBuf,
 }
 
 // From: https://github.com/tauri-apps/tauri/discussions/6309#discussioncomment-10295527
@@ -26,7 +32,12 @@ fn app_handle<'a>() -> &'a AppHandle {
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+    let custom_state = app_handle().state::<CustomState>();
+
+    format!(
+        "Hello, {}! You've been greeted from Rust!\nvolume_dir:{:?}",
+        name, custom_state.volume_dir
+    )
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -34,12 +45,12 @@ pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
-            // let a = app.path().resolve(".", tauri::path::BaseDirectory::).unwrap();
-            let volume_dir = get_volume_dir().unwrap();
-            println!("volume_dir:{:?}", volume_dir);
+            println!("in setup!!!");
 
-            let am: State<APIManagerState> = app.state();
-            am.api_manager_mutex
+            // let am: State<APIManagerState> = app.state();
+            let am = app.state::<CustomState>();
+            am.abc
+                .api_manager_mutex
                 .lock()
                 .unwrap()
                 .start_backend()
@@ -52,6 +63,7 @@ pub fn run() {
         .unwrap();
 
     APP_HANDLE.set(app.app_handle().to_owned()).unwrap();
+    println!("Just set APP_HANDLE");
 
     let app_handle = app_handle();
 
@@ -65,7 +77,16 @@ pub fn run() {
         api_manager_mutex: Mutex::new(api_manager),
     };
 
-    app_handle.manage(ams);
+    let volume_dir = get_volume_dir().unwrap();
+    println!("volume_dir:{:?}", volume_dir);
+
+    let custom_state = CustomState {
+        abc: ams,
+        volume_dir,
+    };
+
+    // app_handle.manage(ams);
+    app_handle.manage(custom_state);
 
     // let sidecar_command = app_handle.shell().sidecar("node_v20_17_0").unwrap();
 
@@ -83,8 +104,9 @@ pub fn run() {
 fn on_window_event(window: &Window, event: &WindowEvent) {
     match &event {
         WindowEvent::Destroyed => {
-            let am: State<APIManagerState> = window.state();
-            am.api_manager_mutex
+            let am = window.state::<CustomState>();
+            am.abc
+                .api_manager_mutex
                 .lock()
                 .unwrap()
                 .terminate_backend()
@@ -94,6 +116,8 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
     }
 }
 
+// Can see about only including this fn for dev. Right now have to include for
+// both dev and build.
 fn get_root_dir() -> Result<PathBuf, std::io::Error> {
     use std::io::Error;
     use std::io::ErrorKind::NotFound;
@@ -121,8 +145,16 @@ fn get_root_dir() -> Result<PathBuf, std::io::Error> {
     }
 }
 
-fn get_volume_dir() -> Result<PathBuf, std::io::Error> {
-    let root_dir = get_root_dir()?;
+fn get_volume_dir() -> Result<PathBuf> {
+    let root_dir;
+    if cfg!(dev) {
+        root_dir = get_root_dir()?;
+    } else {
+        // For windows this is <user>/AppData/Roaming/<bundleIdentifier in
+        // tauri.conf.json like com.tauri-app.app>. VSCode has around 2 GB here
+        // for me, so we should be fine from a size perspective. -isaac
+        root_dir = app_handle().path().app_data_dir()?;
+    }
 
     Ok(root_dir.join("volume"))
 }
