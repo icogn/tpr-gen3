@@ -50,6 +50,22 @@ Next steps:
 - Need to validate the input from the requester and update a file in a branch for the config
   which is used by the menus
 
+---
+
+For developing website in tauri context, we do not need the sidecar. Things that
+would be passed to it should be statically known, such as the port (let's say 3000)
+and the volume path.
+
+We will also need a way to test the sidecar version.
+Should already have top-level `yarn build:website` to put the output
+in the resources folder. When running the sidecar, it should load this
+(which it is already doing).
+
+The no-sidecar version can be the one which does NOT include `--no-watch` since
+watching it is safe when there are no problems related to the sidecar.
+We would still need to pass an environment variable in to indicate that we should
+not run the sidecar.
+
 ## Notes
 
 - We have to use `--no-watch` when running tauri in dev mode.

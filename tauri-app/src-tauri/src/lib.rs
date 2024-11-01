@@ -47,14 +47,16 @@ pub fn run() {
         .setup(move |app| {
             println!("in setup!!!");
 
-            // let am: State<APIManagerState> = app.state();
-            let am = app.state::<CustomState>();
-            am.abc
-                .api_manager_mutex
-                .lock()
-                .unwrap()
-                .start_backend()
-                .expect("backend start failed");
+            if get_do_sidecar() {
+                // let am: State<APIManagerState> = app.state();
+                let am = app.state::<CustomState>();
+                am.abc
+                    .api_manager_mutex
+                    .lock()
+                    .unwrap()
+                    .start_backend()
+                    .expect("backend start failed");
+            }
             Ok(())
         })
         .on_window_event(on_window_event)
@@ -157,4 +159,16 @@ fn get_volume_dir() -> Result<PathBuf> {
     }
 
     Ok(root_dir.join("volume"))
+}
+
+fn get_do_sidecar() -> bool {
+    if let Ok(val) = std::env::var("SIDECAR") {
+        println!("SIDECAR val is {}", val);
+        if val == "false" {
+            return false;
+        }
+    } else {
+        println!("Did not find val for SIDECAR; default is true");
+    }
+    true
 }

@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tauri:dev": "concurrently -n 'VITE,TAURI' -c 'bgBlue.bold,bgMagenta.bold' -p '[{name}]' --kill-others 'yarn dev' 'yarn tauri dev --no-watch'"
+    "tauri:dev": "concurrently -n 'VITE,TAURI' -c 'bgBlue.bold,bgMagenta.bold' -p '[{name}]' --kill-others 'yarn dev' 'yarn tauri dev --no-watch'",
+    "tauri:dev-watch": "concurrently -n 'VITE,TAURI' -c 'bgBlue.bold,bgMagenta.bold' -p '[{name}]' --kill-others 'yarn dev' 'cross-env SIDECAR=false tauri dev'"
   },
   "dependencies": {
     "@tauri-apps/api": ">=2.0.0-rc.0",
@@ -22,6 +23,7 @@
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.2.1",
     "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
     "typescript": "^5.2.2",
     "vite": "^5.3.1"
   }
