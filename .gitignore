@@ -77,3 +77,6 @@ dist-ssr
 # Make sure people do not accidentally commit a publicKey.txt which does not
 # need to be in version control.
 /scripts/convenience/publicKey.txt
+
+# Added below
+/volume

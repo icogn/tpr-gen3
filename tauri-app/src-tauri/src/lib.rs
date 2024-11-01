@@ -1,7 +1,10 @@
 pub mod api_manager;
 
 use api_manager::APIManager;
-use std::sync::{Mutex, OnceLock};
+use std::{
+    path::PathBuf,
+    sync::{Mutex, OnceLock},
+};
 use tauri::{AppHandle, Manager, State, Window, WindowEvent};
 
 struct APIManagerState {
@@ -31,6 +34,10 @@ pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
+            // let a = app.path().resolve(".", tauri::path::BaseDirectory::).unwrap();
+            let volume_dir = get_volume_dir().unwrap();
+            println!("volume_dir:{:?}", volume_dir);
+
             let am: State<APIManagerState> = app.state();
             am.api_manager_mutex
                 .lock()
@@ -81,8 +88,41 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
                 .lock()
                 .unwrap()
                 .terminate_backend()
-                .expect("");
+                .expect("Terminate backend on WindowEvent::Destroyed was not successful");
         }
         _ => {}
     }
+}
+
+fn get_root_dir() -> Result<PathBuf, std::io::Error> {
+    use std::io::Error;
+    use std::io::ErrorKind::NotFound;
+
+    let mut current_dir = std::fs::canonicalize(std::env::current_dir()?)?;
+    println!("current_dir is: {:?}", current_dir);
+
+    loop {
+        let git_dir = current_dir.join(".git");
+
+        let exists = git_dir.try_exists()?;
+
+        if exists {
+            return Ok(current_dir);
+        } else {
+            match current_dir.parent() {
+                Some(x) => {
+                    current_dir = x.to_path_buf();
+                }
+                None => {
+                    return Err(Error::new(NotFound, "Failed to find root dir"));
+                }
+            }
+        }
+    }
+}
+
+fn get_volume_dir() -> Result<PathBuf, std::io::Error> {
+    let root_dir = get_root_dir()?;
+
+    Ok(root_dir.join("volume"))
 }

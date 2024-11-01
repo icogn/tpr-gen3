@@ -49,3 +49,17 @@ Next steps:
 - Needs to verify the sender has permission to make the request.
 - Need to validate the input from the requester and update a file in a branch for the config
   which is used by the menus
+
+## Notes
+
+- We have to use `--no-watch` when running tauri in dev mode.
+  This is because there is no event we can respond to when the rebuild starts, meaning our Node sidecar keeps running and the build process is unable to delete the `src-tauri/target` folder.
+  If you get something like an "PermissionDenied" error for `build-script-build`, then it is likely for this reason.
+  You can try to stop the Node process with task manager or restart your computer.
+  You should use `yarn tauri:dev` which includes the `--no-watch` flag for you and not `yarn tauri dev` for this reason (though `yarn tauri dev` would not start the Vite server on 1420 because of the changes listed later in this document).
+
+  - If you need to do tauri-specific dev which does not need the Node sidecar running, you could temporarily disable that code and run `yarn tauri dev`, or we could potentially make a command which leaves off the no-watch flag and provides and env var which we use in the code to skip starting the sidecar.
+
+- From `tauri.conf.json`: had to remove 'build.beforeDevCommand: yarn dev' part since there is a bug on windows where the Vite process would not die when closing the tauri application (which ends the tauri dev process) when using `--no-watch`.
+  So running the dev command again would not work since port 1420 would be in use.
+  The solution is that we use the `concurrently` package which works quite well, so probably fine there.
