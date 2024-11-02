@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './App.css';
 // import { Command } from '@tauri-apps/plugin-shell';
@@ -43,10 +43,27 @@ import './App.css';
 function App() {
   const [greetMsg, setGreetMsg] = useState('');
   const [name, setName] = useState('');
+  const [port, setPort] = useState<number | undefined>();
+
+  // useEffect(() => {
+  //   async function a() {
+  //     const unlisten = await listen('eee', (event) => {
+  //       console.log('event');
+  //       console.log(event);
+  //     });
+  //   }
+  //   a();
+
+  //   // return unlisten;
+  // }, []);
 
   async function greet() {
     // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke('greet', { name }));
+    const res = await invoke('greet', { name });
+    console.log('res');
+    console.log(res);
+    setGreetMsg(res.message);
+    setPort(res.port);
 
     // const result = await invoke('greet', { name });
     // setGreetMsg(result);
@@ -61,6 +78,10 @@ function App() {
     //   console.log(e);
     // }
   }
+
+  useEffect(() => {
+    greet();
+  }, []);
 
   return (
     // <div className="container">
@@ -82,7 +103,9 @@ function App() {
 
       <p>{greetMsg}</p>
 
-      <iframe src="http://127.0.0.1:3000" className="testing"></iframe>
+      {port != null && (
+        <iframe src={`http://127.0.0.1:${port}`} className="testing"></iframe>
+      )}
     </div>
   );
 }

@@ -8,6 +8,13 @@ use std::{
 };
 use tauri::{AppHandle, Manager, Window, WindowEvent};
 
+// the payload type must implement `Serialize` and `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    message: String,
+    port: u16,
+}
+
 struct APIManagerState {
     api_manager_mutex: Mutex<APIManager>,
 }
@@ -31,13 +38,18 @@ fn app_handle<'a>() -> &'a AppHandle {
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn greet(name: &str) -> String {
+fn greet(name: &str) -> Payload {
     let custom_state = app_handle().state::<CustomState>();
 
-    format!(
-        "Hello, {}! You've been greeted from Rust!\nvolume_dir:{:?}",
-        name, custom_state.volume_dir
-    )
+    let a = custom_state.abc.api_manager_mutex.lock().unwrap();
+
+    Payload {
+        port: a.port,
+        message: format!(
+            "Hello, {}! You've been greeted from Rust!\nvolume_dir:{:?}\nport:{}",
+            name, custom_state.volume_dir, a.port
+        ),
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -57,6 +69,7 @@ pub fn run() {
                     .start_backend()
                     .expect("backend start failed");
             }
+
             Ok(())
         })
         .on_window_event(on_window_event)

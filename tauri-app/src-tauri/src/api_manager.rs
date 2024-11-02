@@ -14,10 +14,17 @@ use crate::path;
 pub struct APIManager {
     cmd: Command,
     child: Option<Child>,
+    pub branch_name: String,
+    pub port: u16,
     // api_process: Option<GroupChild>,
 }
 
-fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
+struct BuildCmdResult {
+    cmd: Command,
+    port: u16,
+}
+
+fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> BuildCmdResult {
     let branch_root_dir = path::branch_root_dir(app_handle, branch_name).unwrap();
     let branch_volume_dir = path::branch_volume_dir(app_handle, branch_name).unwrap();
 
@@ -30,7 +37,6 @@ fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
     });
 
     // Pick the port
-    // TODO: we will also need to send this port to the tauri frontend for the iframe.
     let port;
     if cfg!(dev) {
         port = 3000;
@@ -57,14 +63,23 @@ fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
         .env("PORT", port_str)
         .args(["website/server.js"])
         .current_dir(branch_root_dir);
-    tt.into()
+
+    BuildCmdResult {
+        cmd: tt.into(),
+        port,
+    }
 }
 
 impl APIManager {
     pub fn new(app_handle: &AppHandle, branch_name: &str) -> APIManager {
-        let cmd = build_cmd(app_handle, branch_name);
+        let BuildCmdResult { cmd, port } = build_cmd(app_handle, branch_name);
 
-        APIManager { cmd, child: None }
+        APIManager {
+            cmd,
+            child: None,
+            port,
+            branch_name: branch_name.to_string(),
+        }
     }
 
     // pub fn replace_cmd(&mut self, app_handle: &AppHandle, path_buf: PathBuf) {
