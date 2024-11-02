@@ -1,10 +1,11 @@
 use std::borrow::BorrowMut;
-use std::path::PathBuf;
 use std::process::{Child, Command};
 use tauri::AppHandle;
 // use tauri::api::process::Command as TCommand;
 // use tauri_plugin_shell::process::Command as TCommand;
 use tauri_plugin_shell::ShellExt;
+
+use crate::path;
 
 // Very good guide at: https://github.com/tauri-apps/tauri/discussions/3273#discussioncomment-5610385
 
@@ -14,25 +15,37 @@ pub struct APIManager {
     // api_process: Option<GroupChild>,
 }
 
-impl APIManager {
-    pub fn new(app_handle: &AppHandle, path_buf: PathBuf) -> APIManager {
-        let tt = app_handle
-            .shell()
-            .sidecar("node_v20_17_0")
-            .unwrap()
-            .env("HOSTNAME", "127.0.0.1")
-            .args(["website/server.js"])
-            .current_dir(path_buf);
+fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
+    let branch_root_dir = path::get_branch_root_dir(app_handle, branch_name).unwrap();
+    let branch_volume_dir = path::get_branch_volume_dir(app_handle, branch_name).unwrap();
 
-        // let t = TCommand::new_sidecar("node_v20_17_0").expect("启动API服务器失败");
-        // let tt = TCommand::new("./windx_api/windx_api");
-        // let cmd_from_sidecar: Command = t.into();
-        APIManager {
-            cmd: tt.into(),
-            child: None,
-            // api_process: None,
-        }
+    // TODO: read the package.json from the website's root folder in order to
+    // find the command property. This is what we pass to "args", rather than
+    // hardcoding it.
+
+    let tt = app_handle
+        .shell()
+        .sidecar("node_v20_17_0")
+        .unwrap()
+        .env("HOSTNAME", "127.0.0.1")
+        .env("VOLUME_DIR", branch_volume_dir)
+        .args(["website/server.js"])
+        .current_dir(branch_root_dir);
+    tt.into()
+}
+
+impl APIManager {
+    pub fn new(app_handle: &AppHandle, branch_name: &str) -> APIManager {
+        let cmd = build_cmd(app_handle, branch_name);
+
+        APIManager { cmd, child: None }
     }
+
+    // pub fn replace_cmd(&mut self, app_handle: &AppHandle, path_buf: PathBuf) {
+    //     // terminate the backend (this sets child to None)
+
+    //     self.cmd = Some(tt.into());
+    // }
 
     pub fn start_backend(&mut self) -> Result<String, String> {
         match self.child.borrow_mut() {

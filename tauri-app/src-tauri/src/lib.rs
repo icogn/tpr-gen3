@@ -1,6 +1,6 @@
 pub mod api_manager;
+pub mod path;
 
-use anyhow::Result;
 use api_manager::APIManager;
 use std::{
     path::PathBuf,
@@ -69,17 +69,12 @@ pub fn run() {
 
     let app_handle = app_handle();
 
-    let website_dir = app_handle
-        .path()
-        .resolve("resources/standalone", tauri::path::BaseDirectory::Resource)
-        .unwrap();
-
-    let api_manager = APIManager::new(app_handle, website_dir);
+    let api_manager = APIManager::new(app_handle, "stable");
     let ams = APIManagerState {
         api_manager_mutex: Mutex::new(api_manager),
     };
 
-    let volume_dir = get_volume_dir().unwrap();
+    let volume_dir = path::get_volume_dir(app_handle).unwrap();
     println!("volume_dir:{:?}", volume_dir);
 
     let custom_state = CustomState {
@@ -116,49 +111,6 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
         }
         _ => {}
     }
-}
-
-// Can see about only including this fn for dev. Right now have to include for
-// both dev and build.
-fn get_root_dir() -> Result<PathBuf, std::io::Error> {
-    use std::io::Error;
-    use std::io::ErrorKind::NotFound;
-
-    let mut current_dir = std::fs::canonicalize(std::env::current_dir()?)?;
-    println!("current_dir is: {:?}", current_dir);
-
-    loop {
-        let git_dir = current_dir.join(".git");
-
-        let exists = git_dir.try_exists()?;
-
-        if exists {
-            return Ok(current_dir);
-        } else {
-            match current_dir.parent() {
-                Some(x) => {
-                    current_dir = x.to_path_buf();
-                }
-                None => {
-                    return Err(Error::new(NotFound, "Failed to find root dir"));
-                }
-            }
-        }
-    }
-}
-
-fn get_volume_dir() -> Result<PathBuf> {
-    let root_dir;
-    if cfg!(dev) {
-        root_dir = get_root_dir()?;
-    } else {
-        // For windows this is <user>/AppData/Roaming/<bundleIdentifier in
-        // tauri.conf.json like com.tauri-app.app>. VSCode has around 2 GB here
-        // for me, so we should be fine from a size perspective. -isaac
-        root_dir = app_handle().path().app_data_dir()?;
-    }
-
-    Ok(root_dir.join("volume"))
 }
 
 fn get_do_sidecar() -> bool {
