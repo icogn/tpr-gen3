@@ -82,6 +82,9 @@ pub fn run() {
 
     let app_handle = app_handle();
 
+    // TODO: handle swapping between branches.
+
+    // TODO: default_branch should come from the database.
     let api_manager = APIManager::new(app_handle, "stable");
     let ams = APIManagerState {
         api_manager_mutex: Mutex::new(api_manager),

@@ -22,7 +22,9 @@ export default function Home() {
               src/app/page.tsx
             </code>
           </li>
-          <li>Save and see your changes instantly. 444</li>
+          <li>
+            Save and see your changes instantly. This is the STABLE branch
+          </li>
         </ol>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
