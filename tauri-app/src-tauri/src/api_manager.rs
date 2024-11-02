@@ -1,4 +1,6 @@
 use std::borrow::BorrowMut;
+use std::ffi::OsString;
+use std::net::TcpListener;
 use std::process::{Child, Command};
 use tauri::AppHandle;
 // use tauri::api::process::Command as TCommand;
@@ -27,9 +29,24 @@ fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
         );
     });
 
+    // Pick the port
+    // TODO: we will also need to send this port to the tauri frontend for the iframe.
+    let port;
+    if cfg!(dev) {
+        port = 3000;
+    } else {
+        // Bind to port 0 to get automatic port from OS.
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let socket_addr = listener.local_addr().unwrap();
+        port = socket_addr.port();
+    }
+    println!("port is '{}'", port);
+
     // TODO: read the package.json from the website's root folder in order to
     // find the command property. This is what we pass to "args", rather than
     // hardcoding it.
+
+    let port_str: OsString = port.to_string().into();
 
     let tt = app_handle
         .shell()
@@ -37,6 +54,7 @@ fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
         .unwrap()
         .env("HOSTNAME", "127.0.0.1")
         .env("VOLUME_DIR", branch_volume_dir)
+        .env("PORT", port_str)
         .args(["website/server.js"])
         .current_dir(branch_root_dir);
     tt.into()
