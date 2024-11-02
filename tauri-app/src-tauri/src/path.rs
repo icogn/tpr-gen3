@@ -31,7 +31,7 @@ fn get_root_dir() -> Result<PathBuf, std::io::Error> {
     }
 }
 
-pub fn get_volume_dir(app_handle: &AppHandle) -> Result<PathBuf> {
+pub fn volume_dir(app_handle: &AppHandle) -> Result<PathBuf> {
     let root_dir;
     if cfg!(dev) {
         root_dir = get_root_dir()?;
@@ -45,20 +45,20 @@ pub fn get_volume_dir(app_handle: &AppHandle) -> Result<PathBuf> {
     Ok(root_dir.join("volume"))
 }
 
-pub fn get_branch_root_dir(app_handle: &AppHandle, branch_name: &str) -> Result<PathBuf> {
+pub fn branch_root_dir(app_handle: &AppHandle, branch_name: &str) -> Result<PathBuf> {
     if branch_name == "stable" {
         let dir = app_handle
             .path()
             .resolve("resources/standalone", tauri::path::BaseDirectory::Resource)?;
         Ok(dir)
     } else {
-        let volume_dir = get_volume_dir(app_handle)?;
+        let volume_dir = volume_dir(app_handle)?;
         Ok(volume_dir.join("branches").join(branch_name))
     }
 }
 
-pub fn get_branch_volume_dir(app_handle: &AppHandle, branch_name: &str) -> Result<PathBuf> {
-    let volume_dir = get_volume_dir(app_handle)?;
+pub fn branch_volume_dir(app_handle: &AppHandle, branch_name: &str) -> Result<PathBuf> {
+    let volume_dir = volume_dir(app_handle)?;
 
     Ok(volume_dir.join("branch_app_data").join(branch_name))
 }

@@ -16,8 +16,8 @@ pub struct APIManager {
 }
 
 fn build_cmd(app_handle: &AppHandle, branch_name: &str) -> Command {
-    let branch_root_dir = path::get_branch_root_dir(app_handle, branch_name).unwrap();
-    let branch_volume_dir = path::get_branch_volume_dir(app_handle, branch_name).unwrap();
+    let branch_root_dir = path::branch_root_dir(app_handle, branch_name).unwrap();
+    let branch_volume_dir = path::branch_volume_dir(app_handle, branch_name).unwrap();
 
     // TODO: read the package.json from the website's root folder in order to
     // find the command property. This is what we pass to "args", rather than

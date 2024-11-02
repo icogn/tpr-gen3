@@ -74,7 +74,7 @@ pub fn run() {
         api_manager_mutex: Mutex::new(api_manager),
     };
 
-    let volume_dir = path::get_volume_dir(app_handle).unwrap();
+    let volume_dir = path::volume_dir(app_handle).unwrap();
     println!("volume_dir:{:?}", volume_dir);
 
     let custom_state = CustomState {
