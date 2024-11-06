@@ -18,7 +18,8 @@ impl ReqMgr {
     pub fn new() -> ReqMgr {
         let a: Box<dyn Fn(usize) -> DeduplicateFuture<String> + Send + Sync + 'static> =
             Box::new(&get);
-        let deduplicate_with_fn = Deduplicate::new(a);
+        // Capacity 0 to disable caching.
+        let deduplicate_with_fn = Deduplicate::with_capacity(a, 0);
 
         ReqMgr {
             get_fn4: Arc::new(deduplicate_with_fn),
@@ -36,6 +37,7 @@ impl ReqMgr {
 pub fn get(key: usize) -> DeduplicateFuture<String> {
     // let fut = async move {
     let fut = async move {
+        use std::time::Instant;
         // let num = 1500;
         // // let num = rand::thread_rng().gen_range(1000..2000);
         // // tokio::time::sleep(tokio::time::Duration::from_millis(num)).await;
@@ -44,6 +46,7 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
         // // Some(format!("key: {}, duration: {}", "fish", num))
 
         println!("Doing with key {}; same key prevents multiple", key);
+        let now = Instant::now();
 
         // let first = reqwest::get("https://www.rust-lang.org").await;
 
@@ -51,7 +54,6 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
         // similar for production builds? Also need to know which "central" to
         // use.
         let first = reqwest::get("https://raw.githubusercontent.com/icogn/tpr-gen3/refs/heads/config_branch/config_branch.json").await;
-        tokio::time::sleep(Duration::from_millis(3000)).await;
 
         let text = match first {
             Ok(x) => x,
@@ -68,6 +70,15 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
                 return None;
             }
         };
+
+        // TODO: this call seems to take about 320 ms the first time, and 43 ms
+        // after that, so we should cache the result on the rust side for some
+        // amount of time. Potentially could do something like 15 or 30s?
+
+        let elapsed = now.elapsed();
+        println!("Elapsed: {:.2?}", elapsed);
+
+        tokio::time::sleep(Duration::from_millis(3000)).await;
 
         // .text()
         // .await?;

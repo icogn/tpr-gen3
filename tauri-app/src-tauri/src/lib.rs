@@ -5,6 +5,7 @@ pub mod query;
 use anyhow::Result;
 use api_manager::APIManager;
 use deduplicate::{Deduplicate, DeduplicateFuture};
+use query::ReqMgr;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex, OnceLock},
@@ -25,6 +26,7 @@ struct APIManagerState {
 struct CustomState {
     abc: APIManagerState,
     volume_dir: PathBuf,
+    req_mgr: ReqMgr,
 }
 
 // From: https://github.com/tauri-apps/tauri/discussions/6309#discussioncomment-10295527
@@ -52,6 +54,26 @@ fn greet(name: &str) -> Payload {
             "Hello, {}! You've been greeted from Rust!\nvolume_dir:{:?}\nport:{}",
             name, custom_state.volume_dir, a.port
         ),
+    }
+}
+
+#[tauri::command]
+async fn get_config() -> String {
+    let custom_state = app_handle().state::<CustomState>();
+
+    let a = custom_state.req_mgr.get_fn4.get(10).await;
+    let opt = match a {
+        Ok(x) => x,
+        Err(_) => {
+            return "Err".into();
+        }
+    };
+
+    if let Some(x) = opt {
+        println!("{}", x);
+        x
+    } else {
+        "None".into()
     }
 }
 
@@ -98,7 +120,7 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(on_window_event)
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![greet, get_config])
         .build(tauri::generate_context!())
         .unwrap();
 
@@ -130,6 +152,13 @@ pub fn run() {
     println!("volume_dir:{:?}", volume_dir);
 
     let a = query::ReqMgr::new();
+
+    let start = std::time::SystemTime::now();
+    let since_the_epoch = start
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards");
+    println!("Time: {:?}", since_the_epoch);
+
     let me = Arc::clone(&a.get_fn4);
     // tauri::async_runtime::spawn(do_sth(a.get_fn4));
     tauri::async_runtime::spawn(do_sth(me, 10));
@@ -139,6 +168,7 @@ pub fn run() {
     let custom_state = CustomState {
         abc: ams,
         volume_dir,
+        req_mgr: a,
     };
 
     // app_handle.manage(ams);
