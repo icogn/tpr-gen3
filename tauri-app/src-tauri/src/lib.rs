@@ -1,10 +1,13 @@
 pub mod api_manager;
 pub mod path;
+pub mod query;
 
+use anyhow::Result;
 use api_manager::APIManager;
+use deduplicate::{Deduplicate, DeduplicateFuture};
 use std::{
     path::PathBuf,
-    sync::{Mutex, OnceLock},
+    sync::{Arc, Mutex, OnceLock},
 };
 use tauri::{AppHandle, Manager, Window, WindowEvent};
 
@@ -52,6 +55,23 @@ fn greet(name: &str) -> Payload {
     }
 }
 
+async fn do_sth(
+    with: Arc<
+        Deduplicate<
+            Box<dyn Fn(usize) -> DeduplicateFuture<String> + Send + Sync + 'static>,
+            usize,
+            String,
+        >,
+    >,
+) -> Result<()> {
+    let str = with.get(27).await?;
+    println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    if let Some(s) = str {
+        println!("{}", s);
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -82,7 +102,18 @@ pub fn run() {
 
     let app_handle = app_handle();
 
-    // TODO: handle swapping between branches.
+    // TODO: handle swapping between branches. Should have info stored in the DB
+    // which corresponds to what we have locally so this info is available
+    // immediately (and also if we are truly offline). Then we also want to
+    // fetch data from the github repo in order to determine which ones have
+    // updates. We will need a bunch of github API calls from rust already, so
+    // probably actually easier to handle everything on that side (even the
+    // basic call to update our list of branches that we can swap to). We can
+    // send the intent to the backend which will actually do the download,
+    // verification, and branch swap.
+
+    // 'Update available' part for each branch should be derived. We can just
+    // store current_version and latest_version.
 
     // TODO: default_branch should come from the database.
     let api_manager = APIManager::new(app_handle, "stable");
@@ -92,6 +123,9 @@ pub fn run() {
 
     let volume_dir = path::volume_dir(app_handle).unwrap();
     println!("volume_dir:{:?}", volume_dir);
+
+    let a = query::ReqMgr::new();
+    tauri::async_runtime::spawn(do_sth(a.get_fn4));
 
     let custom_state = CustomState {
         abc: ams,
