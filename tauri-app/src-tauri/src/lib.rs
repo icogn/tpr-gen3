@@ -63,12 +63,17 @@ async fn do_sth(
             String,
         >,
     >,
+    key: usize,
 ) -> Result<()> {
-    let str = with.get(27).await?;
-    println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-    if let Some(s) = str {
-        println!("{}", s);
-    }
+    let _str = with.get(key).await?;
+    let start = std::time::SystemTime::now();
+    println!(
+        "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@await finished, time: {:?}",
+        start
+    );
+    // if let Some(s) = str {
+    //     println!("{}", s);
+    // }
     Ok(())
 }
 
@@ -125,7 +130,11 @@ pub fn run() {
     println!("volume_dir:{:?}", volume_dir);
 
     let a = query::ReqMgr::new();
-    tauri::async_runtime::spawn(do_sth(a.get_fn4));
+    let me = Arc::clone(&a.get_fn4);
+    // tauri::async_runtime::spawn(do_sth(a.get_fn4));
+    tauri::async_runtime::spawn(do_sth(me, 10));
+    let me2 = Arc::clone(&a.get_fn4);
+    tauri::async_runtime::spawn(do_sth(me2, 10));
 
     let custom_state = CustomState {
         abc: ams,
