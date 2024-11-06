@@ -45,7 +45,12 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
 
         println!("Doing with key {}; same key prevents multiple", key);
 
-        let first = reqwest::get("https://www.rust-lang.org").await;
+        // let first = reqwest::get("https://www.rust-lang.org").await;
+
+        // TODO: this should be be provided as a build resource or something
+        // similar for production builds? Also need to know which "central" to
+        // use.
+        let first = reqwest::get("https://raw.githubusercontent.com/icogn/tpr-gen3/refs/heads/config_branch/config_branch.json").await;
         tokio::time::sleep(Duration::from_millis(3000)).await;
 
         let text = match first {

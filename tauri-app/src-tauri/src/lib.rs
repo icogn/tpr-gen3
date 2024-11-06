@@ -65,15 +65,15 @@ async fn do_sth(
     >,
     key: usize,
 ) -> Result<()> {
-    let _str = with.get(key).await?;
+    let str = with.get(key).await?;
     let start = std::time::SystemTime::now();
     println!(
         "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@await finished, time: {:?}",
         start
     );
-    // if let Some(s) = str {
-    //     println!("{}", s);
-    // }
+    if let Some(s) = str {
+        println!("{}", s);
+    }
     Ok(())
 }
 
