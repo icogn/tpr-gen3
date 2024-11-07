@@ -1,4 +1,5 @@
 pub mod api_manager;
+pub mod global;
 pub mod path;
 pub mod query;
 
@@ -101,6 +102,8 @@ async fn do_sth(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    println!("central_name is ''{}''", global::VARS.central_name);
+
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {

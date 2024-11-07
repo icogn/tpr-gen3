@@ -23,5 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# Added below
+#### Added below ###
 src-tauri/resources/standalone
+
+# Each dev should create this file on their own. This can be used to overwrite
+# certain global vars. It is used by the build process to include data directly
+# in the binary.
+src-tauri/src/build_vars.json
