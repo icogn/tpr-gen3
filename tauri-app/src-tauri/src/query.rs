@@ -1,9 +1,10 @@
 use deduplicate::Deduplicate;
 use std::time::Duration;
 // use deduplicate::DeduplicateError;
-use crate::global::VARS;
 use deduplicate::DeduplicateFuture;
 use std::sync::Arc;
+
+use crate::global;
 
 pub struct ReqMgr {
     pub get_fn4: Arc<
@@ -57,7 +58,7 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
 
         let endpoint = format!(
             "https://raw.githubusercontent.com/{}/refs/heads/config_branch/config_branch.json",
-            VARS.user_repo
+            global::vars().user_repo
         );
 
         let req_result = reqwest::get(endpoint).await;

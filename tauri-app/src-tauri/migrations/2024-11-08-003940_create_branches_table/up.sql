@@ -1,0 +1,6 @@
+CREATE TABLE branches (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	branch_name TEXT NOT NULL UNIQUE,
+	display_name TEXT NOT NULL,
+	branch_version TEXT NOT NULL
+)

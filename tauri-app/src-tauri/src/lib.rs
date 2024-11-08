@@ -1,11 +1,15 @@
 pub mod api_manager;
+pub mod db;
 pub mod global;
+pub mod models;
 pub mod path;
 pub mod query;
+pub mod schema;
 
 use anyhow::Result;
 use api_manager::APIManager;
 use deduplicate::{Deduplicate, DeduplicateFuture};
+use models::Branch;
 use query::ReqMgr;
 use std::{
     path::PathBuf,
@@ -102,8 +106,6 @@ async fn do_sth(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    println!("central_name is ''{}''", global::VARS.central_name);
-
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
@@ -131,6 +133,12 @@ pub fn run() {
     println!("Just set APP_HANDLE");
 
     let app_handle = app_handle();
+
+    // global::init must be called as soon as we have the app_handle, before we
+    // try to do anything else.
+    global::init(app_handle);
+
+    println!("db_url is '{}'", global::vars().db_url);
 
     // TODO: handle swapping between branches. Should have info stored in the DB
     // which corresponds to what we have locally so this info is available
@@ -176,6 +184,14 @@ pub fn run() {
 
     // app_handle.manage(ams);
     app_handle.manage(custom_state);
+
+    // Can fetch the installed branches on demand. No reason to store it in the state.
+    match Branch::branches() {
+        Ok(x) => {
+            println!("branches: {:?}", x);
+        }
+        _ => {}
+    }
 
     // let sidecar_command = app_handle.shell().sidecar("node_v20_17_0").unwrap();
 
