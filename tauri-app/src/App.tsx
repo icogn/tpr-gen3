@@ -1,64 +1,13 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './App.css';
-// import { Command } from '@tauri-apps/plugin-shell';
-// import { resolveResource, resolve } from '@tauri-apps/api/path';
-
-// const nodeVerCommand = Command.sidecar('bin/node_v20_17_0', ['-v']);
-
-// const resourcePath = await resolveResource('resources/website/server.js');
-// console.log('resourcePath');
-// console.log(resourcePath);
-
-// const websiteDir = await resolve(resourcePath, '..');
-// console.log('websiteDir');
-// console.log(websiteDir);
-
-// const websiteCommand = Command.sidecar('bin/node_v20_17_0', ['server.js'], {
-//   cwd: websiteDir,
-// });
-
-// websiteCommand.stderr.on('data', (a, b) => {
-//   console.log(a, b);
-// });
-
-// websiteCommand.stdout.on('data', (a, b) => {
-//   console.log(a, b);
-// });
-
-// websiteCommand
-//   .execute()
-//   .then((a) => {
-//     console.log('a');
-//     console.log(a);
-//   })
-//   .catch((e) => {
-//     console.log('e');
-//     console.log(e);
-//   });
-
-// Reference video: https://www.youtube.com/watch?v=dMJKXUFxD0Y
-// Using tauri v1, but still can be helpful
 
 function App() {
   const [greetMsg, setGreetMsg] = useState('');
   const [name, setName] = useState('');
   const [port, setPort] = useState<number | undefined>();
 
-  // useEffect(() => {
-  //   async function a() {
-  //     const unlisten = await listen('eee', (event) => {
-  //       console.log('event');
-  //       console.log(event);
-  //     });
-  //   }
-  //   a();
-
-  //   // return unlisten;
-  // }, []);
-
   async function greet() {
-    // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     const res = await invoke('greet', { name });
     console.log('res');
     console.log(res);
@@ -75,19 +24,6 @@ function App() {
     const res3 = await invoke('get_installed_branches');
     console.log('res3');
     console.log(res3);
-
-    // const result = await invoke('greet', { name });
-    // setGreetMsg(result);
-
-    // try {
-    //   const output = await nodeVerCommand.execute();
-    //   console.log('output');
-    //   console.log(output.stdout);
-    //   setGreetMsg(result + ' ' + output.stdout);
-    // } catch (e) {
-    //   console.log('e');
-    //   console.log(e);
-    // }
   }
 
   useEffect(() => {
