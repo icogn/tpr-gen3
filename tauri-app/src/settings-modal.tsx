@@ -11,7 +11,7 @@ export default function SettingsModal({ open }: SettingsModalProps) {
 
   return (
     <div className={styles.root}>
-      <div>X</div>
+      <div className="pt-5">X</div>
     </div>
   );
 }

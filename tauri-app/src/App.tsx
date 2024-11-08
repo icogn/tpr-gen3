@@ -11,21 +11,22 @@ type Branch = {
 };
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState('');
-  const [name, setName] = useState('');
+  // const [greetMsg, setGreetMsg] = useState('');
   const [port, setPort] = useState<number | undefined>();
   const [branches, setBranches] = useState<Branch[]>([]);
 
   async function greet() {
-    const res = await invoke('greet', { name });
+    const res = (await invoke('greet', { name: 'my_name' })) as {
+      port: number;
+    };
     console.log('res');
     console.log(res);
-    setGreetMsg(res.message);
+    // setGreetMsg(res.message);
     setPort(res.port);
 
     console.log(`bef3: ${Date.now()}`);
     const bef = Date.now();
-    const res3 = await invoke('get_installed_branches');
+    const res3 = (await invoke('get_installed_branches')) as Branch[];
     console.log(`after3: ${Date.now() - bef}`);
     console.log('res3');
     console.log(res3);
