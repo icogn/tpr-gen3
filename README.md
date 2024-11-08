@@ -79,3 +79,9 @@ not run the sidecar.
 - From `tauri.conf.json`: had to remove 'build.beforeDevCommand: yarn dev' part since there is a bug on windows where the Vite process would not die when closing the tauri application (which ends the tauri dev process) when using `--no-watch`.
   So running the dev command again would not work since port 1420 would be in use.
   The solution is that we use the `concurrently` package which works quite well, so probably fine there.
+
+- The window showing up with a light background for a little before the content displays is a limitation of the webview used on Windows.
+  It seems like they are working toward an option to allow setting the background color for this to help a little.
+  The options are either deal with it or put an arbitrary X second delay before showing the window (which is unreliable and makes the app seem slow).
+  Interestingly, the content has loaded and React code is executing before the webview can show the content, so waiting on these events does not work.K
+  - Skipping over the sidecar did not fix the issue either, and it is not clear if that even made things faster (was not easily perceptible at least).
