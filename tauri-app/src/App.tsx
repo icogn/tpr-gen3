@@ -72,6 +72,10 @@ function App() {
     console.log('res2');
     console.log(res2);
 
+    const res3 = await invoke('get_installed_branches');
+    console.log('res3');
+    console.log(res3);
+
     // const result = await invoke('greet', { name });
     // setGreetMsg(result);
 

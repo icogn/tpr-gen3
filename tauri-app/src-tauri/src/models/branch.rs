@@ -3,7 +3,7 @@ use diesel::prelude::*;
 
 use crate::db::establish_connection;
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Clone, serde::Serialize)]
 #[diesel(table_name = crate::schema::branches)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Branch {

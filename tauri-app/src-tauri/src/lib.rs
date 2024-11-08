@@ -82,6 +82,13 @@ async fn get_config() -> String {
     }
 }
 
+#[tauri::command]
+async fn get_installed_branches() -> std::result::Result<Vec<Branch>, String> {
+    // Can fetch the installed branches on demand. No reason to store it in the
+    // state.
+    Branch::branches().map_err(|err| err.to_string())
+}
+
 async fn do_sth(
     with: Arc<
         Deduplicate<
@@ -125,7 +132,11 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(on_window_event)
-        .invoke_handler(tauri::generate_handler![greet, get_config])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            get_config,
+            get_installed_branches
+        ])
         .build(tauri::generate_context!())
         .unwrap();
 
@@ -184,14 +195,6 @@ pub fn run() {
 
     // app_handle.manage(ams);
     app_handle.manage(custom_state);
-
-    // Can fetch the installed branches on demand. No reason to store it in the state.
-    match Branch::branches() {
-        Ok(x) => {
-            println!("branches: {:?}", x);
-        }
-        _ => {}
-    }
 
     // let sidecar_command = app_handle.shell().sidecar("node_v20_17_0").unwrap();
 
