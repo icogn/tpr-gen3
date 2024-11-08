@@ -85,3 +85,5 @@ not run the sidecar.
   The options are either deal with it or put an arbitrary X second delay before showing the window (which is unreliable and makes the app seem slow).
   Interestingly, the content has loaded and React code is executing before the webview can show the content, so waiting on these events does not work.K
   - Skipping over the sidecar did not fix the issue either, and it is not clear if that even made things faster (was not easily perceptible at least).
+  - Tested with with a 500ms delay which was enough on my machine to skip the flash, but it felt much worse since it goes from very responsive to opening to feeling like it lags when you try to start it.
+    We can just live with things until changing the bg color becomes possible.
