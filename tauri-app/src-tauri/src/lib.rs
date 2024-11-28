@@ -1,4 +1,5 @@
 pub mod api_manager;
+pub mod config;
 pub mod db;
 pub mod global;
 pub mod models;
@@ -14,6 +15,7 @@ use query::ReqMgr;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex, OnceLock},
+    time::Instant,
 };
 use tauri::{AppHandle, Manager, Window, WindowEvent};
 
@@ -66,7 +68,13 @@ fn greet(name: &str) -> Payload {
 async fn get_config() -> String {
     let custom_state = app_handle().state::<CustomState>();
 
+    println!("@Calling from get_config");
+
+    let now = Instant::now();
     let a = custom_state.req_mgr.get_fn4.get(10).await;
+    let elapsed = now.elapsed();
+    println!("Elapsed get_config: {:.2?}", elapsed);
+
     let opt = match a {
         Ok(x) => x,
         Err(_) => {
@@ -110,6 +118,7 @@ async fn do_sth(
     >,
     key: usize,
 ) -> Result<()> {
+    println!("@Calling from do_sth");
     let str = with.get(key).await?;
     let start = std::time::SystemTime::now();
     println!(
