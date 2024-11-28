@@ -86,7 +86,18 @@ async fn get_config() -> String {
 async fn get_installed_branches() -> std::result::Result<Vec<Branch>, String> {
     // Can fetch the installed branches on demand. No reason to store it in the
     // state.
-    Branch::branches().map_err(|err| err.to_string())
+    let mut branches = Branch::branches().map_err(|err| err.to_string())?;
+
+    branches.insert(
+        0,
+        Branch {
+            id: -1,
+            branch_name: "stable".to_string(),
+            display_name: "Stable".to_string(),
+            branch_version: "1.2.3".to_string(),
+        },
+    );
+    Ok(branches)
 }
 
 async fn do_sth(

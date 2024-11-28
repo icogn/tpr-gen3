@@ -2,18 +2,13 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './App.css';
 import SettingsModal from './settings-modal';
-
-type Branch = {
-  id: number;
-  branch_name: string;
-  display_name: string;
-  branch_version: string;
-};
+import { Branch } from './types';
 
 function App() {
   // const [greetMsg, setGreetMsg] = useState('');
   const [port, setPort] = useState<number | undefined>();
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [open, setOpen] = useState(false);
 
   async function greet() {
     const res = (await invoke('greet', { name: 'my_name' })) as {
@@ -57,12 +52,26 @@ function App() {
           return <option key={branch.id}>{branch.display_name}</option>;
         })}
       </select>
+      <button
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Click
+      </button>
 
       {port != null && (
         <iframe src={`http://127.0.0.1:${port}`} className="testing"></iframe>
       )}
 
-      <SettingsModal open />
+      {open && (
+        <SettingsModal
+          onClose={() => {
+            setOpen(false);
+          }}
+          branches={branches}
+        />
+      )}
     </div>
   );
 }
