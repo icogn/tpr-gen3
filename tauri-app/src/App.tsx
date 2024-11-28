@@ -3,7 +3,10 @@ import { invoke } from '@tauri-apps/api/core';
 import './App.css';
 import SettingsModal from './settings-modal';
 import { Branch } from './types';
-import { useGetInstalledBranchesQuery } from './state/api-slice';
+import {
+  useBranchesQuery,
+  useGetInstalledBranchesQuery,
+} from './state/api-slice';
 
 function App() {
   // const [greetMsg, setGreetMsg] = useState('');
@@ -12,12 +15,10 @@ function App() {
   const [open, setOpen] = useState(false);
 
   const { data, error, isLoading } = useGetInstalledBranchesQuery();
+  useBranchesQuery();
   console.log('@@@@@@@@@@@@@data');
   console.log(data);
-  console.log('error');
-  console.log(error);
-  console.log('isLoading');
-  console.log(isLoading);
+  console.log(`isLoading: ${isLoading}`);
 
   async function greet() {
     const res = (await invoke('greet', { name: 'my_name' })) as {

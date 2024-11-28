@@ -121,7 +121,7 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
         // read/write data about the installed branches and the default/current
         // branch.
 
-        Some(format!("body = {body:?}"))
+        Some(format!("{body:?}"))
     };
     Box::pin(fut)
 }
