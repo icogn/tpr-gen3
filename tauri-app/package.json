@@ -12,10 +12,12 @@
     "tauri:dev-watch": "concurrently -n 'VITE,TAURI' -c 'bgBlue.bold,bgMagenta.bold' -p '[{name}]' --kill-others 'yarn dev' 'cross-env SIDECAR=false tauri dev'"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.3.0",
     "@tauri-apps/api": ">=2.0.0-rc.0",
     "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-redux": "^9.1.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": ">=2.0.0-rc.0",
