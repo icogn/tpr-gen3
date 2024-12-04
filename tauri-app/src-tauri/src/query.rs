@@ -1,7 +1,8 @@
 use deduplicate::Deduplicate;
-// use std::time::Duration;
-// use deduplicate::DeduplicateError;
 use deduplicate::DeduplicateFuture;
+use std::any::Any;
+use std::any::TypeId;
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::Mutex;
@@ -9,30 +10,57 @@ use std::sync::Mutex;
 use crate::config::Config;
 use crate::global;
 
-static CACHED_CONFIG: LazyLock<Mutex<Option<Config>>> = LazyLock::new(|| Mutex::new(None));
+static CACHE: LazyLock<Mutex<Cache>> = LazyLock::new(|| Mutex::new(Cache::new()));
 
-fn has_cached_config() -> bool {
-    let val = CACHED_CONFIG
-        .lock()
-        .expect("Failed to lock cached_config mutex");
-    if let Some(_) = *val {
-        return true;
+struct Cache {
+    map: HashMap<TypeId, Box<dyn Any + Send>>,
+}
+
+impl Cache {
+    fn new() -> Self {
+        Cache {
+            map: HashMap::new(),
+        }
     }
-    false
+
+    fn contains_key<T: 'static>(&self) -> bool {
+        let type_id = TypeId::of::<T>();
+        self.map.contains_key(&type_id)
+    }
+
+    fn clone_val<T: Clone + 'static>(&self) -> Option<T> {
+        let type_id = TypeId::of::<T>();
+        self.map
+            .get(&type_id)
+            .and_then(|a| a.downcast_ref::<T>())
+            .and_then(|b| Some((*b).clone()))
+    }
+
+    fn insert<T>(&mut self, value: T)
+    where
+        T: Send + 'static,
+    {
+        let type_id = TypeId::of::<T>();
+        self.map.insert(type_id, Box::new(value));
+    }
 }
 
-fn clone_cached_config() -> Option<Config> {
-    let val = CACHED_CONFIG
-        .lock()
-        .expect("Failed to lock cached_config mutex");
-    return (*val).clone();
+fn cache_contains_key<T: 'static>() -> bool {
+    let cache = CACHE.lock().expect("Failed to lock CACHE.");
+    cache.contains_key::<T>()
 }
 
-fn set_cached_config(config_opt: Option<Config>) {
-    let mut val = CACHED_CONFIG
-        .lock()
-        .expect("Failed to lock CACHED_CONFIG mutex");
-    *val = config_opt;
+fn cache_clone_val<T: Clone + 'static>() -> Option<T> {
+    let cache = CACHE.lock().expect("Failed to lock CACHE.");
+    cache.clone_val::<T>()
+}
+
+fn cache_insert<T>(value: T)
+where
+    T: Send + 'static,
+{
+    let mut cache = CACHE.lock().expect("Failed to lock CACHE.");
+    cache.insert(value)
 }
 
 pub struct ReqMgr {
@@ -112,7 +140,8 @@ pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::
         // similar for production builds? Also need to know which "central" to
         // use.
 
-        if !has_cached_config() {
+        // if !has_cached_config() {
+        if !cache_contains_key::<Config>() {
             let endpoint = format!(
                 "https://raw.githubusercontent.com/{}/refs/heads/config_branch/config_branch.json",
                 global::vars().user_repo
@@ -183,7 +212,8 @@ pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::
             let value: Result<Config, serde_json::Error> = serde_json::from_str(&body);
             match value {
                 Ok(aaa) => {
-                    set_cached_config(Some(aaa));
+                    // set_cached_config(Some(aaa));
+                    cache_insert(aaa);
                 }
                 Err(e) => {
                     return prep_error("config body serde parse", e);
@@ -208,7 +238,8 @@ pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::
         // asset_info comes from the config data, so we have to fetch them
         // sequentially.
 
-        let result = match clone_cached_config() {
+        // let result = match clone_cached_config() {
+        let result = match cache_clone_val::<Config>() {
             Some(x) => match serde_json::to_string(&x) {
                 Ok(str) => str,
                 Err(e) => {
