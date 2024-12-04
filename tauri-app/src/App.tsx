@@ -19,6 +19,8 @@ function App() {
   console.log('@@@@@@@@@@@@@data');
   console.log(data);
   console.log(`isLoading: ${isLoading}`);
+  console.log('error');
+  console.log(error);
 
   async function greet() {
     const res = (await invoke('greet', { name: 'my_name' })) as {
@@ -40,9 +42,14 @@ function App() {
     // Note: setup where we start call early in core process causes the call to
     // start about 606-615 ms sooner (in dev mode at least).
     console.log(Date.now());
-    const res2 = await invoke('get_config', {});
-    console.log('res2');
-    console.log(res2);
+    try {
+      const res2 = await invoke('get_config', {});
+      console.log('res2');
+      console.log(res2);
+    } catch (e) {
+      console.error('Found error:');
+      console.error(e);
+    }
   }
 
   useEffect(() => {

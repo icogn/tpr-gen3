@@ -38,17 +38,26 @@ fn set_cached_config(config_opt: Option<Config>) {
 pub struct ReqMgr {
     pub get_fn4: Arc<
         Deduplicate<
-            Box<dyn Fn(usize) -> DeduplicateFuture<String> + Send + Sync + 'static>,
+            Box<
+                dyn Fn(usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>>
+                    + Send
+                    + Sync
+                    + 'static,
+            >,
             usize,
-            String,
+            Result<String, Arc<anyhow::Error>>,
         >,
     >,
 }
 
 impl ReqMgr {
     pub fn new() -> ReqMgr {
-        let a: Box<dyn Fn(usize) -> DeduplicateFuture<String> + Send + Sync + 'static> =
-            Box::new(&get);
+        let a: Box<
+            dyn Fn(usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>>
+                + Send
+                + Sync
+                + 'static,
+        > = Box::new(&get);
         // Capacity 0 to disable caching.
         let deduplicate_with_fn = Deduplicate::with_capacity(a, 0);
 
@@ -58,6 +67,18 @@ impl ReqMgr {
     }
 }
 
+fn prep_error<E, T>(error: E) -> Option<Result<T, Arc<anyhow::Error>>>
+where
+    E: core::error::Error + Send + Sync + 'static,
+{
+    Some(Err(Arc::new(anyhow::Error::new(error))))
+}
+
+fn prep_str_error<T>(msg: &str) -> Option<Result<T, Arc<anyhow::Error>>> {
+    let error = std::io::Error::new(std::io::ErrorKind::AddrInUse, msg.to_string());
+    Some(Err(Arc::new(anyhow::Error::new(error))))
+}
+
 // use rand::Rng;
 
 // This is our slow accessor function. Note that we must take a single
@@ -65,9 +86,9 @@ impl ReqMgr {
 // All of our specific logic is enclosed within an async block. We
 // are using move to move the key into the block.  Finally, we pin
 // the block and return it.
-pub fn get(key: usize) -> DeduplicateFuture<String> {
+pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>> {
     // let fut = async move {
-    let fut = async move {
+    let future = async move {
         use std::time::Instant;
         // let num = 1500;
         // // let num = rand::thread_rng().gen_range(1000..2000);
@@ -94,15 +115,15 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
             let req_result = reqwest::get(endpoint).await;
             let resp = match req_result {
                 Ok(x) => x,
-                Err(_) => {
-                    return None;
+                Err(e) => {
+                    return prep_error(e);
                 }
             };
             let resp_text = resp.text().await;
             let body = match resp_text {
                 Ok(x) => x,
-                Err(_) => {
-                    return None;
+                Err(e) => {
+                    return prep_error(e);
                 }
             };
 
@@ -155,30 +176,47 @@ pub fn get(key: usize) -> DeduplicateFuture<String> {
 
             let value: Result<Config, serde_json::Error> = serde_json::from_str(&body);
             match value {
-                Err(_) => {
-                    return None;
-                }
                 Ok(aaa) => {
                     set_cached_config(Some(aaa));
+                }
+                Err(e) => {
+                    return prep_error(e);
                 }
             }
         }
 
+        // TODO: next thing to do is fetch the asset_info and cache it. We only
+        // indicate that a branch has an available version if its rust triple
+        // siteZip exists for the current OS. We probably don't need to check if
+        // it is on the release. If people get errors, we would rather know that
+        // it somehow isn't there rather than just have it not show up for
+        // people and delay us finding out there was an issue.
+
+        // We probably do want to go ahead and provide a derived list of branch
+        // data about all non-stable branches. It's okay that the same branch
+        // might appear in installedBranches and this list. Resolving both sets
+        // of data will happen on the client side. Also this way we aren't
+        // sending huge publicKeys and signatures which are not used by the
+        // client.
+
+        // asset_info comes from the config data, so we have to fetch them
+        // sequentially.
+
         let result = match clone_cached_config() {
             Some(x) => match serde_json::to_string(&x) {
                 Ok(str) => str,
-                Err(_) => {
-                    return None;
+                Err(e) => {
+                    return prep_error(e);
                 }
             },
             None => {
-                return None;
+                return prep_str_error("Config was 'None'.");
             }
         };
 
-        Some(result)
+        Some(Ok(result))
     };
-    Box::pin(fut)
+    Box::pin(future)
 }
 
 // // All the comments from the get function apply here. In this case

@@ -65,7 +65,7 @@ fn greet(name: &str) -> Payload {
 }
 
 #[tauri::command]
-async fn get_config() -> String {
+async fn get_config() -> std::result::Result<String, String> {
     let custom_state = app_handle().state::<CustomState>();
 
     println!("@Calling from get_config");
@@ -77,16 +77,15 @@ async fn get_config() -> String {
 
     let opt = match a {
         Ok(x) => x,
-        Err(_) => {
-            return "Err".into();
+        Err(dedup_err) => {
+            return Err(dedup_err.to_string());
         }
     };
 
-    if let Some(x) = opt {
-        println!("{}", x);
-        x
+    if let Some(res) = opt {
+        res.or_else(|e| Err(e.to_string()))
     } else {
-        "None".into()
+        return Err("Resulted in 'None' Option".to_string());
     }
 }
 
@@ -111,22 +110,29 @@ async fn get_installed_branches() -> std::result::Result<Vec<Branch>, String> {
 async fn do_sth(
     with: Arc<
         Deduplicate<
-            Box<dyn Fn(usize) -> DeduplicateFuture<String> + Send + Sync + 'static>,
+            Box<
+                dyn Fn(usize) -> DeduplicateFuture<core::result::Result<String, Arc<anyhow::Error>>>
+                    + Send
+                    + Sync
+                    + 'static,
+            >,
             usize,
-            String,
+            core::result::Result<String, Arc<anyhow::Error>>,
         >,
     >,
     key: usize,
 ) -> Result<()> {
     println!("@Calling from do_sth");
-    let str = with.get(key).await?;
+    let res = with.get(key).await?;
     let start = std::time::SystemTime::now();
     println!(
         "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@await finished, time: {:?}",
         start
     );
-    if let Some(s) = str {
-        println!("{}", s);
+    if let Some(r) = res {
+        if let Ok(r_val) = r {
+            println!("{}", r_val);
+        }
     }
     Ok(())
 }
