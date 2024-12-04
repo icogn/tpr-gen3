@@ -1,5 +1,6 @@
 use deduplicate::Deduplicate;
 use deduplicate::DeduplicateFuture;
+use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::any::Any;
@@ -107,7 +108,15 @@ where
     ))))
 }
 
+fn prep_anyhow_error<T>(
+    source: &str,
+    anyhow_error: anyhow::Error,
+) -> Option<Result<T, Arc<(String, anyhow::Error)>>> {
+    Some(Err(Arc::new((source.to_string(), anyhow_error))))
+}
+
 fn prep_str_error<T>(source: &str, msg: &str) -> Option<Result<T, Arc<(String, anyhow::Error)>>> {
+    // TODO: use a better error type here
     let error = std::io::Error::new(std::io::ErrorKind::AddrInUse, msg.to_string());
     Some(Err(Arc::new((
         source.to_string(),
@@ -115,18 +124,44 @@ fn prep_str_error<T>(source: &str, msg: &str) -> Option<Result<T, Arc<(String, a
     ))))
 }
 
+async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error> {
+    for _ in 0..3 {
+        let req_result = reqwest::get(endpoint).await;
+        match req_result {
+            Ok(x) => {
+                return Ok(x);
+            }
+            Err(e) => {
+                // return Err(std::io::Error::new(
+                //     std::io::ErrorKind::AddrInUse,
+                //     e.to_string(),
+                // ));
+                return Err(anyhow::Error::new(e));
+                // return prep_error("api call request", e);
+            }
+        }
+    }
+
+    let error = std::io::Error::new(
+        std::io::ErrorKind::AddrInUse,
+        "api call request".to_string(),
+    );
+    Err(anyhow::Error::new(error))
+}
+
 async fn do_call<T>(endpoint: &str) -> Option<Result<String, Arc<(String, anyhow::Error)>>>
 where
     T: Serialize + DeserializeOwned + Clone + Send + 'static,
 {
     if !cache_contains_key::<T>() {
-        let req_result = reqwest::get(endpoint).await;
-        let resp = match req_result {
+        let resp_abc = request_with_retries(endpoint).await;
+        let resp = match resp_abc {
             Ok(x) => x,
             Err(e) => {
-                return prep_error("api call request", e);
+                return prep_anyhow_error("api call failed", e);
             }
         };
+
         let resp_text = resp.text().await;
         let body = match resp_text {
             Ok(x) => x,
