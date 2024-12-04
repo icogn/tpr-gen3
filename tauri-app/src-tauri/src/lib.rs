@@ -83,7 +83,7 @@ async fn get_config() -> std::result::Result<String, String> {
     };
 
     if let Some(res) = opt {
-        res.or_else(|e| Err(e.to_string()))
+        res.or_else(|e| Err(format!("{} => {:#?}", e.0, e.1)))
     } else {
         return Err("Resulted in 'None' Option".to_string());
     }
@@ -111,13 +111,16 @@ async fn do_sth(
     with: Arc<
         Deduplicate<
             Box<
-                dyn Fn(usize) -> DeduplicateFuture<core::result::Result<String, Arc<anyhow::Error>>>
-                    + Send
+                dyn Fn(
+                        usize,
+                    ) -> DeduplicateFuture<
+                        core::result::Result<String, Arc<(String, anyhow::Error)>>,
+                    > + Send
                     + Sync
                     + 'static,
             >,
             usize,
-            core::result::Result<String, Arc<anyhow::Error>>,
+            core::result::Result<String, Arc<(String, anyhow::Error)>>,
         >,
     >,
     key: usize,

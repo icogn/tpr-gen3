@@ -39,13 +39,13 @@ pub struct ReqMgr {
     pub get_fn4: Arc<
         Deduplicate<
             Box<
-                dyn Fn(usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>>
+                dyn Fn(usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::Error)>>>
                     + Send
                     + Sync
                     + 'static,
             >,
             usize,
-            Result<String, Arc<anyhow::Error>>,
+            Result<String, Arc<(String, anyhow::Error)>>,
         >,
     >,
 }
@@ -53,7 +53,7 @@ pub struct ReqMgr {
 impl ReqMgr {
     pub fn new() -> ReqMgr {
         let a: Box<
-            dyn Fn(usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>>
+            dyn Fn(usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::Error)>>>
                 + Send
                 + Sync
                 + 'static,
@@ -67,16 +67,22 @@ impl ReqMgr {
     }
 }
 
-fn prep_error<E, T>(error: E) -> Option<Result<T, Arc<anyhow::Error>>>
+fn prep_error<E, T>(source: &str, error: E) -> Option<Result<T, Arc<(String, anyhow::Error)>>>
 where
     E: core::error::Error + Send + Sync + 'static,
 {
-    Some(Err(Arc::new(anyhow::Error::new(error))))
+    Some(Err(Arc::new((
+        source.to_string(),
+        anyhow::Error::new(error),
+    ))))
 }
 
-fn prep_str_error<T>(msg: &str) -> Option<Result<T, Arc<anyhow::Error>>> {
+fn prep_str_error<T>(source: &str, msg: &str) -> Option<Result<T, Arc<(String, anyhow::Error)>>> {
     let error = std::io::Error::new(std::io::ErrorKind::AddrInUse, msg.to_string());
-    Some(Err(Arc::new(anyhow::Error::new(error))))
+    Some(Err(Arc::new((
+        source.to_string(),
+        anyhow::Error::new(error),
+    ))))
 }
 
 // use rand::Rng;
@@ -86,7 +92,7 @@ fn prep_str_error<T>(msg: &str) -> Option<Result<T, Arc<anyhow::Error>>> {
 // All of our specific logic is enclosed within an async block. We
 // are using move to move the key into the block.  Finally, we pin
 // the block and return it.
-pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>> {
+pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::Error)>>> {
     // let fut = async move {
     let future = async move {
         use std::time::Instant;
@@ -116,14 +122,14 @@ pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>> 
             let resp = match req_result {
                 Ok(x) => x,
                 Err(e) => {
-                    return prep_error(e);
+                    return prep_error("config api call request", e);
                 }
             };
             let resp_text = resp.text().await;
             let body = match resp_text {
                 Ok(x) => x,
                 Err(e) => {
-                    return prep_error(e);
+                    return prep_error("config api call 'text()'", e);
                 }
             };
 
@@ -180,7 +186,7 @@ pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>> 
                     set_cached_config(Some(aaa));
                 }
                 Err(e) => {
-                    return prep_error(e);
+                    return prep_error("config body serde parse", e);
                 }
             }
         }
@@ -206,11 +212,11 @@ pub fn get(key: usize) -> DeduplicateFuture<Result<String, Arc<anyhow::Error>>> 
             Some(x) => match serde_json::to_string(&x) {
                 Ok(str) => str,
                 Err(e) => {
-                    return prep_error(e);
+                    return prep_error("config serde serialize", e);
                 }
             },
             None => {
-                return prep_str_error("Config was 'None'.");
+                return prep_str_error("cloned cached config", "Config was 'None'.");
             }
         };
 
