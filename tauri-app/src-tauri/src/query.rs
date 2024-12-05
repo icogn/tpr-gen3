@@ -26,11 +26,6 @@ impl Cache {
         }
     }
 
-    fn contains_key<T: 'static>(&self) -> bool {
-        let type_id = TypeId::of::<T>();
-        self.map.contains_key(&type_id)
-    }
-
     fn clone_val<T: Clone + 'static>(&self) -> Option<T> {
         let type_id = TypeId::of::<T>();
         self.map
@@ -46,11 +41,6 @@ impl Cache {
         let type_id = TypeId::of::<T>();
         self.map.insert(type_id, Box::new(value));
     }
-}
-
-fn cache_contains_key<T: 'static>() -> bool {
-    let cache = CACHE.lock().expect("Failed to lock CACHE.");
-    cache.contains_key::<T>()
 }
 
 fn cache_clone_val<T: Clone + 'static>() -> Option<T> {
@@ -112,12 +102,6 @@ fn prep_anyhow_error<T>(
     Err(Arc::new((source.to_string(), anyhow_error)))
 }
 
-fn make_str_error(source: &str, msg: &str) -> Arc<(String, anyhow::Error)> {
-    // TODO: use a better error type here
-    let error = std::io::Error::new(std::io::ErrorKind::AddrInUse, msg.to_string());
-    Arc::new((source.to_string(), anyhow::Error::new(error)))
-}
-
 async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error> {
     let retries = 3;
     // TODO: retry on errors
@@ -153,21 +137,21 @@ async fn do_call<T>(endpoint: &str) -> Result<String, Arc<(String, anyhow::Error
 where
     T: Serialize + DeserializeOwned + Clone + Send + 'static,
 {
-    let result: T = if cache_contains_key::<T>() {
-        cache_clone_val::<T>()
-            .ok_or_else(|| make_str_error("clone cache", "Cache value was 'None'."))?
-    } else {
-        let body = request_with_retries(endpoint)
-            .await
-            .or_else(|e| prep_anyhow_error("api call failed", e))?
-            .text()
-            .await
-            .or_else(|e| prep_error("api call 'text()'", e))?;
+    let result: T = match cache_clone_val::<T>() {
+        Some(x) => x,
+        None => {
+            let body = request_with_retries(endpoint)
+                .await
+                .or_else(|e| prep_anyhow_error("api call failed", e))?
+                .text()
+                .await
+                .or_else(|e| prep_error("api call 'text()'", e))?;
 
-        let value =
-            serde_json::from_str::<T>(&body).or_else(|e| prep_error("body serde parse", e))?;
-        cache_insert(value.clone());
-        value
+            let value =
+                serde_json::from_str::<T>(&body).or_else(|e| prep_error("body serde parse", e))?;
+            cache_insert(value.clone());
+            value
+        }
     };
 
     let str = serde_json::to_string(&result).or_else(|e| prep_error("serde serialize", e))?;
