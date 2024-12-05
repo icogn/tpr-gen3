@@ -112,10 +112,10 @@ fn prep_anyhow_error<T>(
     Err(Arc::new((source.to_string(), anyhow_error)))
 }
 
-fn prep_str_error<T>(source: &str, msg: &str) -> Result<T, Arc<(String, anyhow::Error)>> {
+fn make_str_error(source: &str, msg: &str) -> Arc<(String, anyhow::Error)> {
     // TODO: use a better error type here
     let error = std::io::Error::new(std::io::ErrorKind::AddrInUse, msg.to_string());
-    Err(Arc::new((source.to_string(), anyhow::Error::new(error))))
+    Arc::new((source.to_string(), anyhow::Error::new(error)))
 }
 
 async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error> {
@@ -154,12 +154,8 @@ where
     T: Serialize + DeserializeOwned + Clone + Send + 'static,
 {
     let result: T = if cache_contains_key::<T>() {
-        match cache_clone_val::<T>() {
-            Some(x) => x,
-            None => {
-                return prep_str_error("clone cache", "Cache value was 'None'.");
-            }
-        }
+        cache_clone_val::<T>()
+            .ok_or_else(|| make_str_error("clone cache", "Cache value was 'None'."))?
     } else {
         let body = request_with_retries(endpoint)
             .await
