@@ -154,33 +154,12 @@ where
     T: Serialize + DeserializeOwned + Clone + Send + 'static,
 {
     let result: T = if cache_contains_key::<T>() {
-        // let def = cache_clone_val::<T>().ok_or_else(|| {
-        //     return prep_str_error::<T>("clone cache", "Config was 'None'.");
-        // });
-
-        // cache_clone_val::<T>()
-        //     .ok_or_else(|| prep_str_error::<String>("clone cache", "Config was 'None'."))?
-
-        // match abbb {
-        //     Ok(x) => x,
-        //     Err(e) => {
-        //         return e;
-        //     }
-        // }
-
         match cache_clone_val::<T>() {
             Some(x) => x,
             None => {
-                return prep_str_error("clone cache", "Config was 'None'.");
+                return prep_str_error("clone cache", "Cache value was 'None'.");
             }
         }
-
-        //     .ok_or_else(|| prep_str_error("clone cache", "Config was 'None'."))?;
-        // abc
-
-        // let abc = cache_clone_val::<T>()
-        //     .ok_or_else(|| prep_str_error("clone cache", "Config was 'None'."))?;
-        // abc
     } else {
         let body = request_with_retries(endpoint)
             .await
