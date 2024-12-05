@@ -103,11 +103,11 @@ fn prep_anyhow_error<T>(
 }
 
 async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error> {
+    // TODO: Could add some form of backoff
     let retries = 3;
-    // TODO: retry on errors
     for i in 0..retries {
-        println!("On request attempt '{}'...", i);
         let req_result = reqwest::get(endpoint).await;
+
         match req_result {
             Ok(x) => {
                 return Ok(x);
@@ -116,21 +116,10 @@ async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error>
                 if i == retries - 1 {
                     return Err(anyhow::Error::new(e));
                 }
-
-                // return Err(std::io::Error::new(
-                //     std::io::ErrorKind::AddrInUse,
-                //     e.to_string(),
-                // ));
-                // return prep_error("api call request", e);
             }
         }
     }
-
-    let error = std::io::Error::new(
-        std::io::ErrorKind::AddrInUse,
-        "api call request".to_string(),
-    );
-    Err(anyhow::Error::new(error))
+    unreachable!()
 }
 
 async fn do_call<T>(endpoint: &str) -> Result<String, Arc<(String, anyhow::Error)>>
