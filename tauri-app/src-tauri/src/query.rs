@@ -98,45 +98,45 @@ impl ReqMgr {
     }
 }
 
-fn prep_error<E, T>(source: &str, error: E) -> Option<Result<T, Arc<(String, anyhow::Error)>>>
+fn prep_error<E, T>(source: &str, error: E) -> Result<T, Arc<(String, anyhow::Error)>>
 where
     E: core::error::Error + Send + Sync + 'static,
 {
-    Some(Err(Arc::new((
-        source.to_string(),
-        anyhow::Error::new(error),
-    ))))
+    Err(Arc::new((source.to_string(), anyhow::Error::new(error))))
 }
 
 fn prep_anyhow_error<T>(
     source: &str,
     anyhow_error: anyhow::Error,
-) -> Option<Result<T, Arc<(String, anyhow::Error)>>> {
-    Some(Err(Arc::new((source.to_string(), anyhow_error))))
+) -> Result<T, Arc<(String, anyhow::Error)>> {
+    Err(Arc::new((source.to_string(), anyhow_error)))
 }
 
-fn prep_str_error<T>(source: &str, msg: &str) -> Option<Result<T, Arc<(String, anyhow::Error)>>> {
+fn prep_str_error<T>(source: &str, msg: &str) -> Result<T, Arc<(String, anyhow::Error)>> {
     // TODO: use a better error type here
     let error = std::io::Error::new(std::io::ErrorKind::AddrInUse, msg.to_string());
-    Some(Err(Arc::new((
-        source.to_string(),
-        anyhow::Error::new(error),
-    ))))
+    Err(Arc::new((source.to_string(), anyhow::Error::new(error))))
 }
 
 async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error> {
-    for _ in 0..3 {
+    let retries = 3;
+    // TODO: retry on errors
+    for i in 0..retries {
+        println!("On request attempt '{}'...", i);
         let req_result = reqwest::get(endpoint).await;
         match req_result {
             Ok(x) => {
                 return Ok(x);
             }
             Err(e) => {
+                if i == retries - 1 {
+                    return Err(anyhow::Error::new(e));
+                }
+
                 // return Err(std::io::Error::new(
                 //     std::io::ErrorKind::AddrInUse,
                 //     e.to_string(),
                 // ));
-                return Err(anyhow::Error::new(e));
                 // return prep_error("api call request", e);
             }
         }
@@ -149,51 +149,54 @@ async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error>
     Err(anyhow::Error::new(error))
 }
 
-async fn do_call<T>(endpoint: &str) -> Option<Result<String, Arc<(String, anyhow::Error)>>>
+async fn do_call<T>(endpoint: &str) -> Result<String, Arc<(String, anyhow::Error)>>
 where
     T: Serialize + DeserializeOwned + Clone + Send + 'static,
 {
-    if !cache_contains_key::<T>() {
-        let resp_abc = request_with_retries(endpoint).await;
-        let resp = match resp_abc {
-            Ok(x) => x,
-            Err(e) => {
-                return prep_anyhow_error("api call failed", e);
-            }
-        };
+    let result: T = if cache_contains_key::<T>() {
+        // let def = cache_clone_val::<T>().ok_or_else(|| {
+        //     return prep_str_error::<T>("clone cache", "Config was 'None'.");
+        // });
 
-        let resp_text = resp.text().await;
-        let body = match resp_text {
-            Ok(x) => x,
-            Err(e) => {
-                return prep_error("api call 'text()'", e);
-            }
-        };
+        // cache_clone_val::<T>()
+        //     .ok_or_else(|| prep_str_error::<String>("clone cache", "Config was 'None'."))?
 
-        let value: Result<T, serde_json::Error> = serde_json::from_str(&body);
-        match value {
-            Ok(aaa) => {
-                cache_insert(aaa);
-            }
-            Err(e) => {
-                return prep_error("body serde parse", e);
+        // match abbb {
+        //     Ok(x) => x,
+        //     Err(e) => {
+        //         return e;
+        //     }
+        // }
+
+        match cache_clone_val::<T>() {
+            Some(x) => x,
+            None => {
+                return prep_str_error("clone cache", "Config was 'None'.");
             }
         }
-    }
 
-    let result = match cache_clone_val::<T>() {
-        Some(x) => match serde_json::to_string(&x) {
-            Ok(str) => str,
-            Err(e) => {
-                return prep_error("serde serialize", e);
-            }
-        },
-        None => {
-            return prep_str_error("clone cache", "Config was 'None'.");
-        }
+        //     .ok_or_else(|| prep_str_error("clone cache", "Config was 'None'."))?;
+        // abc
+
+        // let abc = cache_clone_val::<T>()
+        //     .ok_or_else(|| prep_str_error("clone cache", "Config was 'None'."))?;
+        // abc
+    } else {
+        let body = request_with_retries(endpoint)
+            .await
+            .or_else(|e| prep_anyhow_error("api call failed", e))?
+            .text()
+            .await
+            .or_else(|e| prep_error("api call 'text()'", e))?;
+
+        let value =
+            serde_json::from_str::<T>(&body).or_else(|e| prep_error("body serde parse", e))?;
+        cache_insert(value.clone());
+        value
     };
 
-    Some(Ok(result))
+    let str = serde_json::to_string(&result).or_else(|e| prep_error("serde serialize", e))?;
+    Ok(str)
 }
 
 // use rand::Rng;
@@ -340,7 +343,7 @@ pub fn get(_key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow:
             "https://raw.githubusercontent.com/{}/refs/heads/config_branch/config_branch.json",
             global::vars().user_repo
         );
-        do_call::<Config>(&endpoint).await
+        Some(do_call::<Config>(&endpoint).await)
     };
     Box::pin(future)
 }
