@@ -62,7 +62,7 @@ function App() {
   return (
     // <div className="container">
     <div className="container2">
-      <select
+      {/* <select
         style={{
           color: 'black',
           width: 500,
@@ -71,7 +71,7 @@ function App() {
         {branches.map((branch) => {
           return <option key={branch.id}>{branch.display_name}</option>;
         })}
-      </select>
+      </select> */}
       <button
         onClick={() => {
           setOpen(true);
@@ -89,7 +89,7 @@ function App() {
           onClose={() => {
             setOpen(false);
           }}
-          branches={branches}
+          branches={resolvedBranches}
         />
       )}
     </div>

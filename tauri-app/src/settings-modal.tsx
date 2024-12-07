@@ -1,9 +1,10 @@
+import { BranchRow } from './branch-row';
 import styles from './settings-modal.module.css';
 import { useGetPokemonByNameQuery } from './state/pokemon-api-slice';
-import { Branch } from './types';
+import { ResolvedBranch } from './types';
 
 type SettingsModalProps = {
-  branches: Branch[];
+  branches: ResolvedBranch[];
   onClose(): void;
 };
 
@@ -31,8 +32,14 @@ export default function SettingsModal({
           X
         </div>
       </div>
-      <div>
-        <select
+      <div className="flex justify-center">
+        <div style={{ width: '100%', maxWidth: 300 }}>
+          {branches.map((branch) => {
+            return <BranchRow key={branch.name} branch={branch} />;
+          })}
+        </div>
+
+        {/* <select
           style={{
             color: 'black',
             width: 500,
@@ -41,7 +48,7 @@ export default function SettingsModal({
           {branches.map((branch) => {
             return <option key={branch.id}>{branch.display_name}</option>;
           })}
-        </select>
+        </select> */}
       </div>
     </div>
   );
