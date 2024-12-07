@@ -3,6 +3,7 @@ use deduplicate::DeduplicateFuture;
 use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use simple_error::SimpleError;
 use std::any::Any;
 use std::any::TypeId;
 use std::collections::HashMap;
@@ -10,10 +11,24 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::Mutex;
 
+use crate::config::AssetInfo;
 use crate::config::Config;
 use crate::global;
 
+// #[cfg(target_os = "macos")]
+// static TARGET_TRIPLE: &str = "path2";
+// #[cfg(target_arch = "abc", target_env = "gnu")]
+// static TARGET_TRIPLE: &str = "x86_64-unknown-linux-gnu";
+// #[cfg(target_os = "windows")]
+// static TARGET_TRIPLE: &str = "path1";
+
 static CACHE: LazyLock<Mutex<Cache>> = LazyLock::new(|| Mutex::new(Cache::new()));
+
+#[derive(Serialize, Clone)]
+struct TestEntry {
+    branch_name: String,
+    version: String,
+}
 
 struct Cache {
     map: HashMap<TypeId, Box<dyn Any + Send>>,
@@ -102,6 +117,14 @@ fn prep_anyhow_error<T>(
     Err(Arc::new((source.to_string(), anyhow_error)))
 }
 
+fn prep_str_error<T>(source: &str, err_str: String) -> Result<T, Arc<(String, anyhow::Error)>> {
+    let simple_error = SimpleError::new(err_str);
+    Err(Arc::new((
+        source.to_string(),
+        anyhow::Error::new(simple_error),
+    )))
+}
+
 async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error> {
     // TODO: Could add some form of backoff
     let retries = 3;
@@ -122,7 +145,7 @@ async fn request_with_retries(endpoint: &str) -> Result<Response, anyhow::Error>
     unreachable!()
 }
 
-async fn do_call<T>(endpoint: &str) -> Result<String, Arc<(String, anyhow::Error)>>
+async fn do_call<T>(endpoint: &str) -> Result<T, Arc<(String, anyhow::Error)>>
 where
     T: Serialize + DeserializeOwned + Clone + Send + 'static,
 {
@@ -143,8 +166,12 @@ where
         }
     };
 
-    let str = serde_json::to_string(&result).or_else(|e| prep_error("serde serialize", e))?;
-    Ok(str)
+    // TODO: this should return the object. We only convert the final result that we return to a string.
+
+    // let str = serde_json::to_string(&result).or_else(|e| prep_error("serde serialize", e))?;
+    // Ok(str)
+
+    Ok(result)
 }
 
 // use rand::Rng;
@@ -287,11 +314,74 @@ pub fn get(_key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow:
 
         // Some(Ok(result))
 
+        // Fetch config file.
         let endpoint = format!(
             "https://raw.githubusercontent.com/{}/refs/heads/config_branch/config_branch.json",
             global::vars().user_repo
         );
-        Some(do_call::<Config>(&endpoint).await)
+
+        let config_res = do_call::<Config>(&endpoint).await;
+        let config = match config_res {
+            Ok(x) => x,
+            Err(e) => {
+                return Some(Err(e));
+            }
+        };
+
+        let central_name = global::vars().central_name;
+
+        let config_central = match config.central.get(central_name) {
+            Some(x) => x,
+            None => {
+                return Some(prep_str_error(
+                    "query",
+                    format!("Failed to find central for '{}' in config.", central_name),
+                ));
+            }
+        };
+
+        let central_branches = &config_central.branches;
+        if central_branches.len() < 1 {
+            // Skip fetching asset_info.json and return an empty array.
+            return Some(Ok("[]".to_string()));
+        }
+
+        // Fetch asset_info.json
+        let release_tag = &config_central.release_tag;
+
+        let asset_info_url = format!(
+            "https://github.com/{}/releases/download/{}/asset_info.json",
+            global::vars().user_repo,
+            release_tag
+        );
+        let asset_info_res = do_call::<AssetInfo>(&asset_info_url).await;
+        let asset_info = match asset_info_res {
+            Ok(x) => x,
+            Err(e) => {
+                return Some(Err(e));
+            }
+        };
+
+        // Build results list.
+        let target = global::vars().target;
+        let mut entries: Vec<TestEntry> = vec![];
+
+        for branch in central_branches {
+            if let Some(asset_info_branch) = asset_info.branches.get(branch) {
+                if asset_info_branch.site_zips.contains_key(target) {
+                    entries.push(TestEntry {
+                        branch_name: branch.clone(),
+                        version: asset_info_branch.version.clone(),
+                    });
+                }
+            }
+        }
+
+        let result = match serde_json::to_string(&entries) {
+            Ok(x) => Ok(x),
+            Err(e) => prep_error("entries serialize", e),
+        };
+        Some(result)
     };
     Box::pin(future)
 }

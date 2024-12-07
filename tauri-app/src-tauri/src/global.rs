@@ -8,11 +8,14 @@ use crate::path;
 
 static BUILD_VARS_JSON: &str = std::include_str!("./build_vars.json");
 
+const TARGET: &str = env!("TARGET");
+
 #[derive(Debug)]
 pub struct Vars {
     pub db_url: &'static str,
     pub user_repo: &'static str,
     pub central_name: &'static str,
+    pub target: &'static str,
 }
 
 #[derive(Deserialize)]
@@ -65,6 +68,7 @@ pub fn init<'a>(app_handle: &'a AppHandle) {
         db_url: db_url_ref,
         user_repo: "icogn/tpr-gen3",
         central_name: "stable",
+        target: &TARGET,
     };
 
     let res: Result<BuildVarsJson, Error> = serde_json::from_str(BUILD_VARS_JSON);

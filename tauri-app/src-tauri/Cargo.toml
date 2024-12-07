@@ -25,3 +25,4 @@ reqwest = "0.12.9"
 tokio = "1.41.0"
 diesel = { version = "2.2.4", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "chrono"] }
 libsqlite3-sys = { version = "0.30.1", features = ["bundled"] }
+simple-error = "0.3.1"
