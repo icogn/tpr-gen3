@@ -24,3 +24,16 @@ export type Config = {
   >;
   triggers: Record<string, string[]>;
 };
+
+export type PossibleBranch = {
+  branch_name: string;
+  version: string;
+  display_name: string;
+};
+
+export type ResolvedBranch = {
+  name: string;
+  displayName: string;
+  currentVersion?: string;
+  latestVersion?: string;
+};

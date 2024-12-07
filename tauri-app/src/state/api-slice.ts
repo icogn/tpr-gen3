@@ -5,8 +5,8 @@ import {
   createApi,
 } from '@reduxjs/toolkit/query/react';
 import { invoke, InvokeArgs } from '@tauri-apps/api/core';
-import { Branch, Config } from '../types';
-import { useMemo } from 'react';
+import { Branch, Config, PossibleBranch, ResolvedBranch } from '../types';
+import { useMemo, version } from 'react';
 
 type CustomBaseQueryArgs = {
   cmd: string;
@@ -34,8 +34,8 @@ export const tauriApi = createApi({
     getInstalledBranches: builder.query<Branch[], undefined>({
       query: () => ({ cmd: 'get_installed_branches' }),
     }),
-    getConfig: builder.query<Config, undefined>({
-      query: () => ({ cmd: 'get_config' }),
+    getPossibleBranches: builder.query<PossibleBranch[], undefined>({
+      query: () => ({ cmd: 'get_possible_branches' }),
       transformResponse: (strResponse: string) => {
         return JSON.parse(strResponse) as Config;
       },
@@ -46,21 +46,68 @@ export const tauriApi = createApi({
 export const useBranchesQuery = () => {
   const { data: installedBranches, isLoading: isLoadingInstalledBranches } =
     tauriApi.useGetInstalledBranchesQuery();
-  const { data: config, isLoading: isLoadingConfig } =
-    tauriApi.useGetConfigQuery();
-  console.log('config');
-  console.log(config);
+  const { data: possibleBranches, isLoading: isLoadingConfig } =
+    tauriApi.useGetPossibleBranchesQuery();
+  console.log('config@@@@@@@@@@@@@@@@abcd');
+  console.log(possibleBranches);
 
   // Need an ordered list of branches.
 
   // The order is installed at the top followed by the branches in the order in
   // the appropriate "central"
 
-  const merged = useMemo(() => {
-    if (!installedBranches && !config) {
-      return [];
+  const merged = useMemo<ResolvedBranch[]>(() => {
+    // Only return once we have the installed branches info.
+    if (installedBranches) {
+      if (possibleBranches) {
+        const results: ResolvedBranch[] = [];
+
+        const obj: Record<string, PossibleBranch> = {};
+        possibleBranches.forEach((possibleBranch) => {
+          obj[possibleBranch.branch_name] = possibleBranch;
+        });
+
+        const handledNames: Record<string, boolean> = {};
+
+        installedBranches.forEach((installedBranch) => {
+          const name = installedBranch.branch_name;
+          handledNames[name] = true;
+
+          const possibleBranch = obj[name] || {};
+
+          results.push({
+            name,
+            currentVersion: installedBranch.branch_version,
+            latestVersion: possibleBranch.version,
+            displayName: installedBranch.display_name,
+          });
+        });
+
+        possibleBranches.forEach((possibleBranch) => {
+          const name = possibleBranch.branch_name;
+          if (handledNames[name]) {
+            return;
+          }
+
+          results.push({
+            name,
+            latestVersion: possibleBranch.version,
+            displayName: possibleBranch.display_name,
+          });
+        });
+
+        return results;
+      } else {
+        return installedBranches.map<ResolvedBranch>((installedBranch) => ({
+          name: installedBranch.branch_name,
+          currentVersion: installedBranch.branch_version,
+          displayName: installedBranch.display_name,
+        }));
+      }
     }
-  }, [installedBranches, config]);
+
+    return [];
+  }, [installedBranches, possibleBranches]);
 
   return merged;
 };

@@ -25,9 +25,10 @@ use crate::global;
 static CACHE: LazyLock<Mutex<Cache>> = LazyLock::new(|| Mutex::new(Cache::new()));
 
 #[derive(Serialize, Clone)]
-struct TestEntry {
+struct PossibleBranch {
     branch_name: String,
     version: String,
+    display_name: String,
 }
 
 struct Cache {
@@ -152,6 +153,7 @@ where
     let result: T = match cache_clone_val::<T>() {
         Some(x) => x,
         None => {
+            // tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
             let body = request_with_retries(endpoint)
                 .await
                 .or_else(|e| prep_anyhow_error("api call failed", e))?
@@ -165,12 +167,6 @@ where
             value
         }
     };
-
-    // TODO: this should return the object. We only convert the final result that we return to a string.
-
-    // let str = serde_json::to_string(&result).or_else(|e| prep_error("serde serialize", e))?;
-    // Ok(str)
-
     Ok(result)
 }
 
@@ -364,15 +360,18 @@ pub fn get(_key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow:
 
         // Build results list.
         let target = global::vars().target;
-        let mut entries: Vec<TestEntry> = vec![];
+        let mut entries: Vec<PossibleBranch> = vec![];
 
         for branch in central_branches {
             if let Some(asset_info_branch) = asset_info.branches.get(branch) {
                 if asset_info_branch.site_zips.contains_key(target) {
-                    entries.push(TestEntry {
-                        branch_name: branch.clone(),
-                        version: asset_info_branch.version.clone(),
-                    });
+                    if let Some(config_branch) = config.branches.get(branch) {
+                        entries.push(PossibleBranch {
+                            branch_name: branch.clone(),
+                            version: asset_info_branch.version.clone(),
+                            display_name: config_branch.name.clone(),
+                        });
+                    }
                 }
             }
         }

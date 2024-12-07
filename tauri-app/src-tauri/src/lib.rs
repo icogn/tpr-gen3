@@ -65,15 +65,15 @@ fn greet(name: &str) -> Payload {
 }
 
 #[tauri::command]
-async fn get_config() -> std::result::Result<String, String> {
+async fn get_possible_branches() -> std::result::Result<String, String> {
     let custom_state = app_handle().state::<CustomState>();
 
-    println!("@Calling from get_config");
+    println!("@Calling from get_possible_branches");
 
     let now = Instant::now();
     let a = custom_state.req_mgr.get_fn4.get(10).await;
     let elapsed = now.elapsed();
-    println!("Elapsed get_config: {:.2?}", elapsed);
+    println!("Elapsed get_possible_branches: {:.2?}", elapsed);
 
     let opt = match a {
         Ok(x) => x,
@@ -93,7 +93,8 @@ async fn get_config() -> std::result::Result<String, String> {
 async fn get_installed_branches() -> std::result::Result<Vec<Branch>, String> {
     // Can fetch the installed branches on demand. No reason to store it in the
     // state.
-    let mut branches = Branch::branches().map_err(|err| err.to_string())?;
+    // let mut branches = Branch::branches().map_err(|err| err.to_string())?;
+    let mut branches = vec![];
 
     branches.insert(
         0,
@@ -163,7 +164,7 @@ pub fn run() {
         .on_window_event(on_window_event)
         .invoke_handler(tauri::generate_handler![
             greet,
-            get_config,
+            get_possible_branches,
             get_installed_branches
         ])
         .build(tauri::generate_context!())

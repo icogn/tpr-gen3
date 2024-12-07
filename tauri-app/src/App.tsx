@@ -15,7 +15,10 @@ function App() {
   const [open, setOpen] = useState(false);
 
   const { data, error, isLoading } = useGetInstalledBranchesQuery();
-  useBranchesQuery();
+  const resolvedBranches = useBranchesQuery();
+  console.log('-------------------------------');
+  console.log('resolvedBranches');
+  console.log(resolvedBranches);
   console.log('@@@@@@@@@@@@@data');
   console.log(data);
   console.log(`isLoading: ${isLoading}`);
@@ -43,7 +46,7 @@ function App() {
     // start about 606-615 ms sooner (in dev mode at least).
     console.log(Date.now());
     try {
-      const res2 = await invoke('get_config', {});
+      const res2 = await invoke('get_possible_branches', {});
       console.log('res2');
       console.log(res2);
     } catch (e) {
