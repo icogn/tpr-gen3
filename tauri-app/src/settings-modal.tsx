@@ -1,7 +1,6 @@
 import { BranchRow } from './branch-row';
 import styles from './settings-modal.module.css';
 import { useBranchesQuery } from './state/api-slice';
-import { useGetPokemonByNameQuery } from './state/pokemon-api-slice';
 import { ResolvedBranch } from './types';
 import {
   Dialog,
@@ -17,22 +16,10 @@ type SettingsModalProps = {
 };
 
 export default function SettingsModal({ onClose }: SettingsModalProps) {
-  const { data, error, isLoading } = useGetPokemonByNameQuery('squirtle');
   const branches = useBranchesQuery();
 
   return (
     <div className={styles.root}>
-      {error ? (
-        <>Oh no, there was an error</>
-      ) : isLoading ? (
-        <>Loading...</>
-      ) : data ? (
-        <>
-          <h3>{data.species.name}</h3>
-          <img src={data.sprites.front_shiny} alt={data.species.name} />
-        </>
-      ) : null}
-
       <div className="flex px-4 pb-4 ">
         <div role="button" className="pt-5 ml-auto" onClick={onClose}>
           X
