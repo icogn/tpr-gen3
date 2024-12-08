@@ -44,17 +44,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             return <BranchRow key={branch.name} branch={branch} />;
           })}
         </div>
-
-        {/* <select
-          style={{
-            color: 'black',
-            width: 500,
-          }}
-        >
-          {branches.map((branch) => {
-            return <option key={branch.id}>{branch.display_name}</option>;
-          })}
-        </select> */}
       </div>
 
       <Dialog>
