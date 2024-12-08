@@ -1,18 +1,24 @@
 import { BranchRow } from './branch-row';
 import styles from './settings-modal.module.css';
+import { useBranchesQuery } from './state/api-slice';
 import { useGetPokemonByNameQuery } from './state/pokemon-api-slice';
 import { ResolvedBranch } from './types';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 type SettingsModalProps = {
-  branches: ResolvedBranch[];
   onClose(): void;
 };
 
-export default function SettingsModal({
-  branches,
-  onClose,
-}: SettingsModalProps) {
+export default function SettingsModal({ onClose }: SettingsModalProps) {
   const { data, error, isLoading } = useGetPokemonByNameQuery('squirtle');
+  const branches = useBranchesQuery();
 
   return (
     <div className={styles.root}>
@@ -50,6 +56,19 @@ export default function SettingsModal({
           })}
         </select> */}
       </div>
+
+      <Dialog>
+        <DialogTrigger>Open</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

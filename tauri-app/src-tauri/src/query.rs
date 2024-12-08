@@ -178,6 +178,8 @@ where
 // are using move to move the key into the block.  Finally, we pin
 // the block and return it.
 pub fn get(_key: usize) -> DeduplicateFuture<Result<String, Arc<(String, anyhow::Error)>>> {
+    println!("QWQWQWQWQWQWQWQWQWQWQW inside get, doing the work");
+
     // let fut = async move {
     let future = async move {
         // use std::time::Instant;

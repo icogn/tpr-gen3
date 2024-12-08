@@ -15,10 +15,8 @@ function App() {
   const [open, setOpen] = useState(false);
 
   const { data, error, isLoading } = useGetInstalledBranchesQuery();
-  const resolvedBranches = useBranchesQuery();
+  useBranchesQuery();
   console.log('-------------------------------');
-  console.log('resolvedBranches');
-  console.log(resolvedBranches);
   console.log('@@@@@@@@@@@@@data');
   console.log(data);
   console.log(`isLoading: ${isLoading}`);
@@ -34,25 +32,25 @@ function App() {
     // setGreetMsg(res.message);
     setPort(res.port);
 
-    console.log(`bef3: ${Date.now()}`);
-    const bef = Date.now();
-    const res3 = (await invoke('get_installed_branches')) as Branch[];
-    console.log(`after3: ${Date.now() - bef}`);
-    console.log('res3');
-    console.log(res3);
-    setBranches(res3);
+    // console.log(`bef3: ${Date.now()}`);
+    // const bef = Date.now();
+    // const res3 = (await invoke('get_installed_branches')) as Branch[];
+    // console.log(`after3: ${Date.now() - bef}`);
+    // console.log('res3');
+    // console.log(res3);
+    // setBranches(res3);
 
-    // Note: setup where we start call early in core process causes the call to
-    // start about 606-615 ms sooner (in dev mode at least).
-    console.log(Date.now());
-    try {
-      const res2 = await invoke('get_possible_branches', {});
-      console.log('res2');
-      console.log(res2);
-    } catch (e) {
-      console.error('Found error:');
-      console.error(e);
-    }
+    // // Note: setup where we start call early in core process causes the call to
+    // // start about 606-615 ms sooner (in dev mode at least).
+    // console.log(Date.now());
+    // try {
+    //   const res2 = await invoke('get_possible_branches', {});
+    //   console.log('res2');
+    //   console.log(res2);
+    // } catch (e) {
+    //   console.error('Found error:');
+    //   console.error(e);
+    // }
   }
 
   useEffect(() => {
@@ -61,7 +59,7 @@ function App() {
 
   return (
     // <div className="container">
-    <div className="container2">
+    <div className="container2 dark">
       {/* <select
         style={{
           color: 'black',
@@ -89,7 +87,6 @@ function App() {
           onClose={() => {
             setOpen(false);
           }}
-          branches={resolvedBranches}
         />
       )}
     </div>
