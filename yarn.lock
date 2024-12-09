@@ -1598,7 +1598,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-slot@npm:1.1.0":
+"@radix-ui/react-slot@npm:1.1.0, @radix-ui/react-slot@npm:^1.1.0":
   version: 1.1.0
   resolution: "@radix-ui/react-slot@npm:1.1.0"
   dependencies:
@@ -6933,6 +6933,7 @@ __metadata:
   resolution: "tauri-app@workspace:tauri-app"
   dependencies:
     "@radix-ui/react-dialog": "npm:^1.1.2"
+    "@radix-ui/react-slot": "npm:^1.1.0"
     "@reduxjs/toolkit": "npm:^2.3.0"
     "@tauri-apps/api": "npm:>=2.0.0-rc.0"
     "@tauri-apps/cli": "npm:>=2.0.0-rc.0"

@@ -4,14 +4,20 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 type BranchRowProps = {
   branch: ResolvedBranch;
 };
+
+// When they install it, we need to handle events from tauri at a global level.
+// We need to subscribe to the state of updates for this branch from here, but
+// the events and state updates have nothing to do with this component.
 
 export function BranchRow({ branch }: BranchRowProps) {
   const [open, setOpen] = useState(false);
@@ -44,6 +50,9 @@ export function BranchRow({ branch }: BranchRowProps) {
               account and remove your data from our servers.
             </DialogDescription>
           </DialogHeader>
+          <DialogFooter>
+            <Button>Install</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
