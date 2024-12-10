@@ -12,12 +12,13 @@ use api_manager::APIManager;
 use deduplicate::{Deduplicate, DeduplicateFuture};
 use models::Branch;
 use query::ReqMgr;
+use serde::Serialize;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex, OnceLock},
     time::Instant,
 };
-use tauri::{AppHandle, Manager, Window, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager, Window, WindowEvent};
 
 // the payload type must implement `Serialize` and `Clone`.
 #[derive(Clone, serde::Serialize)]
@@ -108,6 +109,79 @@ async fn get_installed_branches() -> std::result::Result<Vec<Branch>, String> {
     Ok(branches)
 }
 
+// TODO: use global events for this since they can refresh the page and we need
+// to be able to hook back into the existing process.
+#[derive(Clone, Serialize)]
+struct BranchInstallEvent {
+    dog: String,
+    number: i32,
+}
+
+#[tauri::command]
+async fn install_branch(app: AppHandle, branch_name: String) {
+    // TODO: needs to handle hooking into an existing Deduplicate thing for the
+    // given branch so we don't start multiple processes (after we refresh the
+    // page for example). On this side, we need to check the installedVersion in
+    // the db against the latestVersion in the asset_info and return a
+    // "no_udpate" event type or similar so we don't redo an installation if the
+    // user happens to refresh the page immediately after the installation
+    // finishes, etc.
+
+    // Actions from the frontend:
+
+    // - Indicate that you want to install an update for a certain branch.
+    // Results:
+    // - Already up-to-date
+    // - Error occurred during something. Include info about the error.
+    // - Download progress update
+    // - Signature verification progress update
+    // - Installation (copying/unzipping to correct location)
+    // Then we update the DB after doing this and delete the old installation.
+    // Can also delete the old installation on startup. Probably we want to
+    // store the install location as a DB column so we don't have to delete
+    // the old installation before this one successfully installs (in case
+    // it fails during the unzip, etc., in which case you would have deleted
+    // the old installation without successfully replacing it which would
+    // be pretty bad, especially if we could have written code to avoid this).
+    // - Success
+    // It is possible for the user to refresh the page such that we unlisten
+    // right before the success event is sent to the frontend such that we
+    // completely miss it. In this case, we will never get an update that the
+    // installation completed. So we need to query the backend on refresh in a
+    // "command and await response" manner to get the list of branchNames which
+    // have an ongoing installation process? We can use a mutex hashmap on the
+    // backend for this since we would only update it at start, error, or finish
+    // for installation processes, so it would be fine from that perspective. It
+    // would basically say true or false for keys which exist. Or we could remove
+    // keys and just make it a Set which might be better.
+
+    // - Manually tell it to check if there is an update (possibly can ignore
+    // this for now since they can close and reopen the app to do this. Does not
+    // seem like a necessity for the first release)
+
+    app.emit(
+        "branch-install",
+        BranchInstallEvent {
+            dog: branch_name,
+            number: -1,
+        },
+    )
+    .unwrap();
+
+    for i in 0..10 {
+        app.emit(
+            "branch-install",
+            BranchInstallEvent {
+                dog: "dog_val".to_string(),
+                number: i,
+            },
+        )
+        .unwrap();
+
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    }
+}
+
 async fn do_sth(
     with: Arc<
         Deduplicate<
@@ -165,7 +239,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             get_possible_branches,
-            get_installed_branches
+            get_installed_branches,
+            install_branch
         ])
         .build(tauri::generate_context!())
         .unwrap();
